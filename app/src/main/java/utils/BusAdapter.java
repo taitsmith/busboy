@@ -1,6 +1,7 @@
 package utils;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,10 @@ import java.util.List;
 
 import obj.Bus;
 
+/** A very cool list view adapter to display a list of upcoming buses at the
+ * selected stop. Eventually users will be able to select a list item for more
+ * info.
+ */
 public class BusAdapter extends BaseAdapter {
     private List<Bus> busList;
     private LayoutInflater inflater;
@@ -57,6 +62,12 @@ public class BusAdapter extends BaseAdapter {
 
         holder.routeName.setText(bus.getRoute());
         holder.busPrediction.setText(bus.getArrivalTime());
+
+        if (bus.getDelay() < 0) {
+            holder.busPrediction.setTextColor(Color.GREEN);
+        } else if (bus.getDelay() > 0) {
+            holder.busPrediction.setTextColor(Color.RED);
+        }
 
         return view;
     }
