@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.activities.ui.busdetail;
+package viewmodels;
 
 import androidx.lifecycle.ViewModel;
 

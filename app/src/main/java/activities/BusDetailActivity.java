@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.activities;
+package activities;
 
 import android.os.Bundle;
 

@@ -47,7 +47,7 @@ public class BusAdapter extends BaseAdapter {
         ViewHolder holder = null;
 
         if (view == null) {
-            view = inflater.inflate(R.layout.schedule_list_item, null);
+            view = inflater.inflate(R.layout.list_item_schedule, null);
             holder = new ViewHolder();
 
             holder.routeName = view.findViewById(R.id.routeNameTextView);
