@@ -31,7 +31,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import utils.BusAdapter;
 
-import static utils.HelpfulUtils.createBusList;
+import static viewmodels.MainActivityViewModel.createBusList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
     OkHttpClient client;
 
-
     private Handler handler;
 
     @Override
@@ -65,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.searchButton) void search() {
+        if (stopEntry.getText().toString().matches("")) {
+            Toast.makeText(this, "Please enter a stop ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String url = String.format(baseUrl, stopEntry.getText().toString())
                 .concat(apiToken);
 
@@ -89,6 +93,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d("ERROR! ", e.toString());
+                handler.post(() -> {
+                    Toast.makeText(MainActivity.this, "Something went wrong...",
+                            Toast.LENGTH_SHORT).show();
+                    hideUi(false);
+                });
+                return;
             }
 
             @Override
