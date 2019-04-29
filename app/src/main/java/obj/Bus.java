@@ -4,39 +4,39 @@ import io.realm.RealmObject;
 
 public class Bus extends RealmObject {
 
-    private String route, arrivalTime, vehicleId, status;
-    private int delay;
+    private String RouteName, PredictedDeparture, VehicleId, status;
+    private int PredictedDelayInSeconds;
 
-    public String getRoute() {
-        return route;
+    public String getRouteName() {
+        return RouteName;
     }
 
-    public void setRoute(String route) {
-        this.route = route;
+    public void setRouteName(String routeName) {
+        this.RouteName = routeName;
     }
 
-    public String getArrivalTime() {
-        return arrivalTime;
+    public String getPredictedDeparture() {
+        return PredictedDeparture;
     }
 
-    public void setArrivalTime(String arrivalTime) {
-        this.arrivalTime = arrivalTime;
+    public void setPredictedDeparture(String predictedDeparture) {
+        this.PredictedDeparture = predictedDeparture;
     }
 
-    public int getDelay() {
-        return delay;
+    public int getPredictedDelayInSeconds() {
+        return PredictedDelayInSeconds;
     }
 
-    public void setDelay(int delay) {
-        this.delay = delay;
+    public void setPredictedDelayInSeconds(int predictedDelayInSeconds) {
+        this.PredictedDelayInSeconds = predictedDelayInSeconds;
     }
 
     public String getVehicleId() {
-        return vehicleId;
+        return VehicleId;
     }
 
     public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
+        this.VehicleId = vehicleId;
     }
 
     public String getStatus() {

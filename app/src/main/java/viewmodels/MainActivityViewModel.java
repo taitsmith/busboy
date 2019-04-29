@@ -10,15 +10,27 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
 import obj.Bus;
 
 public class MainActivityViewModel extends ViewModel {
 
+
     public static List<Bus> createBusList(JSONArray busArray) throws JSONException {
+        Realm realm = Realm.getDefaultInstance();
+
         List<Bus> busList = new ArrayList<>();
 
         for (int i = 0; i < busArray.length(); i++) {
             JSONObject bus = busArray.getJSONObject(i);
+
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.createObjectFromJson(Bus.class, bus);
+                }
+            });
+
             Bus b = new Bus();
 
             String route = bus.getString("RouteName");
@@ -37,10 +49,10 @@ public class MainActivityViewModel extends ViewModel {
                 b.setStatus("On Time");
             }
 
-            b.setArrivalTime(eta);
-            b.setRoute(route);
+            b.setPredictedDeparture(eta);
+            b.setRouteName(route);
             b.setVehicleId(vehicleId);
-            b.setDelay(delay);
+            b.setPredictedDelayInSeconds(delay);
 
             busList.add(b);
         }

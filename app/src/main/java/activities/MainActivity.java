@@ -24,6 +24,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.realm.Realm;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     String apiToken;
 
     OkHttpClient client;
+    Realm realm;
 
     private Handler handler;
 
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         client = new OkHttpClient();
         handler = new Handler(Looper.getMainLooper());
+        realm = Realm.getDefaultInstance();
     }
 
     @OnClick(R.id.searchButton) void search() {

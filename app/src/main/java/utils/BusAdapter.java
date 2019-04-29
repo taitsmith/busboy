@@ -44,7 +44,7 @@ public class BusAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        ViewHolder holder = null;
+        ViewHolder holder;
 
         if (view == null) {
             view = inflater.inflate(R.layout.list_item_schedule, null);
@@ -60,13 +60,13 @@ public class BusAdapter extends BaseAdapter {
 
         Bus bus = busList.get(position);
 
-        holder.routeName.setText(bus.getRoute());
-        holder.busPrediction.setText(bus.getArrivalTime());
+        holder.routeName.setText(bus.getRouteName());
+        holder.busPrediction.setText(bus.getPredictedDeparture());
 
-        if (bus.getDelay() < 0) {
-            holder.busPrediction.setTextColor(Color.GREEN);
-        } else if (bus.getDelay() > 0) {
+        if (bus.getPredictedDelayInSeconds() > 0) {
             holder.busPrediction.setTextColor(Color.RED);
+        } else if (bus.getPredictedDelayInSeconds() < 0) {
+            holder.busPrediction.setTextColor(Color.parseColor("#2E7D32"));
         }
 
         return view;
