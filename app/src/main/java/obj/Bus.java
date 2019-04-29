@@ -4,7 +4,7 @@ import io.realm.RealmObject;
 
 public class Bus extends RealmObject {
 
-    private String RouteName, PredictedDeparture, VehicleId, status;
+    private String RouteName, PredictedDeparture, VehicleId, StopId;
     private int PredictedDelayInSeconds;
 
     public String getRouteName() {
@@ -39,11 +39,11 @@ public class Bus extends RealmObject {
         this.VehicleId = vehicleId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getStopId() {
+        return StopId;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStopId(String stopId) {
+        this.StopId = stopId;
     }
 }

@@ -25,6 +25,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+import io.realm.exceptions.RealmMigrationNeededException;
+import obj.Bus;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -63,10 +67,35 @@ public class MainActivity extends AppCompatActivity {
 
         client = new OkHttpClient();
         handler = new Handler(Looper.getMainLooper());
-        realm = Realm.getDefaultInstance();
+        try {
+            realm = Realm.getDefaultInstance();
+        } catch (RealmMigrationNeededException e) {
+            RealmConfiguration configuration = new RealmConfiguration.Builder()
+                    .deleteRealmIfMigrationNeeded()
+                    .build();
+        }
+
+        deleteRealm();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        final RealmResults<Bus> results = realm.where(Bus.class).findAll();
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                results.deleteAllFromRealm();
+                Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
+        realm.close();
     }
 
     @OnClick(R.id.searchButton) void search() {
+        deleteRealm();
+
         if (stopEntry.getText().toString().matches("")) {
             Toast.makeText(this, "Please enter a stop ID", Toast.LENGTH_SHORT).show();
             return;
@@ -107,18 +136,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseString = response.body().string();
-
-
-                handler.post(() -> {
-                    try {
-                        final BusAdapter adapter = new BusAdapter(MainActivity.this,
-                                createBusList(new JSONArray(responseString)));
-                        busListView.setAdapter(adapter);
+                try {
+                    JSONArray array = new JSONArray(responseString);
+                    createBusList(array);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    handler.post(() -> {
                         hideUi(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
+                        final BusAdapter adapter = new BusAdapter(realm.where(Bus.class)
+                                .equalTo("StopId", "55555")
+                                .findAll());
+                        busListView.setAdapter(adapter);
+                    });
+                }
             }
         });
     }
@@ -134,5 +165,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void deleteRealm() {
+        RealmResults<Bus> realmResults = realm.where(Bus.class)
+                .findAll();
 
+        Realm.Transaction transaction = new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realmResults.deleteAllFromRealm();
+            }
+        };
+    }
 }

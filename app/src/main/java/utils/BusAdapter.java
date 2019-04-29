@@ -1,78 +1,58 @@
 package utils;
 
-import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.taitsmith.busboy.R;
 
-import java.util.List;
-
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmBaseAdapter;
 import obj.Bus;
 
 /** A very cool list view adapter to display a list of upcoming buses at the
  * selected stop. Eventually users will be able to select a list item for more
  * info.
  */
-public class BusAdapter extends BaseAdapter {
-    private List<Bus> busList;
-    private LayoutInflater inflater;
+public class BusAdapter extends RealmBaseAdapter<Bus> implements ListAdapter {
+    OrderedRealmCollection<Bus> busList;
 
-    public BusAdapter(Context context, List<Bus> busList) {
-        this.busList = busList;
-        inflater = LayoutInflater.from(context);
+    public BusAdapter(OrderedRealmCollection<Bus> realmResults) {
+        super(realmResults);
+        busList = realmResults;
     }
 
     @Override
-    public int getCount() {
-        return busList.size();
-    }
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder viewHolder;
 
-    @Override
-    public Object getItem(int position) {
-        return null;
-    }
+        if (convertView == null) {
+            convertView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_schedule, parent, false);
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
+            viewHolder = new ViewHolder();
 
-    @Override
-    public View getView(int position, View view, ViewGroup parent) {
-        ViewHolder holder;
+            viewHolder.busPrediction = convertView.findViewById(R.id.routePredictionTextView);
+            viewHolder.routeName = convertView.findViewById(R.id.routeNameTextView);
 
-        if (view == null) {
-            view = inflater.inflate(R.layout.list_item_schedule, null);
-            holder = new ViewHolder();
+            String s = busList.get(position).getPredictedDeparture();
 
-            holder.routeName = view.findViewById(R.id.routeNameTextView);
-            holder.busPrediction = view.findViewById(R.id.routePredictionTextView);
+            s = s.substring(s.length() - 8, s.length() - 3);
 
-            view.setTag(holder);
+            viewHolder.routeName.setText(busList.get(position).getRouteName());
+            viewHolder.busPrediction.setText(s);
+
+            convertView.setTag(viewHolder);
         } else {
-            holder = (ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        Bus bus = busList.get(position);
-
-        holder.routeName.setText(bus.getRouteName());
-        holder.busPrediction.setText(bus.getPredictedDeparture());
-
-        if (bus.getPredictedDelayInSeconds() > 0) {
-            holder.busPrediction.setTextColor(Color.RED);
-        } else if (bus.getPredictedDelayInSeconds() < 0) {
-            holder.busPrediction.setTextColor(Color.parseColor("#2E7D32"));
-        }
-
-        return view;
+        return convertView;
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView routeName;
         TextView busPrediction;
     }
