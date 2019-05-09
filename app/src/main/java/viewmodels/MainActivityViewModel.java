@@ -11,34 +11,38 @@ import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.exceptions.RealmMigrationNeededException;
 import obj.Bus;
+import obj.Prediction;
 
 public class MainActivityViewModel extends ViewModel {
 
 
-    public static void createBusList(JSONArray busArray) throws JSONException {
+    //get the jsonarray from AC Transit's API and turn each object into a bus
+    public static void createPredictionList(JSONArray busArray) throws JSONException {
         try {
             Realm realm = Realm.getDefaultInstance();
             RealmResults<Bus> results = realm.where(Bus.class).findAll();
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    results.deleteAllFromRealm();
-                }
-            });
+            if (!results.isEmpty()) {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        results.deleteAllFromRealm();
+                    }
+                });
+            }
 
-        } catch (RealmMigrationNeededException e) {
+        } catch (RealmMigrationNeededException | NullPointerException e) {
             RealmConfiguration configuration = new RealmConfiguration.Builder()
                     .deleteRealmIfMigrationNeeded()
                     .build();
         }
 
         for (int i = 0; i < busArray.length(); i++) {
-            JSONObject bus = busArray.getJSONObject(i);
+            JSONObject prediction = busArray.getJSONObject(i);
 
             Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    realm.createObjectFromJson(Bus.class, bus);
+                    realm.createObjectFromJson(Prediction.class, prediction);
                 }
             });
         }

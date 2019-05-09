@@ -15,8 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.taitsmith.busboy.R;
 
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -24,26 +24,31 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import im.delight.android.location.SimpleLocation;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.exceptions.RealmMigrationNeededException;
 import obj.Bus;
+import obj.Prediction;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import utils.BusAdapter;
+import utils.HelpfulUtils;
+import utils.PredictionAdapter;
 
-import static viewmodels.MainActivityViewModel.createBusList;
+import static viewmodels.MainActivityViewModel.createPredictionList;
 
 
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.stopEntryEditText)
     EditText stopEntry;
-    @BindView(R.id.searchButton)
+    @BindView(R.id.searchIdButton)
     Button searchButton;
+    @BindView(R.id.searchNearbyButton)
+    Button searchNearbyButton;
     @BindView(R.id.busListView)
     ListView busListView;
     @BindView(R.id.loadingBar)
@@ -57,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
     Realm realm;
 
+    public static SimpleLocation location;
     private Handler handler;
 
     @Override
@@ -67,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
         client = new OkHttpClient();
         handler = new Handler(Looper.getMainLooper());
+        location = new SimpleLocation(this);
+
         try {
             realm = Realm.getDefaultInstance();
         } catch (RealmMigrationNeededException e) {
@@ -74,8 +82,6 @@ public class MainActivity extends AppCompatActivity {
                     .deleteRealmIfMigrationNeeded()
                     .build();
         }
-
-        deleteRealm();
     }
 
     @Override
@@ -93,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         realm.close();
     }
 
-    @OnClick(R.id.searchButton) void search() {
+    @OnClick(R.id.searchIdButton) void search() {
         deleteRealm();
 
         if (stopEntry.getText().toString().matches("")) {
@@ -103,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
         String url = String.format(baseUrl, stopEntry.getText().toString())
                 .concat(apiToken);
+
+        Log.d("URL: ", url);
 
         hideUi(true);
 
@@ -121,6 +129,11 @@ public class MainActivity extends AppCompatActivity {
                 .url(url)
                 .build();
 
+        if (!location.hasLocationEnabled()) {
+            SimpleLocation.openSettings(this);
+        }
+
+
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -136,16 +149,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseString = response.body().string();
+                String[] coords = HelpfulUtils.getCoords();
                 try {
-                    JSONArray array = new JSONArray(responseString);
-                    createBusList(array);
+                    JSONObject object = new JSONObject(responseString);
+                    object = object.getJSONObject("bustime-response");
+                    createPredictionList(object.getJSONArray("prd"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
                     handler.post(() -> {
                         hideUi(false);
-                        final BusAdapter adapter = new BusAdapter(realm.where(Bus.class)
-                                .equalTo("StopId", "55555")
+                        final PredictionAdapter adapter = new PredictionAdapter(realm.where(Prediction.class)
+                                .equalTo("stpid", stopEntry.getText().toString())
                                 .findAll());
                         busListView.setAdapter(adapter);
                     });
@@ -166,14 +181,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void deleteRealm() {
-        RealmResults<Bus> realmResults = realm.where(Bus.class)
+        RealmResults<Prediction> realmResults = realm.where(Prediction.class)
                 .findAll();
 
-        Realm.Transaction transaction = new Realm.Transaction() {
+        realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 realmResults.deleteAllFromRealm();
             }
-        };
+        });
     }
 }

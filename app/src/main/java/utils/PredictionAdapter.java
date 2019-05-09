@@ -10,39 +10,43 @@ import com.taitsmith.busboy.R;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.RealmBaseAdapter;
-import obj.Bus;
+import obj.Prediction;
 
 /** A very cool list view adapter to display a list of upcoming buses at the
  * selected stop. Eventually users will be able to select a list item for more
  * info.
  */
-public class BusAdapter extends RealmBaseAdapter<Bus> implements ListAdapter {
-    OrderedRealmCollection<Bus> busList;
+public class PredictionAdapter extends RealmBaseAdapter<Prediction> implements ListAdapter {
+    OrderedRealmCollection<Prediction> predictionList;
 
-    public BusAdapter(OrderedRealmCollection<Bus> realmResults) {
+    public PredictionAdapter(OrderedRealmCollection<Prediction> realmResults) {
         super(realmResults);
-        busList = realmResults;
+        predictionList = realmResults;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
+        Prediction prediction;
 
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_schedule, parent, false);
 
             viewHolder = new ViewHolder();
+            prediction = predictionList.get(position);
 
             viewHolder.busPrediction = convertView.findViewById(R.id.routePredictionTextView);
             viewHolder.routeName = convertView.findViewById(R.id.routeNameTextView);
 
-            String s = busList.get(position).getPredictedDeparture();
+            String prdtm = prediction.getPrdtm();
 
-            s = s.substring(s.length() - 8, s.length() - 3);
+            prdtm = prdtm.substring(prdtm.length() - 5);
 
-            viewHolder.routeName.setText(busList.get(position).getRouteName());
-            viewHolder.busPrediction.setText(s);
+            String routeName = prediction.getRt().concat(" ").concat(prediction.getRtdir());
+
+            viewHolder.routeName.setText(routeName);
+            viewHolder.busPrediction.setText(prdtm);
 
             convertView.setTag(viewHolder);
         } else {
