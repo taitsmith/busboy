@@ -1,5 +1,7 @@
 package activities;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,9 +14,12 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.taitsmith.busboy.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,7 +46,6 @@ import utils.PredictionAdapter;
 
 import static viewmodels.MainActivityViewModel.createPredictionList;
 
-
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.stopEntryEditText)
     EditText stopEntry;
@@ -54,13 +58,16 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.loadingBar)
     ProgressBar loadingBar;
 
-    @BindString(R.string.base_url)
-    String baseUrl;
+    @BindString(R.string.url_prediction)
+    String predictionUrl;
+    @BindString(R.string.url_nearby)
+    String nearbyUrl;
     @BindString(R.string.api_token)
     String apiToken;
 
     OkHttpClient client;
     Realm realm;
+    String[] coords;
 
     public static SimpleLocation location;
     private Handler handler;
@@ -75,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
         handler = new Handler(Looper.getMainLooper());
         location = new SimpleLocation(this);
 
+        setupLocation();
+
         try {
             realm = Realm.getDefaultInstance();
         } catch (RealmMigrationNeededException e) {
@@ -82,6 +91,26 @@ public class MainActivity extends AppCompatActivity {
                     .deleteRealmIfMigrationNeeded()
                     .build();
         }
+    }
+
+    //disable the nearby button until we have a good location
+    //the simplelocation library seems weird about
+    private void setupLocation() {
+        searchNearbyButton.setEnabled(false);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    69); //TODO change this
+        }
+        if (!location.hasLocationEnabled()) {
+            SimpleLocation.openSettings(this);
+            Toast.makeText(this, "Please enable location", Toast.LENGTH_SHORT).show();
+        }
+
+        location.beginUpdates();
+        location.setListener(() -> searchNearbyButton.setEnabled(true));
     }
 
     @Override
@@ -97,9 +126,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         realm.close();
+        location.endUpdates();
     }
 
-    @OnClick(R.id.searchIdButton) void search() {
+    @OnClick(R.id.searchIdButton) void searchById() {
         deleteRealm();
 
         if (stopEntry.getText().toString().matches("")) {
@@ -107,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        String url = String.format(baseUrl, stopEntry.getText().toString())
+        String url = String.format(predictionUrl, stopEntry.getText().toString())
                 .concat(apiToken);
 
         Log.d("URL: ", url);
@@ -115,24 +145,30 @@ public class MainActivity extends AppCompatActivity {
         hideUi(true);
 
         try {
-            callApi(url);
-        } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.something_wrong_toast), Toast.LENGTH_SHORT).show();
+            callApi(url, true);
+        } catch (Exception e) { //TODO good exception catching
+            Toast.makeText(this, getString(R.string.toast_something_wrong), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @OnClick(R.id.searchNearbyButton) void searchNearby() {
+        deleteRealm();
+
+        coords = HelpfulUtils.getCoords();
+
+        String url = String.format(nearbyUrl, coords[0], coords[1], Integer.toString(500))
+                .concat(apiToken);
+
+        callApi(url, false);
     }
 
 
     //talk to AC Transit's API, do some stuff (update the UI with a listview, etc)
     //TODO clean and move
-    private void callApi(String url) {
+    private void callApi(String url, boolean isByStopId) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-
-        if (!location.hasLocationEnabled()) {
-            SimpleLocation.openSettings(this);
-        }
-
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -143,17 +179,25 @@ public class MainActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                     hideUi(false);
                 });
-                return;
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseString = response.body().string();
-                String[] coords = HelpfulUtils.getCoords();
+
                 try {
-                    JSONObject object = new JSONObject(responseString);
-                    object = object.getJSONObject("bustime-response");
-                    createPredictionList(object.getJSONArray("prd"));
+                    if (isByStopId) {
+                        JSONObject object = new JSONObject(responseString);
+
+                        object = object.getJSONObject("bustime-response");
+                        createPredictionList(object.getJSONArray("prd")); //the name of the array in ACT's json response
+                    } else {
+                        JSONArray array = new JSONArray(responseString);
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = array.getJSONObject(i);
+                            Log.d("STOP_ID: ", object.getString("Name"));
+                        }
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
