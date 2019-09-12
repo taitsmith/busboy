@@ -36,14 +36,17 @@ import io.realm.RealmResults;
 import io.realm.exceptions.RealmMigrationNeededException;
 import obj.Bus;
 import obj.Prediction;
+import obj.Stop;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import utils.HelpfulUtils;
+import utils.NearbyAdapter;
 import utils.PredictionAdapter;
 
+import static viewmodels.MainActivityViewModel.createNearbyStopList;
 import static viewmodels.MainActivityViewModel.createPredictionList;
 
 public class MainActivity extends AppCompatActivity {
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.searchNearbyButton)
     Button searchNearbyButton;
     @BindView(R.id.busListView)
-    ListView busListView;
+    ListView listView;
     @BindView(R.id.loadingBar)
     ProgressBar loadingBar;
 
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //disable the nearby button until we have a good location
-    //the simplelocation library seems weird about
+    //the simplelocation library seems weird about not finding a location right away (pixel xl android 10)
     private void setupLocation() {
         searchNearbyButton.setEnabled(false);
 
@@ -164,7 +167,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     //talk to AC Transit's API, do some stuff (update the UI with a listview, etc)
-    //TODO clean and move
+    //in the interest of just having one api method we take a boolean to
+    //decide whether it's a nearby call or a stopid call
+    //TODO make this neater
     private void callApi(String url, boolean isByStopId) {
         Request request = new Request.Builder()
                 .url(url)
@@ -188,26 +193,32 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     if (isByStopId) {
                         JSONObject object = new JSONObject(responseString);
-
                         object = object.getJSONObject("bustime-response");
                         createPredictionList(object.getJSONArray("prd")); //the name of the array in ACT's json response
                     } else {
                         JSONArray array = new JSONArray(responseString);
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject object = array.getJSONObject(i);
-                            Log.d("STOP_ID: ", object.getString("Name"));
-                        }
+                        createNearbyStopList(array);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
-                    handler.post(() -> {
-                        hideUi(false);
-                        final PredictionAdapter adapter = new PredictionAdapter(realm.where(Prediction.class)
-                                .equalTo("stpid", stopEntry.getText().toString())
-                                .findAll());
-                        busListView.setAdapter(adapter);
-                    });
+
+                    if (isByStopId) {
+                        handler.post(() -> {
+                            hideUi(false);
+                            final PredictionAdapter adapter = new PredictionAdapter(realm.where(Prediction.class)
+                                    .equalTo("stpid", stopEntry.getText().toString())
+                                    .findAll());
+                            listView.setAdapter(adapter);
+                        });
+                    } else {
+                        handler.post(()-> {
+                            hideUi(false);
+                            final NearbyAdapter adapter = new NearbyAdapter(realm.where(Stop.class)
+                            .findAll());
+                            listView.setAdapter(adapter);
+                        });
+                    }
                 }
             }
         });
@@ -216,10 +227,10 @@ public class MainActivity extends AppCompatActivity {
     //hide or show loading indicator
     private void hideUi(Boolean isHidden) {
         if (isHidden) {
-            busListView.setVisibility(View.INVISIBLE);
+            listView.setVisibility(View.INVISIBLE);
             loadingBar.setVisibility(View.VISIBLE);
         } else {
-            busListView.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.VISIBLE);
             loadingBar.setVisibility(View.INVISIBLE);
         }
     }
