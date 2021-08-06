@@ -3,11 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.taitsmith.busboy">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="activities.BusboyApplication"
+        android:name="com.taitsmith.busboy.activities.BusboyApplication"
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@drawable/bus_timer"
@@ -16,8 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="activities.BusDetailActivity"/>
-        <activity android:name="activities.MainActivity">
+        <activity android:name="com.taitsmith.busboy.activities.BusDetailActivity"/>
+        <activity android:name="com.taitsmith.busboy.activities.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

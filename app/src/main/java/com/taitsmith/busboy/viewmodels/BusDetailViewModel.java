@@ -1,4 +1,4 @@
-package viewmodels;
+package com.taitsmith.busboy.viewmodels;
 
 import androidx.lifecycle.ViewModel;
 

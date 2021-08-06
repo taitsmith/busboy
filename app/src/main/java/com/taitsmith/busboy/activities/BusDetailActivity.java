@@ -1,4 +1,4 @@
-package activities;
+package com.taitsmith.busboy.activities;
 
 import android.os.Bundle;
 
@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.taitsmith.busboy.R;
 
-import fragments.BusDetailFragment;
+import com.taitsmith.busboy.fragments.BusDetailFragment;
 
 public class BusDetailActivity extends AppCompatActivity {
 

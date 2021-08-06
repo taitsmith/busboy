@@ -1,8 +1,6 @@
-package obj;
+package com.taitsmith.busboy.obj;
 
-import io.realm.RealmObject;
-
-public class Stop extends RealmObject {
+public class Stop  {
     private String StopId, Name, Latitude, Longitue;
 
     public String getStopId() {

@@ -1,4 +1,4 @@
-package fragments;
+package com.taitsmith.busboy.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.taitsmith.busboy.R;
 
-import viewmodels.BusDetailViewModel;
+import com.taitsmith.busboy.viewmodels.BusDetailViewModel;
 
 public class BusDetailFragment extends Fragment {
 

@@ -1,9 +1,8 @@
-package utils;
+package com.taitsmith.busboy.utils;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import static activities.MainActivity.location;
 
 /**
  * Here we keep all of our helpful utilities for doing things.
@@ -17,10 +16,10 @@ public class HelpfulUtils {
         return 0;
     }
 
-    public static String[] getCoords() {
-        final double lat = location.getLatitude();
-        final double lon = location.getLongitude();
-
-        return new String[] {Double.toString(lat), Double.toString(lon)};
-    }
+//    public static String[] getCoords() {
+//        final double lat = location.getLatitude();
+//        final double lon = location.getLongitude();
+//
+//        return new String[] {Double.toString(lat), Double.toString(lon)};
+//    }
 }

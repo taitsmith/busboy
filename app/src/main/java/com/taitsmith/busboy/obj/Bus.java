@@ -1,8 +1,6 @@
-package obj;
+package com.taitsmith.busboy.obj;
 
-import io.realm.RealmObject;
-
-public class Bus extends RealmObject {
+public class Bus  {
 
     private String RouteName, PredictedDeparture, VehicleId, StopId;
     private int PredictedDelayInSeconds;
