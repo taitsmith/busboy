@@ -1,10 +1,13 @@
 package com.taitsmith.busboy.utils;
 
+import android.annotation.SuppressLint;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.taitsmith.busboy.databinding.ListItemScheduleBinding;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.List;
  */
 public class PredictionAdapter extends BaseAdapter {
     List<Prediction> predictionList;
+    ListItemScheduleBinding binding;
 
     public PredictionAdapter(List<Prediction> predictionList) {
        this.predictionList = predictionList;
@@ -37,12 +41,12 @@ public class PredictionAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        return null;
-    }
+        binding = ListItemScheduleBinding.inflate(
+                LayoutInflater.from(viewGroup.getContext()),
+                viewGroup, false);
 
-    private static class ViewHolder {
-        TextView routeName;
-        TextView busPrediction;
-    }
+        binding.setPrediction(predictionList.get(i));
 
+        return binding.getRoot();
+    }
 }

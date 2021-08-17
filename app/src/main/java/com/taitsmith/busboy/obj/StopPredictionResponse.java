@@ -99,6 +99,10 @@ public class StopPredictionResponse {
             public String getDes() {
                 return des;
             }
+
+            public String getPrdtm() {
+                return prdtm;
+            }
         }
     }
 }

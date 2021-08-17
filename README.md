@@ -1,4 +1,4 @@
 # busboy
 where's the bus!?
 
-The goal of busboy is to serve as a foss implementation of AC Transit's public API.
+version 2 in progress will add retrofit, live data and databinding. it will remove realm and butterknife, as well as provide major refactoring to increase readability and keep with clean architecture best practices.
