@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -29,6 +30,7 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     public MutableLiveData<List<Prediction>> mutableLivePrediction;
     public MutableLiveData<String> errorMessage;
+    MutableLiveData<Boolean> hasLocationEnabled;
     MutableLiveData<List<BusRoute>> mutableLiveBusRoutes;
     List<Prediction> predictionList;
     ApiInterface apiInterface;
@@ -41,6 +43,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         mutableLiveBusRoutes = new MutableLiveData<>();
         predictionList = new ArrayList<>();
         errorMessage = new MutableLiveData<>();
+        hasLocationEnabled = new MutableLiveData<>(null);
         rt = null;
         apikey = "B344E43EEA2120C5CDDE8E5360D5928F"; //TODO MOVE THIS
     }
@@ -90,11 +93,11 @@ public class MainActivityViewModel extends AndroidViewModel {
         if (ContextCompat.checkSelfPermission(getApplication().getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (!simpleLocation.hasLocationEnabled()) {
-                SimpleLocation.openSettings(getApplication().getApplicationContext());
+                errorMessage.setValue("NO_LOC_ENABLED");
             }
             Log.d("LOCATION ", Double.toString(simpleLocation.getLongitude()));
         } else {
-
+            errorMessage.postValue("NO_PERMISSION");
         }
 
     }

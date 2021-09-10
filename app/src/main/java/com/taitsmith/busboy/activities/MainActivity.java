@@ -1,14 +1,18 @@
 package com.taitsmith.busboy.activities;
 
 import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.taitsmith.busboy.R;
@@ -21,6 +25,7 @@ import im.delight.android.location.SimpleLocation;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
 
     public static SimpleLocation location;
@@ -34,12 +39,7 @@ public class MainActivity extends AppCompatActivity {
         MainActivityViewModel viewModel =
                 new ViewModelProvider(this).get(MainActivityViewModel.class);
 
-        viewModel.errorMessage.observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                getError(s);
-                }
-        });
+        viewModel.errorMessage.observe(this, this::getError);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(binding.fragment.getId(), MainActivityFragment.newInstance())
@@ -49,11 +49,41 @@ public class MainActivity extends AppCompatActivity {
 
     private void getError(String s) {
         switch (s) {
-            case "NO_PERMISSION" :
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 519);
+            case "NO_PERMISSION" : //we don't have permission to access location
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            PERMISSION_REQUEST_FINE_LOCATION);
+                }
                 break;
             case "BAD_STOP" :
+                break;
+            case "NO_LOC_ENABLED" : //we have permission but location setting isn't on
+                askToEnableLoc();
+                break;
+        }
+    }
 
+    private void askToEnableLoc() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+            builder.setMessage(R.string.dialog_no_location)
+                .setPositiveButton(R.string.dialog_no_loc_positive, (dialogInterface, i) ->
+                        SimpleLocation.openSettings(this))
+                .setNegativeButton(R.string.dialog_no_loc_negative, null)
+                .create()
+                .show();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location Permission Granted", Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

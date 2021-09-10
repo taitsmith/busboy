@@ -1,9 +1,5 @@
 <resources>
     <string name="app_name">Busboy</string>
-
-    <string name="url_prediction">https://api.actransit.org/transit/actrealtime/prediction\?stpid=%1$s&amp;</string>
-    <!-- for nearby url we need three strings: lat, lon, and distance of search radius -->
-    <string name="url_nearby">https://api.actransit.org/transit/stops/%1$s/%2$s/%3$s?</string>
     <!--suppress AndroidDomInspection -->
     <string name="api_token">token=B344E43EEA2120C5CDDE8E5360D5928F</string>
 
@@ -12,6 +8,13 @@
     <string name="search_id_button_text">Search by stop Id</string>
     <string name="search_nearby_button_text">Search nearby</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
+
+    <!-- Dialogues etc -->
+    <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
+        your location, but the location setting is turned off. To see nearby stops, please
+        enable the location setting.</string>
+    <string name="dialog_no_loc_positive">Enable Location</string>
+    <string name="dialog_no_loc_negative">No Thanks</string>
 
     <!-- Toasts, etc -->
     <string name="toast_something_wrong">Something went wrong…</string>
