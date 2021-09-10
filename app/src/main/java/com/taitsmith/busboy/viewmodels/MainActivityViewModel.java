@@ -1,9 +1,13 @@
 package com.taitsmith.busboy.viewmodels;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -31,22 +35,24 @@ import retrofit2.Response;
 
 public class MainActivityViewModel extends AndroidViewModel {
     public String stopId, rt, apikey;
-    public double lat, lon;
     public MutableLiveData<List<Prediction>> mutableLivePrediction;
     public MutableLiveData<String> errorMessage;
+    public MutableLiveData<List<Stop>> mutableLiveStop;
 
-    MutableLiveData<List<BusRoute>> mutableLiveBusRoutes;
+    List<Stop> stopList;
     List<Prediction> predictionList;
     ApiInterface apiInterface;
     SimpleLocation simpleLocation;
 
     public MainActivityViewModel(Application application) {
         super(application);
-        simpleLocation = new SimpleLocation(application.getApplicationContext());
         mutableLivePrediction = new MutableLiveData<>();
-        mutableLiveBusRoutes = new MutableLiveData<>();
-        predictionList = new ArrayList<>();
+        mutableLiveStop = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
+
+        stopList = new ArrayList<>();
+        predictionList = new ArrayList<>();
+
         apikey = "B344E43EEA2120C5CDDE8E5360D5928F"; //TODO MOVE THIS
     }
 
@@ -56,9 +62,11 @@ public class MainActivityViewModel extends AndroidViewModel {
         call.enqueue(new Callback<StopPredictionResponse>() {
             @Override
             public void onResponse(Call<StopPredictionResponse> call, Response<StopPredictionResponse> response) {
-                if (response.body() == null || response.body().getBustimeResponse() == null) {
+
+                if (response.body() == null || response.code() == 404) {
                     errorMessage.setValue("NULL_PRED_RESPONSE");
                 } else {
+                    predictionList.clear();
                     predictionList.addAll(response.body().getBustimeResponse().getPrd());
                     mutableLivePrediction.setValue(predictionList);
                 }
@@ -71,45 +79,26 @@ public class MainActivityViewModel extends AndroidViewModel {
         });
     }
 
-    public void getRoutes() {
-        apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<List<BusRoute>> call = apiInterface.getRoutes(apikey);
-        call.enqueue(new Callback<List<BusRoute>>() {
-            @Override
-            public void onResponse(Call<List<BusRoute>> call, Response<List<BusRoute>> response) {
-                for (BusRoute br : response.body()) {
-                    //DO SOMETHING HERE
-                    Log.d("BUS ROUTE RESPONSE: ", br.getName()
-                    .concat(" " + br.getRouteId())
-                    .concat(" " + br.getDescription()));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<BusRoute>> call, Throwable t) {
-                Log.d("BUS ROUTE FAILURE", t.getMessage());
-            }
-        });
-    }
-
     public void getNearbyStops() {
-        simpleLocation = new SimpleLocation(getApplication().getApplicationContext());
-        lat = (double) Math.round(simpleLocation.getLatitude() * 1000d) / 1000d;
-        lon = (double) Math.round(simpleLocation.getLongitude() * 1000d) / 1000d;
+        //simpleLocation doesn't seem to return the correct emulator location, so we have to do it old school
+        LocationManager lm = (LocationManager) getApplication().getSystemService(Context.LOCATION_SERVICE);
+        @SuppressLint("MissingPermission") //we can't get here without permission
+        Location loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<List<Stop>> call = apiInterface.getNearbyStops(lat, lon, apikey);
+        Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(), loc.getLongitude(), apikey);
         call.enqueue(new Callback<List<Stop>>() {
             @Override
             public void onResponse(Call<List<Stop>> call, Response<List<Stop>> response) {
-                if (response.body() == null) errorMessage.setValue("NO_NEARBY");
+                if (response.body() == null || response.code() == 404)
+                    errorMessage.setValue("NEARBY_404");
                 else {
-                    Log.d("NEARBY", response.body().toString());
-                    for (Stop s : response.body()) {
-                        Log.d("STOP NEARBY: ", s.getName());
+                    stopList.clear();
+                    stopList.addAll(response.body());
+                    mutableLiveStop.setValue(stopList);
                     }
                 }
-            }
+
 
             @Override
             public void onFailure(Call<List<Stop>> call, Throwable t) {
@@ -119,6 +108,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     }
 
     public void checkLocationPerm() {
+        simpleLocation = new SimpleLocation(getApplication().getApplicationContext());
         if (ContextCompat.checkSelfPermission(getApplication().getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (!simpleLocation.hasLocationEnabled()) {
@@ -128,20 +118,5 @@ public class MainActivityViewModel extends AndroidViewModel {
         } else {
             errorMessage.postValue("NO_PERMISSION");
         }
-
-    }
-
-    public void getRouteDirs(String name) {
-        apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<List<String>> call = apiInterface.getRouteDirections(name, apikey);
-        call.enqueue(new Callback<List<String>>() {
-            @Override
-            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
-            }
-
-            @Override
-            public void onFailure(Call<List<String>> call, Throwable t) {
-            }
-        });
     }
 }

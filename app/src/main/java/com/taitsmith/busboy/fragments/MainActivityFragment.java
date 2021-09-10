@@ -11,11 +11,16 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.taitsmith.busboy.databinding.FragmentMainActivityBinding;
+import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.utils.NearbyAdapter;
 import com.taitsmith.busboy.utils.PredictionAdapter;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
+
+import java.util.List;
 
 public class MainActivityFragment extends Fragment{
 
@@ -24,8 +29,9 @@ public class MainActivityFragment extends Fragment{
     FragmentMainActivityBinding binding;
     Button searchByIdButton, searchNearbyButton;
     EditText stopIdEditText;
-    ListView predictionListView;
-    PredictionAdapter adapter;
+    ListView listView; //doubles
+    PredictionAdapter predictionAdapter;
+    NearbyAdapter nearbyAdapter;
 
     public static MainActivityFragment newInstance() {
         return new MainActivityFragment();
@@ -39,16 +45,20 @@ public class MainActivityFragment extends Fragment{
         searchByIdButton = binding.searchIdButton;
         searchNearbyButton = binding.searchNearbyButton;
         stopIdEditText = binding.stopEntryEditText;
-        predictionListView = binding.busListView;
+        listView = binding.predOrNearbyListView;
 
         searchByIdButton.setOnClickListener(view -> {
-            showLoading(true);
-            mainActivityViewModel.stopId = stopIdEditText.getText().toString();
-            mainActivityViewModel.getMutableLivePrediction();
-
+            String s = stopIdEditText.getText().toString();
+            if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
+            else {
+                showLoading(true);
+                mainActivityViewModel.stopId = stopIdEditText.getText().toString();
+                mainActivityViewModel.getMutableLivePrediction();
+            }
         });
 
         searchNearbyButton.setOnClickListener(view -> {
+            showLoading(true);
             mainActivityViewModel.checkLocationPerm();
         });
 
@@ -59,10 +69,19 @@ public class MainActivityFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
+        setObservers();
+    }
 
+    private void setObservers() {
         mainActivityViewModel.mutableLivePrediction.observe(getViewLifecycleOwner(), predictions -> {
-            adapter = new PredictionAdapter(predictions);
-            predictionListView.setAdapter(adapter);
+            predictionAdapter = new PredictionAdapter(predictions);
+            listView.setAdapter(predictionAdapter);
+            showLoading(false);
+        });
+
+        mainActivityViewModel.mutableLiveStop.observe(getViewLifecycleOwner(), stopList -> {
+            nearbyAdapter = new NearbyAdapter(stopList);
+            listView.setAdapter(nearbyAdapter);
             showLoading(false);
         });
     }

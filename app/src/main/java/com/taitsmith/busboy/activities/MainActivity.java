@@ -14,6 +14,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.taitsmith.busboy.R;
 
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
@@ -53,10 +55,19 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSION_REQUEST_FINE_LOCATION);
                 break;
-            case "BAD_STOP" :
+            case "NEARBY_404" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_nearby_404,
+                        Snackbar.LENGTH_LONG).show();
                 break;
             case "NO_LOC_ENABLED" : //we have permission but location setting isn't on
                 askToEnableLoc();
+                break;
+            case "BAD_INPUT" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_bad_input,
+                        Snackbar.LENGTH_LONG).show();
+                break;
+            case "NULL_PRED_RESPONSE" :
+                Log.d("NULL PRED", " RESPONSE");
                 break;
         }
     }

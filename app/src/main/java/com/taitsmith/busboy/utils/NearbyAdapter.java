@@ -8,64 +8,69 @@ import android.widget.TextView;
 
 import com.taitsmith.busboy.R;
 
-
+import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
 import com.taitsmith.busboy.obj.Stop;
 
 import java.util.List;
 
-/** A very cool list view adapter to display a list of nearby stops.
- * TODO includes adding lines served at each stop (one thing at a time).
- */
 public class NearbyAdapter extends BaseAdapter {
     List<Stop> stopList;
+    ListItemNearbyBinding binding;
 
-    public NearbyAdapter(List<Stop> realmResults) {
-        stopList = realmResults;
+    public NearbyAdapter(List<Stop> stopList) {
+        this.stopList = stopList;
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return stopList.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return stopList.get(i);
     }
 
     @Override
     public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
         return 0;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder;
-        Stop stop;
+    public View getView(int position, View view, ViewGroup parent) {
+        ViewHolder holder;
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item_nearby, parent, false);
+        if (view == null) {
+            binding = ListItemNearbyBinding.inflate(
+                    LayoutInflater.from(parent.getContext()),
+                    parent, false);
 
-            viewHolder = new ViewHolder();
-            stop = stopList.get(position);
+            holder = new ViewHolder(binding);
+            holder.view = binding.getRoot();
+            holder.view.setTag(holder);
 
-            viewHolder.stopNameTV = convertView.findViewById(R.id.stopNameTextView);
-
-            String stopName = stop.getName();
-
-            viewHolder.stopNameTV.setText(stopName);
-
-            convertView.setTag(viewHolder);
         } else {
-            viewHolder = (ViewHolder) convertView.getTag();
+            holder = (ViewHolder) view.getTag();
         }
 
-        return convertView;
+        binding.setStop(stopList.get(position));
+
+        return holder.view;
     }
 
     private static class ViewHolder {
-        TextView stopNameTV; //form of street + cross street
+        private View view;
+        private ListItemNearbyBinding binding;
+
+        ViewHolder(ListItemNearbyBinding binding) {
+            this.view = binding.getRoot();
+            this.binding = binding;
+        }
     }
 
 }
