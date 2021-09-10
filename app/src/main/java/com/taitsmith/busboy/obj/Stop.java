@@ -1,37 +1,40 @@
 package com.taitsmith.busboy.obj;
 
+import androidx.annotation.StringRes;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Date;
+
 public class Stop  {
-    private String StopId, Name, Latitude, Longitue;
+    @SerializedName("StopId")
+    String stopId;
+    @SerializedName("Name")
+    String name;
+    @SerializedName("Latitude")
+    Double latitude;
+    @SerializedName("Longitude")
+    Double longitude;
+    @SerializedName("ScheduledTime")
+    Date scheduledTime;
 
     public String getStopId() {
-        return StopId;
-    }
-
-    public void setStopId(String stopId) {
-        StopId = stopId;
+        return stopId;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
-    public void setName(String name) {
-        Name = name;
+    public Double getLatitude() {
+        return latitude;
     }
 
-    public String getLatitude() {
-        return Latitude;
+    public Double getLongitude() {
+        return longitude;
     }
 
-    public void setLatitude(String latitude) {
-        Latitude = latitude;
-    }
-
-    public String getLongitue() {
-        return Longitue;
-    }
-
-    public void setLongitue(String longitue) {
-        Longitue = longitue;
+    public Date getScheduledTime() {
+        return scheduledTime;
     }
 }
