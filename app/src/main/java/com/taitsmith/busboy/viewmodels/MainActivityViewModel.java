@@ -4,26 +4,21 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,19 +30,19 @@ import retrofit2.Response;
 
 public class MainActivityViewModel extends AndroidViewModel {
     public String stopId, rt, apikey;
-    public MutableLiveData<List<Prediction>> mutableLivePrediction;
+    public MutableLiveData<List<Prediction>> mutableStopPredictions;
+    public MutableLiveData<List<Stop>> mutableNearbyStops;
     public MutableLiveData<String> errorMessage;
-    public MutableLiveData<List<Stop>> mutableLiveStop;
+    public List<Stop> stopList;
+    public List<Prediction> predictionList;
 
-    List<Stop> stopList;
-    List<Prediction> predictionList;
     ApiInterface apiInterface;
     SimpleLocation simpleLocation;
 
     public MainActivityViewModel(Application application) {
         super(application);
-        mutableLivePrediction = new MutableLiveData<>();
-        mutableLiveStop = new MutableLiveData<>();
+        mutableStopPredictions = new MutableLiveData<>();
+        mutableNearbyStops = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
 
         stopList = new ArrayList<>();
@@ -56,7 +51,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         apikey = "B344E43EEA2120C5CDDE8E5360D5928F"; //TODO MOVE THIS
     }
 
-    public void getMutableLivePrediction() {
+    public void getStopPredictions() {
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
         Call<StopPredictionResponse> call = apiInterface.getStopPredictionList(stopId, rt, apikey);
         call.enqueue(new Callback<StopPredictionResponse>() {
@@ -68,7 +63,7 @@ public class MainActivityViewModel extends AndroidViewModel {
                 } else {
                     predictionList.clear();
                     predictionList.addAll(response.body().getBustimeResponse().getPrd());
-                    mutableLivePrediction.setValue(predictionList);
+                    mutableStopPredictions.setValue(predictionList);
                 }
             }
 
@@ -95,10 +90,9 @@ public class MainActivityViewModel extends AndroidViewModel {
                 else {
                     stopList.clear();
                     stopList.addAll(response.body());
-                    mutableLiveStop.setValue(stopList);
+                    mutableNearbyStops.setValue(stopList);
                     }
                 }
-
 
             @Override
             public void onFailure(Call<List<Stop>> call, Throwable t) {

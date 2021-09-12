@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,21 +25,22 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import im.delight.android.location.SimpleLocation;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements MainActivityFragment.OnListItemSelectedListener{
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
 
     public static SimpleLocation location;
 
+    MainActivityViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         location = new SimpleLocation(this);
-        MainActivityViewModel viewModel =
-                new ViewModelProvider(this).get(MainActivityViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         viewModel.errorMessage.observe(this, this::getError);
         if (savedInstanceState == null) {
@@ -92,5 +94,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Location Permission Granted", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    public void onPredictionSelected(int position) {
+        Log.d("PREDICTION SELECTED: ", viewModel.predictionList.get(position).getDes());
+    }
+
+    @Override
+    public void onNearbyStopSelected(int position) {
+        Log.d("STOP SELECTED: ", viewModel.stopList.get(position).getName());
     }
 }

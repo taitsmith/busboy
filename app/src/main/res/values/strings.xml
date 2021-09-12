@@ -3,22 +3,21 @@
     <!--suppress AndroidDomInspection -->
     <string name="api_token">token=B344E43EEA2120C5CDDE8E5360D5928F</string>
 
-
     <!-- buttons etc -->
     <string name="search_id_button_text">Search by stop Id</string>
     <string name="search_nearby_button_text">Search nearby</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
 
-    <!-- Dialogues etc -->
+    <!-- Dialogues, snackbars, toasts etc -->
     <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
         your location, but the location setting is turned off. To see nearby stops, please
         enable the location setting.</string>
     <string name="dialog_no_loc_positive">Enable Location</string>
     <string name="dialog_no_loc_negative">No Thanks</string>
+    <string name="snackbar_nearby_404">Looks like there\'s nothing nearby</string>
+    <string name="snackbar_bad_input">Please enter a five-digit stop ID</string>
 
     <!-- Toasts, etc -->
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
-
-
 </resources>

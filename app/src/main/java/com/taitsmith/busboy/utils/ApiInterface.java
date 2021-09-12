@@ -1,5 +1,7 @@
 package com.taitsmith.busboy.utils;
 
+import androidx.annotation.Nullable;
+
 import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
