@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
 import com.taitsmith.busboy.databinding.ListItemScheduleBinding;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
@@ -36,17 +37,51 @@ public class PredictionAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return i;
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        binding = ListItemScheduleBinding.inflate(
-                LayoutInflater.from(viewGroup.getContext()),
-                viewGroup, false);
+    public int getItemViewType(int position) {
+        return position;
+    }
 
-        binding.setPrediction(predictionList.get(i));
+    @Override
+    public int getViewTypeCount() {
+        if (predictionList.size() == 0) {
+            return 1;
+        }
+        return predictionList.size();
+    }
 
-        return binding.getRoot();
+    @Override
+    public View getView(int position, View view, ViewGroup parent) {
+        ViewHolder holder;
+
+        if (view == null) {
+            binding = ListItemScheduleBinding.inflate(
+                    LayoutInflater.from(parent.getContext()),
+                    parent, false);
+
+            holder = new ViewHolder(binding);
+            holder.view = binding.getRoot();
+            holder.view.setTag(holder);
+
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+
+        binding.setPrediction(predictionList.get(position));
+
+        return holder.view;
+    }
+
+    private static class ViewHolder {
+        private View view;
+        ListItemScheduleBinding binding;
+
+        ViewHolder(ListItemScheduleBinding binding) {
+            this.view = binding.getRoot();
+            this.binding = binding;
+        }
     }
 }
