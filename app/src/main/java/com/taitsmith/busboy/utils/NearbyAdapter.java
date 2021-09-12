@@ -28,7 +28,7 @@ public class NearbyAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        return stopList.get(i);
+        return null;
     }
 
     @Override
@@ -38,7 +38,15 @@ public class NearbyAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return 0;
+        return position;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        if (stopList.size() == 0) {
+            return 1;
+        }
+        return stopList.size();
     }
 
     @Override
@@ -65,7 +73,7 @@ public class NearbyAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         private View view;
-        private ListItemNearbyBinding binding;
+        ListItemNearbyBinding binding;
 
         ViewHolder(ListItemNearbyBinding binding) {
             this.view = binding.getRoot();
