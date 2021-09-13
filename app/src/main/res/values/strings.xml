@@ -8,7 +8,7 @@
     <string name="search_nearby_button_text">Search nearby</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
 
-    <!-- Dialogues, snackbars, toasts etc -->
+    <!-- Dialogues, snackbars, toasts, tabs etc -->
     <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
         your location, but the location setting is turned off. To see nearby stops, please
         enable the location setting.</string>
@@ -18,8 +18,9 @@
     <string name="snackbar_bad_input">Please enter a five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
-
-    <!-- Toasts, etc -->
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
+    <string name="tab_layout_by_stop">Search by Stop</string>
+    <string name="tab_layout_nearby">Search Nearby</string>
+    <string name="tab_layout_help">Help</string>
 </resources>
