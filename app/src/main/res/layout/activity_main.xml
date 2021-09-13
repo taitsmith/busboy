@@ -5,16 +5,16 @@
     <data>
         <variable
             name="mainActivity"
-            type="com.taitsmith.busboy.activities.MainActivity" />
+            type="com.taitsmith.busboy.ui.MainActivity" />
     </data>
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.taitsmith.busboy.activities.MainActivity">
+    tools:context="com.taitsmith.busboy.ui.MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment"
-        android:name="com.taitsmith.busboy.fragments.MainActivityFragment"
+        android:name="com.taitsmith.busboy.ui.MainActivityFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

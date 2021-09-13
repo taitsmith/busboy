@@ -3,16 +3,18 @@ package com.taitsmith.busboy.viewmodels;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
@@ -27,17 +29,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class MainActivityViewModel extends AndroidViewModel {
-    public String stopId, rt, apikey;
+    public String rt, apikey;
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
     public MutableLiveData<List<Stop>> mutableNearbyStops;
     public MutableLiveData<String> errorMessage;
     public List<Stop> stopList;
     public List<Prediction> predictionList;
+    public int distance;
+    public Location loc;
 
     ApiInterface apiInterface;
     SimpleLocation simpleLocation;
+    FusedLocationProviderClient fusedLocation;
 
     public MainActivityViewModel(Application application) {
         super(application);
@@ -45,14 +49,20 @@ public class MainActivityViewModel extends AndroidViewModel {
         mutableNearbyStops = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
 
+        simpleLocation = new SimpleLocation(application.getApplicationContext());
+        fusedLocation = new FusedLocationProviderClient(getApplication().getApplicationContext());
+
         stopList = new ArrayList<>();
         predictionList = new ArrayList<>();
 
-        apikey = "B344E43EEA2120C5CDDE8E5360D5928F"; //TODO MOVE THIS
+        apikey = application.getString(R.string.api_token);
+        distance = 1000; //default distance in feet for nearby stops
+        rt = ""; //route is optional in the 'nearby stops' call
     }
 
-    public void getStopPredictions() {
+    public void getStopPredictions(@Nullable String stopId) {
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
+
         Call<StopPredictionResponse> call = apiInterface.getStopPredictionList(stopId, rt, apikey);
         call.enqueue(new Callback<StopPredictionResponse>() {
             @Override
@@ -62,7 +72,11 @@ public class MainActivityViewModel extends AndroidViewModel {
                     errorMessage.setValue("NULL_PRED_RESPONSE");
                 } else {
                     predictionList.clear();
-                    predictionList.addAll(response.body().getBustimeResponse().getPrd());
+                    try {
+                        predictionList.addAll(response.body().getBustimeResponse().getPrd());
+                    } catch (NullPointerException e) {
+                        errorMessage.setValue("NULL_PRED_RESPONSE");
+                    }
                     mutableStopPredictions.setValue(predictionList);
                 }
             }
@@ -74,14 +88,15 @@ public class MainActivityViewModel extends AndroidViewModel {
         });
     }
 
+    @SuppressLint("MissingPermission") //won't end up here without permissions
     public void getNearbyStops() {
-        //simpleLocation doesn't seem to return the correct emulator location, so we have to do it old school
-        LocationManager lm = (LocationManager) getApplication().getSystemService(Context.LOCATION_SERVICE);
-        @SuppressLint("MissingPermission") //we can't get here without permission
-        Location loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(), loc.getLongitude(), apikey);
+        Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(),
+                loc.getLongitude(),
+                distance,
+                rt,
+                apikey);
         call.enqueue(new Callback<List<Stop>>() {
             @Override
             public void onResponse(Call<List<Stop>> call, Response<List<Stop>> response) {
@@ -107,8 +122,8 @@ public class MainActivityViewModel extends AndroidViewModel {
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (!simpleLocation.hasLocationEnabled()) {
                 errorMessage.setValue("NO_LOC_ENABLED");
-            }
-            getNearbyStops();
+            } else MainActivity.getLocation(fusedLocation);
+            ;
         } else {
             errorMessage.postValue("NO_PERMISSION");
         }

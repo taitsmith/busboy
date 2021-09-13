@@ -1,11 +1,11 @@
-package com.taitsmith.busboy.activities;
+package com.taitsmith.busboy.ui;
 
 import android.Manifest;
-import android.content.DialogInterface;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,12 +15,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.snackbar.Snackbar;
-import com.taitsmith.busboy.R;
 
+import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
-import com.taitsmith.busboy.fragments.MainActivityFragment;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import im.delight.android.location.SimpleLocation;
@@ -31,25 +30,23 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
 
-    public static SimpleLocation location;
-
-    MainActivityViewModel viewModel;
+    static MainActivityViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        location = new SimpleLocation(this);
         viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         viewModel.errorMessage.observe(this, this::getError);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(binding.fragment.getId(), MainActivityFragment.newInstance())
+                    .replace(binding.fragment.getId(), new MainActivityFragment())
                     .commitNow();
         }
     }
 
+    //let people know what's happening
     private void getError(String s) {
         switch (s) {
             case "NO_PERMISSION" : //we don't have permission to access location
@@ -69,7 +66,8 @@ public class MainActivity extends AppCompatActivity
                         Snackbar.LENGTH_LONG).show();
                 break;
             case "NULL_PRED_RESPONSE" :
-                Log.d("NULL PRED", " RESPONSE");
+                Snackbar.make(binding.getRoot(), R.string.snackbar_no_predictions,
+                        Snackbar.LENGTH_LONG).show();
                 break;
         }
     }
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity
                 .create()
                 .show();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -103,6 +100,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNearbyStopSelected(int position) {
-        Log.d("STOP SELECTED: ", viewModel.stopList.get(position).getName());
+        viewModel.getStopPredictions(viewModel.stopList.get(position).getStopId());
+    }
+
+    @SuppressLint("MissingPermission")
+    public static void getLocation(FusedLocationProviderClient client) {
+        client.getCurrentLocation(LocationRequest.QUALITY_LOW_POWER, null)
+                .addOnSuccessListener(location -> {
+                    viewModel.loc = location;
+                    viewModel.getNearbyStops();
+                });
     }
 }

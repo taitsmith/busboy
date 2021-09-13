@@ -1,11 +1,10 @@
-package com.taitsmith.busboy.fragments;
+package com.taitsmith.busboy.ui;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,8 +21,7 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 public class MainActivityFragment extends Fragment{
 
-    //TODO rename these
-    private MainActivityViewModel mainActivityViewModel;
+    MainActivityViewModel mainActivityViewModel;
     FragmentMainActivityBinding binding;
     Button searchByIdButton, searchNearbyButton;
     EditText stopIdEditText;
@@ -32,7 +30,7 @@ public class MainActivityFragment extends Fragment{
     NearbyAdapter nearbyAdapter;
     OnListItemSelectedListener listener;
 
-    public static MainActivityFragment newInstance() {
+    public MainActivityFragment newInstance() {
         return new MainActivityFragment();
     }
 
@@ -61,16 +59,14 @@ public class MainActivityFragment extends Fragment{
         searchNearbyButton = binding.searchNearbyButton;
         stopIdEditText = binding.stopEntryEditText;
         listView = binding.predOrNearbyListView;
-
-                searchByIdButton.setOnClickListener(view -> {
-                    String s = stopIdEditText.getText().toString();
-                    if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
-                    else {
-                        showLoading(true);
-                        mainActivityViewModel.stopId = stopIdEditText.getText().toString();
-                        mainActivityViewModel.getStopPredictions();
-                    }
-                });
+            searchByIdButton.setOnClickListener(view -> {
+                String s = stopIdEditText.getText().toString();
+                if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
+                else {
+                    showLoading(true);
+                    mainActivityViewModel.getStopPredictions(s);
+                }
+            });
 
         searchNearbyButton.setOnClickListener(view -> {
             showLoading(true);

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Busboy</string>
     <!--suppress AndroidDomInspection -->
-    <string name="api_token">token=B344E43EEA2120C5CDDE8E5360D5928F</string>
+    <string name="api_token">B344E43EEA2120C5CDDE8E5360D5928F</string>
 
     <!-- buttons etc -->
     <string name="search_id_button_text">Search by stop Id</string>
@@ -16,6 +16,8 @@
     <string name="dialog_no_loc_negative">No Thanks</string>
     <string name="snackbar_nearby_404">Looks like there\'s nothing nearby</string>
     <string name="snackbar_bad_input">Please enter a five-digit stop ID</string>
+    <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
+        this stop.</string>
 
     <!-- Toasts, etc -->
     <string name="toast_something_wrong">Something went wrong…</string>

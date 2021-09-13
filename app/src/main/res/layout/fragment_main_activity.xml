@@ -5,13 +5,13 @@
     <data>
         <variable
             name="mainFragment"
-            type="com.taitsmith.busboy.fragments.MainActivityFragment" />
+            type="com.taitsmith.busboy.ui.MainActivityFragment" />
         <import type="android.view.View"/>
     </data>
 <androidx.constraintlayout.widget.ConstraintLayout 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.taitsmith.busboy.activities.MainActivity">
+    tools:context="com.taitsmith.busboy.ui.MainActivity">
 
     <EditText
         android:id="@+id/stopEntryEditText"

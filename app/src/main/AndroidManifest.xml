@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.taitsmith.busboy.activities.BusboyApplication"
+        android:name="com.taitsmith.busboy.BusboyApplication"
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@drawable/bus_timer"
@@ -17,8 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.taitsmith.busboy.activities.BusDetailActivity"/>
-        <activity android:name="com.taitsmith.busboy.activities.MainActivity"
+        <activity android:name="com.taitsmith.busboy.ui.BusDetailActivity"/>
+        <activity android:name="com.taitsmith.busboy.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

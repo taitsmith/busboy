@@ -1,12 +1,11 @@
-package com.taitsmith.busboy.activities;
+package com.taitsmith.busboy.ui;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.taitsmith.busboy.R;
-
-import com.taitsmith.busboy.fragments.BusDetailFragment;
+import com.taitsmith.busboy.ui.BusDetailFragment;
 
 public class BusDetailActivity extends AppCompatActivity {
 

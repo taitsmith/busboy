@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.fragments;
+package com.taitsmith.busboy.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
