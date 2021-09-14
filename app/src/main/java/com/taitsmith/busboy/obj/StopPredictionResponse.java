@@ -12,14 +12,23 @@ public class StopPredictionResponse {
     private BustimeResponse bustimeResponse;
     @SerializedName("error")
     @Expose
-    private String error;
+    private BusError error;
 
     public BustimeResponse getBustimeResponse() {
         return bustimeResponse;
     }
 
-    public String getError() {
+    public BusError getErrors() {
         return error;
+    }
+
+    public static class BusError {
+        @SerializedName("msg")
+        String message;
+
+        public String getMessage() {
+            return message;
+        }
     }
 
     public static class BustimeResponse {
@@ -103,6 +112,8 @@ public class StopPredictionResponse {
             public String getPrdtm() {
                 return prdtm;
             }
+
+            public String getStpnm() { return stpnm; }
         }
     }
 }
