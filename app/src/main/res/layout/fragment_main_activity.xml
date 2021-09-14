@@ -13,6 +13,16 @@
     android:layout_height="match_parent"
     tools:context="com.taitsmith.busboy.ui.MainActivity">
 
+    <TextView
+        android:id="@+id/main_fragment_stop_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/stopEntryEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <EditText
         android:id="@+id/stopEntryEditText"
         android:layout_width="wrap_content"
@@ -26,7 +36,8 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/main_fragment_stop_name"
+        android:importantForAutofill="no" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -101,6 +112,13 @@
             android:text="@string/tab_layout_nearby" />
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_item_favorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_layout_favorites"
+            android:icon="@drawable/ic_baseline_loyalty_24"/>
+
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/tab_item_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -108,6 +126,8 @@
             android:text="@string/tab_layout_help" />
 
     </com.google.android.material.tabs.TabLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
