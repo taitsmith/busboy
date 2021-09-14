@@ -2,6 +2,7 @@ package com.taitsmith.busboy.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
@@ -20,12 +21,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
+import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import im.delight.android.location.SimpleLocation;
 
 public class MainActivity extends AppCompatActivity
-        implements MainActivityFragment.OnListItemSelectedListener{
+        implements MainActivityFragment.OnListItemSelectedListener, MainActivityFragment.OnListItemLongListener{
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
@@ -95,7 +97,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPredictionSelected(int position) {
-        Log.d("PREDICTION SELECTED: ", viewModel.predictionList.get(position).getDes());
     }
 
     @Override
@@ -110,5 +111,14 @@ public class MainActivity extends AppCompatActivity
                     viewModel.loc = location;
                     viewModel.getNearbyStops();
                 });
+    }
+
+    @Override
+    public void onNearbyLongSelected(int position) {
+
+    }
+
+    @Override
+    public void onPredictionLongSelected(int position) {
     }
 }

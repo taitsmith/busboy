@@ -18,6 +18,7 @@ import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
+import com.taitsmith.busboy.ui.MainActivityFragment;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
@@ -74,10 +75,11 @@ public class MainActivityViewModel extends AndroidViewModel {
                     predictionList.clear();
                     try {
                         predictionList.addAll(response.body().getBustimeResponse().getPrd());
-                    } catch (NullPointerException e) {
+                    } catch (NullPointerException | IndexOutOfBoundsException e) {
                         errorMessage.setValue("NULL_PRED_RESPONSE");
                     }
-                    mutableStopPredictions.setValue(predictionList);
+                    if (predictionList.size() == 0) errorMessage.setValue("BAD_INPUT");
+                    else mutableStopPredictions.setValue(predictionList);
                 }
             }
 

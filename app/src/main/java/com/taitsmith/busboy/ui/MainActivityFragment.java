@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -31,7 +32,8 @@ public class MainActivityFragment extends Fragment{
     ListView listView; //shows both types of lists //TODO is this bad practice?
     PredictionAdapter predictionAdapter;
     NearbyAdapter nearbyAdapter;
-    OnListItemSelectedListener listener;
+    OnListItemSelectedListener listItemListener;
+    OnListItemLongListener listItemLongListener;
     TabLayout bottomTabLayout;
     List<Stop> nearbyStopList;
     List<Prediction> predictionList;
@@ -45,11 +47,17 @@ public class MainActivityFragment extends Fragment{
         void onNearbyStopSelected(int position);
     }
 
+    public interface OnListItemLongListener {
+        void onNearbyLongSelected(int position);
+        void onPredictionLongSelected(int position);
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            listener = (OnListItemSelectedListener) context;
+            listItemListener = (OnListItemSelectedListener) context;
+            listItemLongListener = (OnListItemLongListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
                     "Must Implement OnListItemSelectedListener");
@@ -63,7 +71,6 @@ public class MainActivityFragment extends Fragment{
         bottomTabLayout = binding.mainTabLayout;
         stopIdEditText = binding.stopEntryEditText;
         listView = binding.predOrNearbyListView;
-
         bottomTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -125,6 +132,7 @@ public class MainActivityFragment extends Fragment{
     private void setObservers() {
         mainActivityViewModel.mutableStopPredictions.observe(getViewLifecycleOwner(), predictionList -> {
             this.predictionList = predictionList;
+            binding.mainFragmentStopName.setText(predictionList.get(0).getStpnm());
             showStopPredictionsList();
         });
 
@@ -136,7 +144,7 @@ public class MainActivityFragment extends Fragment{
     }
 
     //let the user know some stuff if happening in the background
-    private void showLoading(boolean isHidden) {
+    public void showLoading(boolean isHidden) {
         binding.loadingBar.setVisibility(isHidden ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -144,7 +152,11 @@ public class MainActivityFragment extends Fragment{
         predictionAdapter = new PredictionAdapter(predictionList);
         listView.setAdapter(predictionAdapter);
         listView.setOnItemClickListener((adapterView, view, i, l) ->
-                listener.onPredictionSelected(i));
+                listItemListener.onPredictionSelected(i));
+        listView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            listItemLongListener.onPredictionLongSelected(i);
+            return true;
+        });
         showLoading(false);
     }
 
@@ -152,7 +164,11 @@ public class MainActivityFragment extends Fragment{
         nearbyAdapter = new NearbyAdapter(nearbyStopList);
         listView.setAdapter(nearbyAdapter);
         listView.setOnItemClickListener((adapterView, view, i, l) ->
-                listener.onNearbyStopSelected(i));
-        showLoading(false);
+                listItemListener.onNearbyStopSelected(i));
+        listView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            listItemLongListener.onNearbyLongSelected(i);
+            return true;
+        });
+                showLoading(false);
     }
 }
