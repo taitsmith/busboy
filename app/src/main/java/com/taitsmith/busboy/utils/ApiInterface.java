@@ -1,6 +1,8 @@
 package com.taitsmith.busboy.utils;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.taitsmith.busboy.obj.BusRoute;
+import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 
@@ -33,5 +35,12 @@ public interface ApiInterface {
                                     @Path("distance") int distance,
                                     @Path("route") String route,
                                     @Query("token") String token);
+
+
+    @GET()
+    Call<DirectionResponseData> getStopDirections(@Query("origin") LatLng origin,
+                                                  @Query("destination") LatLng destination,
+                                                  @Query("mode") String mode,
+                                                  @Query("key") String apiKey);
 
 }

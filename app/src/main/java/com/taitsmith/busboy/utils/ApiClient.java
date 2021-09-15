@@ -6,9 +6,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static Retrofit retrofit;
+    static Retrofit acTransitRetrofit;
+    static Retrofit googleMapsRetrofit;
 
-    public static Retrofit getClient() {
+    public static Retrofit getAcTransitClient() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
 
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -16,12 +17,29 @@ public class ApiClient {
                 .addInterceptor(interceptor)
                 .build();
 
-        retrofit = new Retrofit.Builder()
+        acTransitRetrofit = new Retrofit.Builder()
                 .baseUrl("https://api.actransit.org/transit/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
 
-        return retrofit;
+        return acTransitRetrofit;
+    }
+
+    public static Retrofit getMapsClient() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+        googleMapsRetrofit = new Retrofit.Builder()
+                .baseUrl("https://maps.googleapis.com/maps/api/directions/json")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+
+        return googleMapsRetrofit;
     }
 }
