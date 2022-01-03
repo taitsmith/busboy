@@ -2,11 +2,9 @@ package com.taitsmith.busboy.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,7 +19,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
-import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import im.delight.android.location.SimpleLocation;
@@ -71,6 +68,13 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(binding.getRoot(), R.string.snackbar_no_predictions,
                         Snackbar.LENGTH_LONG).show();
                 break;
+            case "HELP_REQUESTED" :
+                showHelp();
+                break;
+            case "FAVORITES" :
+                Snackbar.make(binding.getRoot(), "FAVORITES",
+                        Snackbar.LENGTH_LONG).show();
+                break;
         }
     }
 
@@ -83,6 +87,16 @@ public class MainActivity extends AppCompatActivity
                 .setNegativeButton(R.string.dialog_no_loc_negative, null)
                 .create()
                 .show();
+    }
+
+    private void showHelp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.dialog_help)
+                    .setPositiveButton(R.string.dialog_got_it, ((dialogInterface, i) ->
+                            SimpleLocation.openSettings(this)))
+                    .setNegativeButton(R.string.dialog_no_loc_negative, null)
+                    .create()
+                    .show();
     }
 
     @Override

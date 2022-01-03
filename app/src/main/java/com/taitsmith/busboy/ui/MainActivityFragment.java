@@ -74,8 +74,9 @@ public class MainActivityFragment extends Fragment{
         bottomTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0:
+
+                switch (tab.getText().toString()) {
+                    case "By ID":
                         String s = stopIdEditText.getText().toString();
                         if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
                         else {
@@ -83,11 +84,14 @@ public class MainActivityFragment extends Fragment{
                             mainActivityViewModel.getStopPredictions(s);
                         }
                         break;
-                    case 1:
+                    case "Nearby":
                         showLoading(true);
                         mainActivityViewModel.checkLocationPerm();
                         break;
-                    case 2:
+                    case "Favorites":
+                        mainActivityViewModel.errorMessage.setValue("FAVORITES");
+                        break;
+                    case "Help":
                         mainActivityViewModel.errorMessage.setValue("HELP_REQUESTED");
                         break;
                 }
@@ -100,11 +104,11 @@ public class MainActivityFragment extends Fragment{
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                switch (bottomTabLayout.getSelectedTabPosition()) {
-                    case 0 :
+                switch (tab.getText().toString()) {
+                    case "By ID" :
                         if (predictionAdapter != null) showStopPredictionsList();
                         else {
-                            String s = stopIdEditText.getText().toString();
+                            String s = stopIdEditText.getText().toString(); //
                             if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
                             else {
                                 showLoading(true);
@@ -112,7 +116,7 @@ public class MainActivityFragment extends Fragment{
                             }
                         }
                         break;
-                    case 1:
+                    case "Nearby":
                         if (nearbyAdapter != null) showNearbyStopList();
                         break;
                 }

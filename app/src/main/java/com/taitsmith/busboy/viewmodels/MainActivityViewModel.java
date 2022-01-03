@@ -18,7 +18,6 @@ import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
-import com.taitsmith.busboy.ui.MainActivityFragment;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
@@ -62,7 +61,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     }
 
     public void getStopPredictions(@Nullable String stopId) {
-        apiInterface = ApiClient.getClient().create(ApiInterface.class);
+        apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
 
         Call<StopPredictionResponse> call = apiInterface.getStopPredictionList(stopId, rt, apikey);
         call.enqueue(new Callback<StopPredictionResponse>() {
@@ -93,7 +92,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     @SuppressLint("MissingPermission") //won't end up here without permissions
     public void getNearbyStops() {
 
-        apiInterface = ApiClient.getClient().create(ApiInterface.class);
+        apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(),
                 loc.getLongitude(),
                 distance,
@@ -125,7 +124,7 @@ public class MainActivityViewModel extends AndroidViewModel {
             if (!simpleLocation.hasLocationEnabled()) {
                 errorMessage.setValue("NO_LOC_ENABLED");
             } else MainActivity.getLocation(fusedLocation);
-            ;
+
         } else {
             errorMessage.postValue("NO_PERMISSION");
         }

@@ -14,14 +14,18 @@
         enable the location setting.</string>
     <string name="dialog_no_loc_positive">Enable Location</string>
     <string name="dialog_no_loc_negative">No Thanks</string>
+    <string name="dialog_got_it">Got it</string>
+    <string name="dialog_help">Here\'s a help message.</string>
     <string name="snackbar_nearby_404">Looks like there\'s nothing nearby</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
-    <string name="tab_layout_by_stop">Search by Stop</string>
-    <string name="tab_layout_nearby">Search Nearby</string>
+
+    <!-- tabs, menus etc-->
+    <string name="tab_layout_by_stop">By ID</string>
+    <string name="tab_layout_nearby">Nearby</string>
     <string name="tab_layout_help">Help</string>
     <string name="tab_layout_favorites">Favorites</string>
 </resources>
