@@ -28,4 +28,5 @@
     <string name="tab_layout_nearby">Nearby</string>
     <string name="tab_layout_help">Help</string>
     <string name="tab_layout_favorites">Favorites</string>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>

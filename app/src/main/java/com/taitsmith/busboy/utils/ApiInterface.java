@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public interface ApiInterface {
                                                        @Query("rt") String routeId,
                                                        @Query("token") String token);
 
+    //TODO delete these two, do we actually use them?
     @GET("routes")//list all AC Transit routes
     Call<List<BusRoute>> getRoutes(@Query("token") String token);
 
@@ -36,8 +38,12 @@ public interface ApiInterface {
                                     @Path("route") String route,
                                     @Query("token") String token);
 
+    @GET("stop/{stopID}/destinations")//get destinations for given stop so we can display NB/SB/EB/WB
+    Call<List<RouteDestination>> getStopDirection(@Path("stopID") String stopId,
+                                                  @Query("token") String token);
 
-    @GET()
+
+    @GET() //talk to google and get walking directions from our location to the selected stop
     Call<DirectionResponseData> getStopDirections(@Query("origin") LatLng origin,
                                                   @Query("destination") LatLng destination,
                                                   @Query("mode") String mode,
