@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.obj;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class DirectionResponseData {
 
     public static class MapRoute {
         @SerializedName("bounds")
-        List<Double> boundsList;
+        Object boundsList;
         @SerializedName("legs")
         List<Leg> tripList;
         @SerializedName("warnings")
@@ -34,12 +35,6 @@ public class DirectionResponseData {
     }
 
     public static class Leg {
-        @SerializedName("distance")
-        String distance;
-        @SerializedName("start_location")
-        double[] coords;
-        @SerializedName("summary")
-        String summary;
         @SerializedName("steps")
         List<Step> stepList;
 
@@ -50,8 +45,21 @@ public class DirectionResponseData {
 
     public static class Step {
         @SerializedName("end_location")
-        double[] endCoords;
-        @SerializedName("start_location")
-        double[] startCoords;
+        EndCoords endCoords;
+
+        public EndCoords getEndCoords() {
+            return endCoords;
+        }
+    }
+
+    public static class EndCoords {
+        @SerializedName("lat")
+        Double lat;
+        @SerializedName("lng")
+        Double lon;
+
+        public LatLng returnCoords() {
+            return new LatLng(this.lat, this.lon);
+        }
     }
 }

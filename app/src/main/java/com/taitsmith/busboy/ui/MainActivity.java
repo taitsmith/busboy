@@ -2,6 +2,7 @@ package com.taitsmith.busboy.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
+import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import im.delight.android.location.SimpleLocation;
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
-        viewModel.errorMessage.observe(this, this::getError);
+        viewModel.mutableStatusMessage.observe(this, this::getStatus);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(binding.fragment.getId(), new MainActivityFragment())
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //let people know what's happening
-    private void getError(String s) {
+    private void getStatus(String s) {
         switch (s) {
             case "NO_PERMISSION" : //we don't have permission to access location
                 ActivityCompat.requestPermissions(this,
@@ -75,6 +77,9 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(binding.getRoot(), "FAVORITES",
                         Snackbar.LENGTH_LONG).show();
                 break;
+            case "POLYLINE_READY" :
+                Intent intent = new Intent(this, MapsActivity.class);
+                startActivity(intent);
         }
     }
 
@@ -93,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.dialog_help)
                     .setPositiveButton(R.string.dialog_got_it, ((dialogInterface, i) ->
-                            SimpleLocation.openSettings(this)))
+                            Toast.makeText(this, getText(R.string.dialog_help), Toast.LENGTH_SHORT).show()))
                     .setNegativeButton(R.string.dialog_no_loc_negative, null)
                     .create()
                     .show();
@@ -129,7 +134,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNearbyLongSelected(int position) {
+        Stop stop = viewModel.stopList.get(position);
+        String startLoc = Double.toString(viewModel.loc.getLatitude()).concat(",")
+                .concat(Double.toString(viewModel.loc.getLongitude()));
+        String endLoc = Double.toString(stop.getLatitude()).concat(",")
+                .concat(Double.toString(stop.getLongitude()));
 
+        viewModel.getDirectionsToStop(startLoc, endLoc);
     }
 
     @Override

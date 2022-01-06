@@ -77,7 +77,7 @@ public class MainActivityFragment extends Fragment{
                 switch (tab.getText().toString()) {
                     case "By ID":
                         String s = stopIdEditText.getText().toString();
-                        if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
+                        if (s.length() != 5) mainActivityViewModel.mutableStatusMessage.setValue("BAD_INPUT");
                         else {
                             showLoading(true);
                             mainActivityViewModel.getStopPredictions(s);
@@ -88,10 +88,10 @@ public class MainActivityFragment extends Fragment{
                         mainActivityViewModel.checkLocationPerm();
                         break;
                     case "Favorites":
-                        mainActivityViewModel.errorMessage.setValue("FAVORITES");
+                        mainActivityViewModel.mutableStatusMessage.setValue("FAVORITES");
                         break;
                     case "Help":
-                        mainActivityViewModel.errorMessage.setValue("HELP_REQUESTED");
+                        mainActivityViewModel.mutableStatusMessage.setValue("HELP_REQUESTED");
                         break;
                 }
             }
@@ -108,7 +108,7 @@ public class MainActivityFragment extends Fragment{
                         if (predictionAdapter != null) showStopPredictionsList();
                         else {
                             String s = stopIdEditText.getText().toString(); //
-                            if (s.length() != 5) mainActivityViewModel.errorMessage.setValue("BAD_INPUT");
+                            if (s.length() != 5) mainActivityViewModel.mutableStatusMessage.setValue("BAD_INPUT");
                             else {
                                 showLoading(true);
                                 mainActivityViewModel.getStopPredictions(s);

@@ -35,7 +35,7 @@ public class ApiClient {
                 .build();
 
         googleMapsRetrofit = new Retrofit.Builder()
-                .baseUrl("https://maps.googleapis.com/maps/api/directions/json")
+                .baseUrl("https://maps.googleapis.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();

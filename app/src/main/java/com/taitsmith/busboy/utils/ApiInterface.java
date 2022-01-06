@@ -43,10 +43,10 @@ public interface ApiInterface {
                                                   @Query("token") String token);
 
 
-    @GET() //talk to google and get walking directions from our location to the selected stop
-    Call<DirectionResponseData> getStopDirections(@Query("origin") LatLng origin,
-                                                  @Query("destination") LatLng destination,
-                                                  @Query("mode") String mode,
-                                                  @Query("key") String apiKey);
+    @GET("maps/api/directions/json") //talk to google and get walking directions from our location to the selected stop
+    Call<DirectionResponseData> getNavigationToStop(@Query(value = "origin", encoded = true) String origin,
+                                                    @Query(value = "destination", encoded = true) String destination,
+                                                    @Query("mode") String mode,
+                                                    @Query("key") String apiKey);
 
 }

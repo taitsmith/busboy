@@ -13,7 +13,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
@@ -33,7 +35,8 @@ public class MainActivityViewModel extends AndroidViewModel {
     public String rt, apikey;
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
     public MutableLiveData<List<Stop>> mutableNearbyStops;
-    public MutableLiveData<String> errorMessage;
+    public MutableLiveData<String> mutableStatusMessage;
+    public static List<LatLng> polylineCoords;
     public List<Stop> stopList;
     public List<Prediction> predictionList;
     public int distance;
@@ -47,7 +50,9 @@ public class MainActivityViewModel extends AndroidViewModel {
         super(application);
         mutableStopPredictions = new MutableLiveData<>();
         mutableNearbyStops = new MutableLiveData<>();
-        errorMessage = new MutableLiveData<>();
+        mutableStatusMessage = new MutableLiveData<>();
+
+        polylineCoords = new ArrayList<>();
 
         simpleLocation = new SimpleLocation(application.getApplicationContext());
         fusedLocation = new FusedLocationProviderClient(getApplication().getApplicationContext());
@@ -69,15 +74,15 @@ public class MainActivityViewModel extends AndroidViewModel {
             public void onResponse(Call<StopPredictionResponse> call, Response<StopPredictionResponse> response) {
 
                 if (response.body() == null || response.code() == 404) {
-                    errorMessage.setValue("NULL_PRED_RESPONSE");
+                    mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
                 } else {
                     predictionList.clear();
                     try {
                         predictionList.addAll(response.body().getBustimeResponse().getPrd());
                     } catch (NullPointerException | IndexOutOfBoundsException e) {
-                        errorMessage.setValue("NULL_PRED_RESPONSE");
+                        mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
                     }
-                    if (predictionList.size() == 0) errorMessage.setValue("BAD_INPUT");
+                    if (predictionList.size() == 0) mutableStatusMessage.setValue("BAD_INPUT");
                     else mutableStopPredictions.setValue(predictionList);
                 }
             }
@@ -91,7 +96,6 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     @SuppressLint("MissingPermission") //won't end up here without permissions
     public void getNearbyStops() {
-
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(),
                 loc.getLongitude(),
@@ -102,7 +106,7 @@ public class MainActivityViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<List<Stop>> call, Response<List<Stop>> response) {
                 if (response.body() == null || response.code() == 404)
-                    errorMessage.setValue("NEARBY_404");
+                    mutableStatusMessage.setValue("NEARBY_404");
                 else {
                     stopList.clear();
                     stopList.addAll(response.body());
@@ -117,16 +121,42 @@ public class MainActivityViewModel extends AndroidViewModel {
         });
     }
 
+    public void getDirectionsToStop(String start, String stop) {
+        apiInterface = ApiClient.getMapsClient().create(ApiInterface.class);
+        Call<DirectionResponseData> call = apiInterface.getNavigationToStop(start,
+                stop,
+                "walking",
+                "AIzaSyCSMBC8N4Pnr59CoM2BwR7xOG665YBfr4A"); //TODO move me
+        call.enqueue(new Callback<DirectionResponseData>() {
+            @Override
+            public void onResponse(Call<DirectionResponseData> call, Response<DirectionResponseData> response) {
+                List<DirectionResponseData.Step> stepList = response.body().getRouteList().get(0)
+                        .getTripList().get(0).getStepList();
+                polylineCoords.clear();
+
+                for (DirectionResponseData.Step step : stepList) {
+                    polylineCoords.add(step.getEndCoords().returnCoords());
+                }
+                mutableStatusMessage.setValue("POLYLINE_READY");
+            }
+
+            @Override
+            public void onFailure(Call<DirectionResponseData> call, Throwable t) {
+                Log.d("DIRECTIONS FAILURE: ", t.getMessage());
+            }
+        });
+    }
+
     public void checkLocationPerm() {
         simpleLocation = new SimpleLocation(getApplication().getApplicationContext());
         if (ContextCompat.checkSelfPermission(getApplication().getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (!simpleLocation.hasLocationEnabled()) {
-                errorMessage.setValue("NO_LOC_ENABLED");
+                mutableStatusMessage.setValue("NO_LOC_ENABLED");
             } else MainActivity.getLocation(fusedLocation);
 
         } else {
-            errorMessage.postValue("NO_PERMISSION");
+            mutableStatusMessage.postValue("NO_PERMISSION");
         }
     }
 }

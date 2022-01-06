@@ -8,18 +8,24 @@
     <string name="search_nearby_button_text">Search nearby</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
 
-    <!-- Dialogues, snackbars, toasts, tabs etc -->
+    <!-- dialogs -->
     <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
         your location, but the location setting is turned off. To see nearby stops, please
         enable the location setting.</string>
     <string name="dialog_no_loc_positive">Enable Location</string>
     <string name="dialog_no_loc_negative">No Thanks</string>
     <string name="dialog_got_it">Got it</string>
-    <string name="dialog_help">Here\'s a help message.</string>
+    <string name="dialog_help">You can search for nearby stops if you\'ve granted busboy permission
+        to view your location and have the location setting enabled. If you\'re already at your stop,
+        you can find upcoming busses by entering your stop ID (found at the bottom of the sign) and
+        pressing the \'By ID\' button.</string>
+
+    <!-- snackbars && toasts-->
     <string name="snackbar_nearby_404">Looks like there\'s nothing nearby</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
+    <string name="snackbar_no_polyline">Looks like there aren\'t any directions</string>
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
 
