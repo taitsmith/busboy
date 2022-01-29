@@ -86,6 +86,7 @@ public class MainActivityFragment extends Fragment{
                     case "Nearby":
                         showLoading(true);
                         mainActivityViewModel.checkLocationPerm();
+                        binding.mainFragmentStopName.setText("Nearby Stops");
                         break;
                     case "Favorites":
                         mainActivityViewModel.mutableStatusMessage.setValue("FAVORITES");

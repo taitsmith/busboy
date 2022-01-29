@@ -10,6 +10,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
@@ -49,7 +51,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             directionRoute = googleMap.addPolyline(new PolylineOptions());
             directionRoute.setPoints(polylineCoords);
             directionRoute.setColor(Color.RED);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords.get(0), 17));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords.get(0), 15));
         }
+
+        googleMap.addMarker(new MarkerOptions()
+        .position(polylineCoords.get(0))
+        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+        googleMap.addMarker(new MarkerOptions()
+        .position(polylineCoords.get(polylineCoords.size() - 1))
+        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
     }
 }
