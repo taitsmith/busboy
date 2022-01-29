@@ -61,7 +61,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         predictionList = new ArrayList<>();
 
         apikey = application.getString(R.string.api_token);
-        distance = 1000; //default distance in feet for nearby stops
+        distance = 2000; //default distance in feet for nearby stops
         rt = ""; //route is optional in the 'nearby stops' call
     }
 

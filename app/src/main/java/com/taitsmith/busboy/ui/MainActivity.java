@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                 showHelp();
                 break;
             case "FAVORITES" :
-                Snackbar.make(binding.getRoot(), "FAVORITES",
+                Snackbar.make(binding.getRoot(), R.string.snackbar_favorites_in_progress,
                         Snackbar.LENGTH_LONG).show();
                 break;
             case "POLYLINE_READY" :
@@ -97,9 +97,7 @@ public class MainActivity extends AppCompatActivity
     private void showHelp() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.dialog_help)
-                    .setPositiveButton(R.string.dialog_got_it, ((dialogInterface, i) ->
-                            Toast.makeText(this, getText(R.string.dialog_help), Toast.LENGTH_SHORT).show()))
-                    .setNegativeButton(R.string.dialog_no_loc_negative, null)
+                    .setPositiveButton(R.string.dialog_got_it, null)
                     .create()
                     .show();
     }

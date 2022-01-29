@@ -148,6 +148,9 @@ public class MainActivityFragment extends Fragment{
 
     //let the user know some stuff if happening in the background
     public void showLoading(boolean isHidden) {
+        if (binding.busFlagIV.getVisibility() == View.VISIBLE) {
+            binding.busFlagIV.setVisibility(View.INVISIBLE);
+        }
         binding.loadingBar.setVisibility(isHidden ? View.VISIBLE : View.INVISIBLE);
     }
 
