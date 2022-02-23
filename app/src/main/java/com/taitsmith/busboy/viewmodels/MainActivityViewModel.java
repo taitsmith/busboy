@@ -15,7 +15,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.obj.DirectionResponseData;
+import com.taitsmith.busboy.obj.StopDestinationResponse;
 import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
@@ -34,10 +36,9 @@ import retrofit2.Response;
 public class MainActivityViewModel extends AndroidViewModel {
     public String rt, apikey;
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
-    public MutableLiveData<List<Stop>> mutableNearbyStops;
-    public MutableLiveData<String> mutableStatusMessage;
+    public static MutableLiveData<String> mutableStatusMessage;
+    public static MutableLiveData<String> mutableErrorMessage;
     public static List<LatLng> polylineCoords;
-    public List<Stop> stopList;
     public List<Prediction> predictionList;
     public int distance;
     public Location loc;
@@ -49,15 +50,14 @@ public class MainActivityViewModel extends AndroidViewModel {
     public MainActivityViewModel(Application application) {
         super(application);
         mutableStopPredictions = new MutableLiveData<>();
-        mutableNearbyStops = new MutableLiveData<>();
         mutableStatusMessage = new MutableLiveData<>();
+        mutableErrorMessage = new MutableLiveData<>();
 
         polylineCoords = new ArrayList<>();
 
         simpleLocation = new SimpleLocation(application.getApplicationContext());
         fusedLocation = new FusedLocationProviderClient(getApplication().getApplicationContext());
 
-        stopList = new ArrayList<>();
         predictionList = new ArrayList<>();
 
         apikey = application.getString(R.string.api_token);
@@ -94,29 +94,21 @@ public class MainActivityViewModel extends AndroidViewModel {
         });
     }
 
-    @SuppressLint("MissingPermission") //won't end up here without permissions
-    public void getNearbyStops() {
+    public void getRoutesServed(Stop stop) {
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
-        Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(),
-                loc.getLongitude(),
-                distance,
-                rt,
+        Call<List<RouteDestination>> call = apiInterface.getStopDirection(stop.getStopId(),
                 apikey);
-        call.enqueue(new Callback<List<Stop>>() {
+        call.enqueue(new Callback<List<StopDestinationResponse.RouteDestination>>() {
             @Override
-            public void onResponse(Call<List<Stop>> call, Response<List<Stop>> response) {
-                if (response.body() == null || response.code() == 404)
-                    mutableStatusMessage.setValue("NEARBY_404");
-                else {
-                    stopList.clear();
-                    stopList.addAll(response.body());
-                    mutableNearbyStops.setValue(stopList);
-                    }
+            public void onResponse(Call<List<RouteDestination>> call, Response<List<RouteDestination>> response) {
+                for (RouteDestination r : response.body()) {
+                    Log.d("ROUTES SERVED ", r.destination);
                 }
+            }
 
             @Override
-            public void onFailure(Call<List<Stop>> call, Throwable t) {
-                Log.d("NEARBY ERROR", t.getMessage());
+            public void onFailure(Call<List<StopDestinationResponse.RouteDestination>> call, Throwable t) {
+
             }
         });
     }

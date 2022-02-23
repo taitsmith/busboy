@@ -4,49 +4,105 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.LocationRequest;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.snackbar.Snackbar;
 
+import com.google.android.material.tabs.TabLayout;
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
+
 import im.delight.android.location.SimpleLocation;
 
 public class MainActivity extends AppCompatActivity
-        implements MainActivityFragment.OnListItemSelectedListener, MainActivityFragment.OnListItemLongListener{
+        implements NearbyFragment.OnListItemSelectedListener, NearbyFragment.OnListItemLongListener{
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
 
-    static MainActivityViewModel viewModel;
+    static MainActivityViewModel mainActivityViewModel;
+
+    TabLayout mainTabLayout;
+    NearbyFragment nearbyFragment;
+    ByIdFragment byIdFragment;
+    FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
-        viewModel.mutableStatusMessage.observe(this, this::getStatus);
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        mainTabLayout = binding.mainTabLayout;
+        fragmentManager = getSupportFragmentManager();
+        nearbyFragment = new NearbyFragment();
+        byIdFragment = new ByIdFragment();
+
+        mutableStatusMessage.observe(this, this::getStatus);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(binding.fragment.getId(), new MainActivityFragment())
                     .commitNow();
         }
+
+        mainTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+                switch (tab.getText().toString()) {
+                    case "By ID":
+                        fragmentManager.beginTransaction()
+                                .add(binding.fragment.getId(), byIdFragment)
+                                .addToBackStack("byId")
+                                .commit();
+                        break;
+                    case "Nearby":
+                        fragmentManager.beginTransaction()
+                                .add(binding.fragment.getId(), nearbyFragment)
+                                .addToBackStack("nearby")
+                                .commit();
+                        break;
+                    case "Favorites":
+                        MainActivityViewModel.mutableStatusMessage.setValue("FAVORITES");
+                        break;
+                    case "Help":
+                        MainActivityViewModel.mutableStatusMessage.setValue("HELP_REQUESTED");
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                switch (tab.getText().toString()) {
+                    case "By ID":
+                }
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
+    //TODO change this, have separate status for loading etc and errors
     //let people know what's happening
     private void getStatus(String s) {
         switch (s) {
@@ -76,11 +132,20 @@ public class MainActivity extends AppCompatActivity
             case "FAVORITES" :
                 Snackbar.make(binding.getRoot(), R.string.snackbar_favorites_in_progress,
                         Snackbar.LENGTH_LONG).show();
+                test();
                 break;
             case "POLYLINE_READY" :
                 Intent intent = new Intent(this, MapsActivity.class);
                 startActivity(intent);
         }
+    }
+
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+         mutableStatusMessage.removeObservers(this);
     }
 
     private void askToEnableLoc() {
@@ -108,40 +173,40 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Location Permission Granted", Toast.LENGTH_LONG).show();
+                getLocation(new FusedLocationProviderClient(this));
             }
         }
     }
 
-    @Override
-    public void onPredictionSelected(int position) {
-    }
-
-    @Override
-    public void onNearbyStopSelected(int position) {
-        viewModel.getStopPredictions(viewModel.stopList.get(position).getStopId());
-    }
-
+    @RequiresApi(api = Build.VERSION_CODES.S)
     @SuppressLint("MissingPermission")
     public static void getLocation(FusedLocationProviderClient client) {
-        client.getCurrentLocation(LocationRequest.QUALITY_LOW_POWER, null)
+        client.getLastLocation()
                 .addOnSuccessListener(location -> {
-                    viewModel.loc = location;
-                    viewModel.getNearbyStops();
+                    mainActivityViewModel.loc = location;
+//                    mainActivityViewModel.getNearbyStops();
                 });
     }
 
     @Override
     public void onNearbyLongSelected(int position) {
-        Stop stop = viewModel.stopList.get(position);
-        String startLoc = Double.toString(viewModel.loc.getLatitude()).concat(",")
-                .concat(Double.toString(viewModel.loc.getLongitude()));
-        String endLoc = Double.toString(stop.getLatitude()).concat(",")
-                .concat(Double.toString(stop.getLongitude()));
+//        Stop stop = mainActivityViewModel.stopList.get(position);
+//        String startLoc = Double.toString(mainActivityViewModel.loc.getLatitude()).concat(",")
+//                .concat(Double.toString(mainActivityViewModel.loc.getLongitude()));
+//        String endLoc = Double.toString(stop.getLatitude()).concat(",")
+//                .concat(Double.toString(stop.getLongitude()));
+//
+//        mainActivityViewModel.getDirectionsToStop(startLoc, endLoc);
+    }
 
-        viewModel.getDirectionsToStop(startLoc, endLoc);
+    public void test() {
+        SimpleLocation location = new SimpleLocation(this);
+        location.beginUpdates();
+        Log.d("LOC ", Double.toString(location.getLatitude()));
     }
 
     @Override
-    public void onPredictionLongSelected(int position) {
+    public void onNearbySelected(int position) {
+
     }
 }

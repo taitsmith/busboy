@@ -99,46 +99,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/main_tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2">
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_by_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_baseline_ballot_24"
-            android:text="@string/tab_layout_by_stop" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_nearby"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_baseline_location_on_24"
-            android:text="@string/tab_layout_nearby" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_favorites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_baseline_loyalty_24"
-            android:text="@string/tab_layout_favorites" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_baseline_device_unknown_24"
-            android:text="@string/tab_layout_help" />
-
-    </com.google.android.material.tabs.TabLayout>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
