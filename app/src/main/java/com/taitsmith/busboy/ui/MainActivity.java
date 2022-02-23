@@ -24,7 +24,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
-import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.utils.OnItemClickListener;
+import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
@@ -32,7 +33,7 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatu
 import im.delight.android.location.SimpleLocation;
 
 public class MainActivity extends AppCompatActivity
-        implements NearbyFragment.OnListItemSelectedListener, NearbyFragment.OnListItemLongListener{
+        implements OnItemClickListener, OnItemLongClickListener {
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
     private ActivityMainBinding binding;
@@ -132,7 +133,6 @@ public class MainActivity extends AppCompatActivity
             case "FAVORITES" :
                 Snackbar.make(binding.getRoot(), R.string.snackbar_favorites_in_progress,
                         Snackbar.LENGTH_LONG).show();
-                test();
                 break;
             case "POLYLINE_READY" :
                 Intent intent = new Intent(this, MapsActivity.class);
@@ -188,8 +188,8 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    @Override
-    public void onNearbyLongSelected(int position) {
+//    @Override
+//    public void onNearbyLongSelected(int position) {
 //        Stop stop = mainActivityViewModel.stopList.get(position);
 //        String startLoc = Double.toString(mainActivityViewModel.loc.getLatitude()).concat(",")
 //                .concat(Double.toString(mainActivityViewModel.loc.getLongitude()));
@@ -197,16 +197,24 @@ public class MainActivity extends AppCompatActivity
 //                .concat(Double.toString(stop.getLongitude()));
 //
 //        mainActivityViewModel.getDirectionsToStop(startLoc, endLoc);
-    }
+//    }
 
-    public void test() {
-        SimpleLocation location = new SimpleLocation(this);
-        location.beginUpdates();
-        Log.d("LOC ", Double.toString(location.getLatitude()));
+    @Override
+    public void onNearbyItemSelected(int position) {
+
+    }
+    @Override
+    public void onIdItemSelected(int position) {
+
     }
 
     @Override
-    public void onNearbySelected(int position) {
+    public void onNearbyLongClick(int position) {
+
+    }
+
+    @Override
+    public void onIdLongClick(int position) {
 
     }
 }
