@@ -1,13 +1,11 @@
 package com.taitsmith.busboy.viewmodels;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -20,7 +18,6 @@ import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.StopDestinationResponse;
 import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.obj.Stop;
-import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
@@ -34,7 +31,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivityViewModel extends AndroidViewModel {
-    public String rt, apikey;
+    public String apikey, rt;
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
     public static MutableLiveData<String> mutableStatusMessage;
     public static MutableLiveData<String> mutableErrorMessage;
@@ -63,35 +60,6 @@ public class MainActivityViewModel extends AndroidViewModel {
         apikey = application.getString(R.string.api_token);
         distance = 2000; //default distance in feet for nearby stops
         rt = ""; //route is optional in the 'nearby stops' call
-    }
-
-    public void getStopPredictions(@Nullable String stopId) {
-        apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
-
-        Call<StopPredictionResponse> call = apiInterface.getStopPredictionList(stopId, rt, apikey);
-        call.enqueue(new Callback<StopPredictionResponse>() {
-            @Override
-            public void onResponse(Call<StopPredictionResponse> call, Response<StopPredictionResponse> response) {
-
-                if (response.body() == null || response.code() == 404) {
-                    mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
-                } else {
-                    predictionList.clear();
-                    try {
-                        predictionList.addAll(response.body().getBustimeResponse().getPrd());
-                    } catch (NullPointerException | IndexOutOfBoundsException e) {
-                        mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
-                    }
-                    if (predictionList.size() == 0) mutableStatusMessage.setValue("BAD_INPUT");
-                    else mutableStopPredictions.setValue(predictionList);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<StopPredictionResponse> call, Throwable t) {
-                Log.d("BUS LIST FAILURE", t.getMessage());
-            }
-        });
     }
 
     public void getRoutesServed(Stop stop) {

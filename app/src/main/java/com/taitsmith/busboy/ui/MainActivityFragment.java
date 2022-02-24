@@ -2,11 +2,10 @@ package com.taitsmith.busboy.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,8 +20,6 @@ public class MainActivityFragment extends Fragment{
 
     MainActivityViewModel mainActivityViewModel;
     FragmentMainActivityBinding binding;
-    EditText stopIdEditText;
-    ListView listView;
 
     public MainActivityFragment newInstance() {
         return new MainActivityFragment();
@@ -38,7 +35,7 @@ public class MainActivityFragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMainActivityBinding.inflate(inflater, container, false);
-        stopIdEditText = binding.stopEntryEditText;
+        Log.d("MAIN ACTIVITY FRAGMENT ", "ON CREATE VIEW");
 
         return binding.getRoot();
     }
@@ -47,20 +44,6 @@ public class MainActivityFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
-        setObservers();
-    }
-
-    private void setObservers() {
-//        mainActivityViewModel.mutableStopPredictions.observe(getViewLifecycleOwner(), predictionList -> {
-//            this.predictionList = predictionList;
-//            binding.mainFragmentStopName.setText(predictionList.get(0).getStpnm());
-//            showStopPredictionsList();
-//        });
-//
-//        mainActivityViewModel.mutableNearbyStops.observe(getViewLifecycleOwner(), stopList -> {
-//            showNearbyStopList();
-//        });
-
     }
 
     //let the user know some stuff if happening in the background
@@ -71,4 +54,9 @@ public class MainActivityFragment extends Fragment{
         binding.loadingBar.setVisibility(isHidden ? View.VISIBLE : View.INVISIBLE);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

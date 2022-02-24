@@ -1,23 +1,40 @@
 package com.taitsmith.busboy.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ListView;
 
-import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.databinding.ByIdFragmentBinding;
+import com.taitsmith.busboy.obj.StopPredictionResponse;
+import com.taitsmith.busboy.utils.OnItemClickListener;
+import com.taitsmith.busboy.utils.OnItemLongClickListener;
+import com.taitsmith.busboy.utils.PredictionAdapter;
 import com.taitsmith.busboy.viewmodels.ByIdViewModel;
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
+
+import java.util.List;
 
 public class ByIdFragment extends Fragment {
 
-    private ByIdViewModel mViewModel;
+    ByIdViewModel byIdViewModel;
+    ByIdFragmentBinding binding;
+    OnItemClickListener listItemListener;
+    OnItemLongClickListener longClickListener;
+    ListView predictionListView;
+    List<StopPredictionResponse.BustimeResponse.Prediction> predictionList;
+    EditText stopIdEditText;
+    PredictionAdapter predictionAdapter;
 
     public static ByIdFragment newInstance() {
         return new ByIdFragment();
@@ -26,14 +43,65 @@ public class ByIdFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.by_id_fragment, container, false);
+        binding = ByIdFragmentBinding.inflate(inflater, container, false);
+        predictionListView = binding.predictionListView;
+        stopIdEditText = binding.stopEntryEditText;
+
+        binding.searchByIdButton.setOnClickListener(this::search);
+
+        predictionListView.setOnItemClickListener((adapterView, view, i, l) ->
+                listItemListener.onIdItemSelected(i));
+        
+        predictionListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            longClickListener.onIdLongClick(i);
+            return true;
+        });
+
+        return binding.getRoot();
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(ByIdViewModel.class);
-        // TODO: Use the ViewModel
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        byIdViewModel = new ViewModelProvider(requireActivity()).get(ByIdViewModel.class);
+        setObserver();
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        try {
+            listItemListener = (OnItemClickListener) context;
+            longClickListener = (OnItemLongClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context +
+                    "Must Implement OnListItemSelectedListener");
+        }
+    }
+
+    private void setObserver() {
+        byIdViewModel.mutableStopPredictions.observe(getViewLifecycleOwner(), predictions -> {
+                    this.predictionList = predictions;
+                    predictionAdapter = new PredictionAdapter(predictionList);
+                    predictionListView.setAdapter(predictionAdapter);
+                    binding.busFlagIV.setVisibility(View.INVISIBLE);
+                }
+        );
+    }
+
+    private void search(View view) {
+        if (binding.stopEntryEditText.getText().length() == 5) {
+            MainActivityViewModel.mutableStatusMessage.setValue("LOADING");
+            byIdViewModel.getStopPredictions(stopIdEditText.getText().toString());
+        } else {
+            MainActivityViewModel.mutableErrorMessage.setValue("BAD_INPUT");
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

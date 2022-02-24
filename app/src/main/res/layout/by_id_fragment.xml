@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         tools:context=".ui.ByIdFragment">
         <TextView
-            android:id="@+id/main_fragment_stop_name"
+            android:id="@+id/stopNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@+id/stopEntryEditText"
@@ -35,10 +35,21 @@
             android:maxLength="5"
             android:minHeight="48dp"
             android:textColorHint="#546E7A"
-            app:layout_constraintBottom_toTopOf="@+id/guideline"
+            app:layout_constraintBottom_toTopOf="@+id/searchByIdButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/main_fragment_stop_name" />
+            app:layout_constraintTop_toBottomOf="@+id/stopNameTextView" />
+
+        <Button
+            android:id="@+id/searchByIdButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_id_button_text"
+            app:layout_constraintTop_toBottomOf="@id/stopEntryEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline"/>
+
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -47,37 +58,29 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.25" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.9" />
-
         <ImageView
             android:id="@+id/busFlagIV"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:contentDescription="@string/accessibility_busflag_img_desc"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/guideline"
-            app:layout_constraintBottom_toTopOf="parent"
             app:srcCompat="@drawable/ic_busflag"
-            tools:layout_editor_absoluteY="191dp"
-            android:contentDescription="@string/accessibility_busflag_img_desc" />
+            tools:ignore="ImageContrastCheck" />
 
         <ListView
-            android:id="@+id/predOrNearbyListView"
+            android:id="@+id/predictionListView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/guideline2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline"/>
+            app:layout_constraintTop_toTopOf="@+id/guideline"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
         <androidx.constraintlayout.widget.Guideline
@@ -86,5 +89,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,6 +28,7 @@ import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 
 import im.delight.android.location.SimpleLocation;
@@ -36,33 +37,44 @@ public class MainActivity extends AppCompatActivity
         implements OnItemClickListener, OnItemLongClickListener {
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 6;
+
     private ActivityMainBinding binding;
 
     static MainActivityViewModel mainActivityViewModel;
+    public static String acTransitApiKey;
 
     TabLayout mainTabLayout;
     NearbyFragment nearbyFragment;
     ByIdFragment byIdFragment;
+    FavoritesFragment favoritesFragment;
     FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
+        acTransitApiKey = getString(R.string.api_token);
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+
+
         mainTabLayout = binding.mainTabLayout;
+
         fragmentManager = getSupportFragmentManager();
         nearbyFragment = new NearbyFragment();
         byIdFragment = new ByIdFragment();
+        favoritesFragment = new FavoritesFragment();
 
-        mutableStatusMessage.observe(this, this::getStatus);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(binding.fragment.getId(), new MainActivityFragment())
-                    .commitNow();
+            fragmentManager.beginTransaction()
+                    .replace(binding.mainFragmentContainer.getId(), byIdFragment)
+                    .commit();
         }
+        mutableStatusMessage.observe(this, this::getStatusMessage);
+        mutableErrorMessage.observe(this, this::getErrorMessage);
+        setTabListeners();
+    }
 
+    private void setTabListeners() {
         mainTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -70,18 +82,21 @@ public class MainActivity extends AppCompatActivity
                 switch (tab.getText().toString()) {
                     case "By ID":
                         fragmentManager.beginTransaction()
-                                .add(binding.fragment.getId(), byIdFragment)
-                                .addToBackStack("byId")
+                                .replace(binding.mainFragmentContainer.getId(), byIdFragment)
+                                .addToBackStack(null)
                                 .commit();
                         break;
                     case "Nearby":
+
                         fragmentManager.beginTransaction()
-                                .add(binding.fragment.getId(), nearbyFragment)
-                                .addToBackStack("nearby")
+                                .replace(binding.mainFragmentContainer.getId(), nearbyFragment)
+                                .addToBackStack(null)
                                 .commit();
                         break;
                     case "Favorites":
-                        MainActivityViewModel.mutableStatusMessage.setValue("FAVORITES");
+                        fragmentManager.beginTransaction()
+                                .replace(binding.mainFragmentContainer.getId(),favoritesFragment)
+                                .commit();
                         break;
                     case "Help":
                         MainActivityViewModel.mutableStatusMessage.setValue("HELP_REQUESTED");
@@ -91,9 +106,6 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                switch (tab.getText().toString()) {
-                    case "By ID":
-                }
             }
 
             @Override
@@ -103,9 +115,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    //TODO change this, have separate status for loading etc and errors
-    //let people know what's happening
-    private void getStatus(String s) {
+    private void getErrorMessage(String s) {
         switch (s) {
             case "NO_PERMISSION" : //we don't have permission to access location
                 ActivityCompat.requestPermissions(this,
@@ -127,6 +137,11 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(binding.getRoot(), R.string.snackbar_no_predictions,
                         Snackbar.LENGTH_LONG).show();
                 break;
+        }
+    }
+
+    private void getStatusMessage(String s) {
+        switch (s) {
             case "HELP_REQUESTED" :
                 showHelp();
                 break;
@@ -137,15 +152,24 @@ public class MainActivity extends AppCompatActivity
             case "POLYLINE_READY" :
                 Intent intent = new Intent(this, MapsActivity.class);
                 startActivity(intent);
+                break;
+            case "LOADING":
+                binding.mainFragmentContainer.setVisibility(View.INVISIBLE);
+                binding.progressBar.setVisibility(View.VISIBLE);
+                break;
+            case "LOADED":
+                binding.mainFragmentContainer.setVisibility(View.VISIBLE);
+                binding.progressBar.setVisibility(View.INVISIBLE);
+                break;
         }
     }
-
-
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
          mutableStatusMessage.removeObservers(this);
+         binding = null;
+         mainActivityViewModel = null;
     }
 
     private void askToEnableLoc() {
@@ -188,24 +212,14 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-//    @Override
-//    public void onNearbyLongSelected(int position) {
-//        Stop stop = mainActivityViewModel.stopList.get(position);
-//        String startLoc = Double.toString(mainActivityViewModel.loc.getLatitude()).concat(",")
-//                .concat(Double.toString(mainActivityViewModel.loc.getLongitude()));
-//        String endLoc = Double.toString(stop.getLatitude()).concat(",")
-//                .concat(Double.toString(stop.getLongitude()));
-//
-//        mainActivityViewModel.getDirectionsToStop(startLoc, endLoc);
-//    }
-
     @Override
     public void onNearbyItemSelected(int position) {
 
     }
+
     @Override
     public void onIdItemSelected(int position) {
-
+        Toast.makeText(this, "BY ID", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -215,6 +229,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onIdLongClick(int position) {
-
+        Toast.makeText(this, "BY ID LONGBOI", Toast.LENGTH_SHORT).show();
     }
 }
