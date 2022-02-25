@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +21,13 @@ import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
+import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocation;
+
 public class NearbyFragment extends Fragment {
+    static NearbyViewModel nearbyViewModel;
 
     OnItemClickListener listItemListener;
     OnItemLongClickListener listItemLongListener;
-    NearbyViewModel nearbyViewModel;
     ListView nearbyStopListView;
     NearbyFragmentBinding binding;
 
@@ -38,12 +41,27 @@ public class NearbyFragment extends Fragment {
         binding = NearbyFragmentBinding.inflate(inflater, container, false);
         nearbyStopListView = binding.nearbyListView;
 
+        nearbyStopListView.setOnItemClickListener((adapterView, view, i, l) ->
+                listItemListener.onNearbyItemSelected(i));
+
+        nearbyStopListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            listItemLongListener.onNearbyLongClick(i);
+            return true;
+        });
+
         return  binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
+
+        nearbyViewModel.checkLocationPerm();
+        mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
+            nearbyViewModel.loc = simpleLocation;
+            nearbyViewModel.getNearbyStops();
+        });
     }
 
     @Override
@@ -65,5 +83,10 @@ public class NearbyFragment extends Fragment {
 
         listItemListener = null;
         listItemLongListener = null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }

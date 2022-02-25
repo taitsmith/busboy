@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.taitsmith.busboy.obj.StopPredictionResponse;
-import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
@@ -21,8 +20,8 @@ import retrofit2.Response;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
 import static com.taitsmith.busboy.ui.MainActivity.acTransitApiKey;
-import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 
 public class ByIdViewModel extends ViewModel {
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
@@ -45,15 +44,15 @@ public class ByIdViewModel extends ViewModel {
             public void onResponse(Call<StopPredictionResponse> call, Response<StopPredictionResponse> response) {
 
                 if (response.body() == null || response.code() == 404) {
-                    mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
+                    mutableErrorMessage.setValue("NULL_PRED_RESPONSE");
                 } else {
                     predictionList.clear();
                     try {
                         predictionList.addAll(response.body().getBustimeResponse().getPrd());
                     } catch (NullPointerException | IndexOutOfBoundsException e) {
-                        mutableStatusMessage.setValue("NULL_PRED_RESPONSE");
+                        mutableErrorMessage.setValue("NULL_PRED_RESPONSE");
                     }
-                    if (predictionList.size() == 0) mutableStatusMessage.setValue("BAD_INPUT");
+                    if (predictionList.size() == 0) mutableErrorMessage.setValue("BAD_INPUT");
                     else {
                         mutableStopPredictions.setValue(predictionList);
                         mutableStatusMessage.setValue("LOADED");
@@ -66,5 +65,9 @@ public class ByIdViewModel extends ViewModel {
                 Log.d("BUS LIST FAILURE", t.getMessage());
             }
         });
+    }
+
+    public static class FavoritesViewModel extends ViewModel {
+
     }
 }

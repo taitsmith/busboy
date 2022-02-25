@@ -103,5 +103,8 @@ public class ByIdFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        listItemListener = null;
+        longClickListener = null;
+        byIdViewModel.mutableStopPredictions.removeObservers(getViewLifecycleOwner());
     }
 }

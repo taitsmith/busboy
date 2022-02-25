@@ -1,7 +1,5 @@
 package com.taitsmith.busboy.ui;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.Context;
 import android.os.Bundle;
 
@@ -14,10 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.viewmodels.ByIdViewModel;
 
 public class FavoritesFragment extends Fragment {
 
-    private FavoritesViewModel favoritesViewModel;
+    private ByIdViewModel.FavoritesViewModel favoritesViewModel;
 
     public static FavoritesFragment newInstance() {
         return new FavoritesFragment();

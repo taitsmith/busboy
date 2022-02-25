@@ -106,17 +106,4 @@ public class MainActivityViewModel extends AndroidViewModel {
             }
         });
     }
-
-    public void checkLocationPerm() {
-        simpleLocation = new SimpleLocation(getApplication().getApplicationContext());
-        if (ContextCompat.checkSelfPermission(getApplication().getApplicationContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (!simpleLocation.hasLocationEnabled()) {
-                mutableStatusMessage.setValue("NO_LOC_ENABLED");
-            } else MainActivity.getLocation(fusedLocation);
-
-        } else {
-            mutableStatusMessage.postValue("NO_PERMISSION");
-        }
-    }
 }

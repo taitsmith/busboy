@@ -27,6 +27,7 @@ import com.taitsmith.busboy.databinding.ActivityMainBinding;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
+import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
@@ -196,20 +197,12 @@ public class MainActivity extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Location Permission Granted", Toast.LENGTH_LONG).show();
-                getLocation(new FusedLocationProviderClient(this));
+                NearbyViewModel.mutableSimpleLocation.setValue(NearbyViewModel.loc);
+                NearbyViewModel.loc.beginUpdates();
+                NearbyViewModel.loc.setListener(() ->
+                        NearbyViewModel.mutableSimpleLocation.setValue(NearbyViewModel.loc));
             }
         }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    @SuppressLint("MissingPermission")
-    public static void getLocation(FusedLocationProviderClient client) {
-        client.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    mainActivityViewModel.loc = location;
-//                    mainActivityViewModel.getNearbyStops();
-                });
     }
 
     @Override

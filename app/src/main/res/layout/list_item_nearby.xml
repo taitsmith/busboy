@@ -6,7 +6,7 @@
     <data>
         <variable
             name="nearbyListItem"
-            type="com.taitsmith.busboy.ui.MainActivityFragment" />
+            type="com.taitsmith.busboy.ui.NearbyFragment" />
         <variable
             name="stop"
             type="com.taitsmith.busboy.obj.Stop" />
