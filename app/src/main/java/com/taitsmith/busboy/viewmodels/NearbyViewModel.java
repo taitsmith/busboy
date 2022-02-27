@@ -52,16 +52,18 @@ public class NearbyViewModel extends AndroidViewModel {
         if (rt == null) rt = "";
 
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
-        Call<List<Stop>> call = apiInterface.getNearbyStops(loc.getLatitude(),
+        Call<List<Stop>> call = apiInterface.getNearbyStops(
+                loc.getLatitude(),
                 loc.getLongitude(),
-                distance,
+                2000,
+                true,
                 rt,
                 acTransitApiKey);
         call.enqueue(new Callback<List<Stop>>() {
             @Override
             public void onResponse(Call<List<Stop>> call, Response<List<Stop>> response) {
                 if (response.body() == null || response.code() == 404)
-                    mutableStatusMessage.setValue("NEARBY_404");
+                    mutableErrorMessage.setValue("NEARBY_404");
                 else {
                     stopList.clear();
                     stopList.addAll(response.body());

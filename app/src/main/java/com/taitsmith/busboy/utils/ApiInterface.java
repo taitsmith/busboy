@@ -31,11 +31,12 @@ public interface ApiInterface {
                                           @Query("token") String token);
 
     //find all active stops within {distance} feet of point
-    @GET("stops/{latitude}/{longitude}/{distance}/active/{route}")
+    @GET("stops/{latitude}/{longitude}/")
     Call<List<Stop>> getNearbyStops(@Path("latitude") double latitude,
                                     @Path("longitude") double longitude,
-                                    @Path("distance") int distance,
-                                    @Path("route") String route,
+                                    @Query("distance") int distance,
+                                    @Query("active") boolean active,
+                                    @Query("routeName") String routeName,
                                     @Query("token") String token);
 
     @GET("stop/{stopID}/destinations")//get destinations for given stop so we can display NB/SB/EB/WB
