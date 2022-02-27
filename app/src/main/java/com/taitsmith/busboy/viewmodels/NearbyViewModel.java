@@ -6,13 +6,11 @@ import android.app.Application;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.taitsmith.busboy.obj.Stop;
-import com.taitsmith.busboy.ui.MainActivity;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
@@ -31,7 +29,7 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatu
 public class NearbyViewModel extends AndroidViewModel {
     public MutableLiveData<List<Stop>> mutableNearbyStops;
     public static MutableLiveData<SimpleLocation> mutableSimpleLocation;
-    public List<Stop> stopList;
+    public static List<Stop> stopList;
     public static SimpleLocation loc;
 
     ApiInterface apiInterface;
@@ -68,6 +66,7 @@ public class NearbyViewModel extends AndroidViewModel {
                     stopList.clear();
                     stopList.addAll(response.body());
                     mutableNearbyStops.setValue(stopList);
+                    mutableStatusMessage.setValue("LOADED");
                 }
             }
 
@@ -85,6 +84,7 @@ public class NearbyViewModel extends AndroidViewModel {
                 mutableErrorMessage.setValue("NO_LOC_ENABLED"); //granted permissions, but location is disabled.
             } else {
                 mutableSimpleLocation.setValue(loc);
+                mutableStatusMessage.setValue("LOADING");
                 loc.beginUpdates();
                 loc.setListener(this::getNearbyStops);
             }

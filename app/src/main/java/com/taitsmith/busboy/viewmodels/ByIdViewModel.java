@@ -25,17 +25,18 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatu
 
 public class ByIdViewModel extends ViewModel {
     public MutableLiveData<List<Prediction>> mutableStopPredictions;
-    public List<Prediction> predictionList;
+    public static List<Prediction> predictionList;
     ApiInterface apiInterface;
     String rt;
 
     public ByIdViewModel() {
         mutableStopPredictions = new MutableLiveData<>();
         predictionList = new ArrayList<>();
-        rt = "";
     }
 
     public void getStopPredictions(@Nullable String stopId) {
+        if (rt == null) rt = "";
+
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
 
         Call<StopPredictionResponse> call = apiInterface.getStopPredictionList(stopId, rt, acTransitApiKey);
@@ -65,9 +66,5 @@ public class ByIdViewModel extends ViewModel {
                 Log.d("BUS LIST FAILURE", t.getMessage());
             }
         });
-    }
-
-    public static class FavoritesViewModel extends ViewModel {
-
     }
 }

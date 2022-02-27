@@ -12,11 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.taitsmith.busboy.R;
-import com.taitsmith.busboy.viewmodels.ByIdViewModel;
+import com.taitsmith.busboy.viewmodels.FavoritesViewModel;
 
 public class FavoritesFragment extends Fragment {
 
-    private ByIdViewModel.FavoritesViewModel favoritesViewModel;
+    private FavoritesViewModel favoritesViewModel;
 
     public static FavoritesFragment newInstance() {
         return new FavoritesFragment();

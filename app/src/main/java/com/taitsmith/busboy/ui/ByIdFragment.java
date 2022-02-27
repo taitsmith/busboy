@@ -1,5 +1,7 @@
 package com.taitsmith.busboy.ui;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
+
 import android.content.Context;
 import android.os.Bundle;
 
@@ -11,17 +13,16 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding;
-import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.utils.PredictionAdapter;
 import com.taitsmith.busboy.viewmodels.ByIdViewModel;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
+import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
 import java.util.List;
 
@@ -29,10 +30,12 @@ public class ByIdFragment extends Fragment {
 
     ByIdViewModel byIdViewModel;
     ByIdFragmentBinding binding;
+
     OnItemClickListener listItemListener;
     OnItemLongClickListener longClickListener;
     ListView predictionListView;
-    List<StopPredictionResponse.BustimeResponse.Prediction> predictionList;
+    List<Prediction> predictionList;
+
     EditText stopIdEditText;
     PredictionAdapter predictionAdapter;
 
@@ -57,6 +60,12 @@ public class ByIdFragment extends Fragment {
             return true;
         });
 
+        if (getArguments() != null) {
+            byIdViewModel.getStopPredictions(getArguments().get("BY_ID").toString());
+        }
+
+
+
         return binding.getRoot();
     }
 
@@ -70,7 +79,6 @@ public class ByIdFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
         try {
             listItemListener = (OnItemClickListener) context;
             longClickListener = (OnItemLongClickListener) context;
@@ -86,13 +94,14 @@ public class ByIdFragment extends Fragment {
                     predictionAdapter = new PredictionAdapter(predictionList);
                     predictionListView.setAdapter(predictionAdapter);
                     binding.busFlagIV.setVisibility(View.INVISIBLE);
+                    mutableStatusMessage.setValue("LOADED");
                 }
         );
     }
 
     private void search(View view) {
         if (binding.stopEntryEditText.getText().length() == 5) {
-            MainActivityViewModel.mutableStatusMessage.setValue("LOADING");
+            mutableStatusMessage.setValue("LOADING");
             byIdViewModel.getStopPredictions(stopIdEditText.getText().toString());
         } else {
             MainActivityViewModel.mutableErrorMessage.setValue("BAD_INPUT");
@@ -100,11 +109,16 @@ public class ByIdFragment extends Fragment {
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        listItemListener = null;
+        longClickListener = null;
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-        listItemListener = null;
-        longClickListener = null;
         byIdViewModel.mutableStopPredictions.removeObservers(getViewLifecycleOwner());
     }
 }

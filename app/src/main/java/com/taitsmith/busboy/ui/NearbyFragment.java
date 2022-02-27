@@ -12,16 +12,19 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding;
+import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.utils.NearbyAdapter;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
+import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocation;
+
+import java.util.List;
 
 public class NearbyFragment extends Fragment {
     static NearbyViewModel nearbyViewModel;
@@ -30,6 +33,8 @@ public class NearbyFragment extends Fragment {
     OnItemLongClickListener listItemLongListener;
     ListView nearbyStopListView;
     NearbyFragmentBinding binding;
+    List<Stop> nearbyStopList;
+    NearbyAdapter nearbyAdapter;
 
     public static NearbyFragment newInstance() {
         return new NearbyFragment();
@@ -58,10 +63,8 @@ public class NearbyFragment extends Fragment {
         nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
 
         nearbyViewModel.checkLocationPerm();
-        mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
-            nearbyViewModel.loc = simpleLocation;
-            nearbyViewModel.getNearbyStops();
-        });
+
+        setObservers();
     }
 
     @Override
@@ -88,5 +91,22 @@ public class NearbyFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mutableSimpleLocation.removeObservers(getViewLifecycleOwner());
+        nearbyViewModel.mutableNearbyStops.removeObservers(getViewLifecycleOwner());
+
+    }
+
+    private void setObservers() {
+        nearbyViewModel.mutableNearbyStops.observe(getViewLifecycleOwner(), stops -> {
+            this.nearbyStopList = stops;
+            nearbyAdapter = new NearbyAdapter(nearbyStopList);
+            nearbyStopListView.setAdapter(nearbyAdapter);
+        });
+
+        mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
+            NearbyViewModel.loc = simpleLocation;
+            nearbyViewModel.getNearbyStops();
+            loc.endUpdates();
+        });
     }
 }
