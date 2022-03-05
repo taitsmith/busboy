@@ -6,6 +6,7 @@ import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
+import com.taitsmith.busboy.obj.WaypointResponse;
 
 import java.util.List;
 
@@ -43,6 +44,8 @@ public interface ApiInterface {
     Call<List<RouteDestination>> getStopDirection(@Path("stopID") String stopId,
                                                   @Query("token") String token);
 
+    @GET("route/{route}/waypoints")//get lat/lon waypoints so we can draw the route on a map
+    Call<List<WaypointResponse>> getRouteWaypoints(@Path("Route") String route);
 
     @GET("maps/api/directions/json") //talk to google and get walking directions from our location to the selected stop
     Call<DirectionResponseData> getNavigationToStop(@Query(value = "origin", encoded = true) String origin,
