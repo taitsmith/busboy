@@ -1,6 +1,6 @@
 package com.taitsmith.busboy.utils;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
@@ -45,7 +45,12 @@ public interface ApiInterface {
                                                   @Query("token") String token);
 
     @GET("route/{route}/waypoints")//get lat/lon waypoints so we can draw the route on a map
-    Call<List<WaypointResponse>> getRouteWaypoints(@Path("Route") String route);
+    Call<List<WaypointResponse>> getRouteWaypoints(@Path("route") String route,
+                                                   @Query("token") String token);
+
+    @GET("vehicle/{vehicleId}")//get info about a bus so we can put it on the map
+    Call<Bus> getVehicleInfo(@Path("vehicleId") String vehicleId,
+                             @Query("token") String token);
 
     @GET("maps/api/directions/json") //talk to google and get walking directions from our location to the selected stop
     Call<DirectionResponseData> getNavigationToStop(@Query(value = "origin", encoded = true) String origin,

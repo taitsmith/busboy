@@ -24,7 +24,7 @@ public class WaypointResponse {
         return patterns;
     }
 
-    static class Pattern {
+    public static class Pattern {
         @SerializedName("DirectionId")
         @Expose
         private Integer directionId;
@@ -53,37 +53,37 @@ public class WaypointResponse {
         public List<Waypoint> getWaypoints() {
             return waypoints;
         }
-    }
 
-    static class Waypoint {
-        @SerializedName("OrderID")
-        @Expose
-        private Integer orderID;
-        @SerializedName("Latitude")
-        @Expose
-        private Double latitude;
-        @SerializedName("Longitude")
-        @Expose
-        private Double longitude;
-        @SerializedName("Heading")
-        @Expose
-        private Double heading;
-        @SerializedName("DistanceToNextStop")
-        @Expose
-        private Integer distanceToNextStop;
-        @SerializedName("DistanceFromStart")
-        @Expose
-        private Integer distanceFromStart;
-        @SerializedName("StopSequence")
-        @Expose
-        private Integer stopSequence;
+        public static class Waypoint {
+            @SerializedName("OrderID")
+            @Expose
+            private Integer orderID;
+            @SerializedName("Latitude")
+            @Expose
+            private Double latitude;
+            @SerializedName("Longitude")
+            @Expose
+            private Double longitude;
+            @SerializedName("Heading")
+            @Expose
+            private Double heading;
+            @SerializedName("DistanceToNextStop")
+            @Expose
+            private Integer distanceToNextStop;
+            @SerializedName("DistanceFromStart")
+            @Expose
+            private Integer distanceFromStart;
+            @SerializedName("StopSequence")
+            @Expose
+            private Integer stopSequence;
 
-        public Double getLatitude() {
-            return latitude;
-        }
+            public Double getLatitude() {
+                return latitude;
+            }
 
-        public Double getLongitude() {
-            return longitude;
+            public Double getLongitude() {
+                return longitude;
+            }
         }
     }
 }

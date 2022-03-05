@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -20,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
+import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
@@ -40,13 +43,16 @@ public class MainActivity extends AppCompatActivity
     private ActivityMainBinding binding;
 
     static MainActivityViewModel mainActivityViewModel;
+
     public static String acTransitApiKey;
+    public static MutableLiveData<Bus> mutableBus;
 
     TabLayout mainTabLayout;
     NearbyFragment nearbyFragment;
     ByIdFragment byIdFragment;
     FavoritesFragment favoritesFragment;
     FragmentManager fragmentManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +62,8 @@ public class MainActivity extends AppCompatActivity
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         mainTabLayout = binding.mainTabLayout;
+
+        mutableBus = new MutableLiveData<>();
 
         fragmentManager = getSupportFragmentManager();
         nearbyFragment = new NearbyFragment();
@@ -124,6 +132,7 @@ public class MainActivity extends AppCompatActivity
             case "NEARBY_404" :
                 Snackbar.make(binding.getRoot(), R.string.snackbar_nearby_404,
                         Snackbar.LENGTH_LONG).show();
+                mutableStatusMessage.setValue("LOADED");
                 break;
             case "NO_LOC_ENABLED" : //we have permission but location setting isn't on
                 askToEnableLoc();
@@ -140,12 +149,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getStatusMessage(String s) {
+        Intent intent = new Intent(this, MapsActivity.class);
         switch (s) {
             case "HELP_REQUESTED" :
                 showHelp();
                 break;
-            case "POLYLINE_READY" :
-                Intent intent = new Intent(this, MapsActivity.class);
+            case "DIRECTION_POLYLINE_READY" :
+                intent.putExtra("POLYLINE_TYPE", "DIRECTION");
+                startActivity(intent);
+                break;
+            case "ROUTE_POLYLINE_READY" :
+                Bus b = mutableBus.getValue();
+                mutableStatusMessage.setValue("LOADED");
+                intent.putExtra("POLYLINE_TYPE", "ROUTE");
+                intent.putExtra("BUS_COORDS", new double[]{b.getLatitude(), b.getLongitude()});
                 startActivity(intent);
                 break;
             case "LOADING":
@@ -217,7 +234,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onIdItemSelected(int position) {
-        Toast.makeText(this, "BY ID", Toast.LENGTH_SHORT).show();
+        mutableStatusMessage.setValue("LOADING");
+        mainActivityViewModel.getBusLocation(byIdFragment.predictionList.get(0).getVid());
+        mutableBus.observe(this, bus -> {
+            String s = byIdFragment.predictionList.get(position).getRt();
+            mainActivityViewModel.getWaypoints(s);
+        });
+
     }
 
     @Override
@@ -232,6 +255,5 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onIdLongClick(int position) {
-        Toast.makeText(this, "BY ID LONGBOI", Toast.LENGTH_SHORT).show();
     }
 }

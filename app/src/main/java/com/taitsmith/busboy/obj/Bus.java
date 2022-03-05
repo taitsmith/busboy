@@ -1,47 +1,33 @@
 package com.taitsmith.busboy.obj;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Bus  {
+    @SerializedName("VehicleId")
+    @Expose
+    public Integer vehicleId;
+    @SerializedName("CurrentTripId")
+    @Expose
+    public Integer currentTripId;
+    @SerializedName("Latitude")
+    @Expose
+    public Double latitude;
+    @SerializedName("Longitude")
+    @Expose
+    public Double longitude;
+    @SerializedName("Heading")
+    @Expose
+    public Integer heading;
+    @SerializedName("TimeLastReported")
+    @Expose
+    public String timeLastReported;
 
-    private String RouteName, PredictedDeparture, VehicleId, StopId;
-    private int PredictedDelayInSeconds;
-
-    public String getRouteName() {
-        return RouteName;
+    public Double getLatitude() {
+        return latitude;
     }
 
-    public void setRouteName(String routeName) {
-        this.RouteName = routeName;
-    }
-
-    public String getPredictedDeparture() {
-        return PredictedDeparture;
-    }
-
-    public void setPredictedDeparture(String predictedDeparture) {
-        this.PredictedDeparture = predictedDeparture;
-    }
-
-    public int getPredictedDelayInSeconds() {
-        return PredictedDelayInSeconds;
-    }
-
-    public void setPredictedDelayInSeconds(int predictedDelayInSeconds) {
-        this.PredictedDelayInSeconds = predictedDelayInSeconds;
-    }
-
-    public String getVehicleId() {
-        return VehicleId;
-    }
-
-    public void setVehicleId(String vehicleId) {
-        this.VehicleId = vehicleId;
-    }
-
-    public String getStopId() {
-        return StopId;
-    }
-
-    public void setStopId(String stopId) {
-        this.StopId = stopId;
+    public Double getLongitude() {
+        return longitude;
     }
 }

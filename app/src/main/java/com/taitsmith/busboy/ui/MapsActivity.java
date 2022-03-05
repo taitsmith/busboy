@@ -11,6 +11,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -23,9 +24,11 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.polylineCoor
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap googleMap;
-    private ActivityMapsBinding binding;
+    GoogleMap googleMap;
+    ActivityMapsBinding binding;
     Polyline directionRoute;
+    LatLng cameraFocus; //these depends on whether we're
+    float zoom;         //displaying a route or direction map
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        if (getIntent().getStringExtra("POLYLINE_TYPE").equals("ROUTE")) {
+            double[] buscoords = getIntent().getDoubleArrayExtra("BUS_COORDS");
+            zoom = 15;
+            cameraFocus = new LatLng(buscoords[0], buscoords[1]);
+        } else {
+            cameraFocus = polylineCoords.get(0);
+            zoom = 15;
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -51,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             directionRoute = googleMap.addPolyline(new PolylineOptions());
             directionRoute.setPoints(polylineCoords);
             directionRoute.setColor(Color.RED);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords.get(0), 15));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraFocus, zoom));
         }
 
         googleMap.addMarker(new MarkerOptions()

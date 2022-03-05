@@ -114,6 +114,10 @@ public class StopPredictionResponse {
             }
 
             public String getStpnm() { return stpnm; }
+
+            public String getVid() {
+                return vid;
+            }
         }
     }
 }
