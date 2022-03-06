@@ -1,9 +1,13 @@
 package com.taitsmith.busboy.ui;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.FragmentActivity;
 
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,8 +23,10 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMapsBinding;
+import com.taitsmith.busboy.obj.Bus;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.polylineCoords;
+import static com.taitsmith.busboy.ui.MainActivity.mutableBus;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -28,7 +34,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ActivityMapsBinding binding;
     Polyline directionRoute;
     LatLng cameraFocus; //these depends on whether we're
-    float zoom;         //displaying a route or direction map
+    float zoom;                      //displaying a route or direction map
+    Bus bus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +45,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(binding.getRoot());
 
         if (getIntent().getStringExtra("POLYLINE_TYPE").equals("ROUTE")) {
-            double[] buscoords = getIntent().getDoubleArrayExtra("BUS_COORDS");
+            bus = mutableBus.getValue();
             zoom = 15;
-            cameraFocus = new LatLng(buscoords[0], buscoords[1]);
+            cameraFocus = new LatLng(bus.getLatitude(), bus.longitude);
         } else {
             cameraFocus = polylineCoords.get(0);
             zoom = 15;
@@ -67,11 +74,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         googleMap.addMarker(new MarkerOptions()
-        .position(polylineCoords.get(0))
-        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            .position(polylineCoords.get(0))
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
         googleMap.addMarker(new MarkerOptions()
-        .position(polylineCoords.get(polylineCoords.size() - 1))
-        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            .position(polylineCoords.get(polylineCoords.size() - 1))
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+        if (bus != null) {
+            googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(bus.getLatitude(), bus.getLongitude()))
+                    .title("THE BUS")
+                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        }
     }
 }
