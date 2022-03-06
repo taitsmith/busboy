@@ -1,13 +1,10 @@
 package com.taitsmith.busboy.utils;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
-import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
 import com.taitsmith.busboy.databinding.ListItemScheduleBinding;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 

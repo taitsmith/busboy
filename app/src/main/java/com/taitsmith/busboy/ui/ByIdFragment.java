@@ -64,8 +64,6 @@ public class ByIdFragment extends Fragment {
             byIdViewModel.getStopPredictions(getArguments().get("BY_ID").toString());
         }
 
-
-
         return binding.getRoot();
     }
 

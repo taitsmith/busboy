@@ -4,9 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
-
-import com.taitsmith.busboy.R;
 
 import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
 import com.taitsmith.busboy.obj.Stop;
@@ -80,5 +77,4 @@ public class NearbyAdapter extends BaseAdapter {
             this.binding = binding;
         }
     }
-
 }

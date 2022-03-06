@@ -2,7 +2,6 @@ package com.taitsmith.busboy.ui;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,14 +27,12 @@ public class MainActivityFragment extends Fragment{
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMainActivityBinding.inflate(inflater, container, false);
-        Log.d("MAIN ACTIVITY FRAGMENT ", "ON CREATE VIEW");
 
         return binding.getRoot();
     }
@@ -44,14 +41,6 @@ public class MainActivityFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
-    }
-
-    //let the user know some stuff if happening in the background
-    public void showLoading(boolean isHidden) {
-        if (binding.busFlagIV.getVisibility() == View.VISIBLE) {
-            binding.busFlagIV.setVisibility(View.INVISIBLE);
-        }
-        binding.loadingBar.setVisibility(isHidden ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override

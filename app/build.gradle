@@ -48,8 +48,8 @@ dependencies {
 
     implementation 'net.danlew:android.joda:2.10.12.2'
     implementation 'com.github.delight-im:Android-SimpleLocation:v1.0.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
 
     testImplementation 'junit:junit:4.13.2'
 

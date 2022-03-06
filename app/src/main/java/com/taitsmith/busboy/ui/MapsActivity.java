@@ -1,13 +1,8 @@
 package com.taitsmith.busboy.ui;
 
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.FragmentActivity;
 
-
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,7 +29,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ActivityMapsBinding binding;
     Polyline directionRoute;
     LatLng cameraFocus; //these depends on whether we're
-    float zoom;                      //displaying a route or direction map
+    float zoom;         //displaying a route or direction map
     Bus bus;
 
     @Override
