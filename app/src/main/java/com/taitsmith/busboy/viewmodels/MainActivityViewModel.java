@@ -11,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.WaypointResponse;
@@ -31,6 +32,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     public static List<LatLng> polylineCoords;
 
     ApiInterface googleApiInterface, acTransitApiInterface;
+    String googleApiKey;
 
     public MainActivityViewModel(Application application) {
         super(application);
@@ -40,13 +42,14 @@ public class MainActivityViewModel extends AndroidViewModel {
         polylineCoords = new ArrayList<>();
         acTransitApiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         googleApiInterface = ApiClient.getMapsClient().create(ApiInterface.class);
+        googleApiKey = application.getString(R.string.google_maps_key);
     }
 
     public void getDirectionsToStop(String start, String stop) {
         Call<DirectionResponseData> call = googleApiInterface.getNavigationToStop(start,
                 stop,
                 "walking",
-                "AIzaSyCSMBC8N4Pnr59CoM2BwR7xOG665YBfr4A"); //TODO move me
+                googleApiKey);
         call.enqueue(new Callback<DirectionResponseData>() {
             @Override
             public void onResponse(Call<DirectionResponseData> call, Response<DirectionResponseData> response) {
@@ -94,6 +97,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         call.enqueue(new Callback<Bus>() {
             @Override
             public void onResponse(Call<Bus> call, Response<Bus> response) {
+                if (response.code() == 404) mutableErrorMessage.setValue("404");
                 if (response.body() != null ) {
                     mutableBus.setValue(response.body());
                 }
@@ -101,7 +105,7 @@ public class MainActivityViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(Call<Bus> call, Throwable t) {
-                Log.d("BUS LOCATION FAILURE: ", t.getMessage());
+                mutableErrorMessage.setValue("404");
             }
         });
     }

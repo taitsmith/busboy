@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Busboy</string>
-    <!--suppress AndroidDomInspection -->
-    <string name="api_token">B344E43EEA2120C5CDDE8E5360D5928F</string>
 
     <!-- buttons etc -->
     <string name="search_id_button_text">Search by stop Id</string>
@@ -27,7 +25,7 @@
         or send an email to busboy@taitsmith.com</string>
 
     <!-- snackbars && toasts-->
-    <string name="snackbar_nearby_404">Looks like there\'s nothing nearby</string>
+    <string name="snackbar_404">Looks like something went wrong</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>

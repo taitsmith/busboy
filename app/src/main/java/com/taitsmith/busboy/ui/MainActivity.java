@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        acTransitApiKey = getString(R.string.api_token);
+        acTransitApiKey = getString(R.string.ac_transit_key);
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         mainTabLayout = binding.mainTabLayout;
@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 break;
             case "Nearby":
-
                 fragmentManager.beginTransaction()
                         .replace(binding.mainFragmentContainer.getId(), nearbyFragment)
                         .addToBackStack(null)
@@ -127,8 +126,8 @@ public class MainActivity extends AppCompatActivity
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSION_REQUEST_FINE_LOCATION);
                 break;
-            case "NEARBY_404" :
-                Snackbar.make(binding.getRoot(), R.string.snackbar_nearby_404,
+            case "404" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_404,
                         Snackbar.LENGTH_LONG).show();
                 mutableStatusMessage.setValue("LOADED");
                 break;
@@ -160,7 +159,6 @@ public class MainActivity extends AppCompatActivity
                 Bus b = mutableBus.getValue();
                 mutableStatusMessage.setValue("LOADED");
                 intent.putExtra("POLYLINE_TYPE", "ROUTE");
-                intent.putExtra("BUS_COORDS", new double[]{b.getLatitude(), b.getLongitude()});
                 startActivity(intent);
                 break;
             case "LOADING":
@@ -233,7 +231,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onIdItemSelected(int position) {
         mutableStatusMessage.setValue("LOADING");
-        mainActivityViewModel.getBusLocation(byIdFragment.predictionList.get(0).getVid());
+        mainActivityViewModel.getBusLocation(byIdFragment.predictionList.get(position).getVid());
         mutableBus.observe(this, bus -> {
             String s = byIdFragment.predictionList.get(position).getRt();
             mainActivityViewModel.getWaypoints(s);
