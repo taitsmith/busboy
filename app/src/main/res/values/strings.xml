@@ -30,6 +30,7 @@
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
     <string name="snackbar_no_polyline">Looks like there aren\'t any directions</string>
+    <string name="snackbar_null_bus_coords">Looks like there\'s no data for this bus</string>
     <string name="snackbar_favorites_in_progress">The Favorites option is coming soon.</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="toast_something_wrong">Something went wrong…</string>

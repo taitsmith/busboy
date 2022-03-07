@@ -25,7 +25,8 @@
         <activity
             android:name=".ui.MapsActivity"
             android:exported="false"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:launchMode="singleInstance"/>
 
         <meta-data
             android:name="com.google.android.gms.version"

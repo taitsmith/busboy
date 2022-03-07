@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.google.android.material.tabs.TabLayout;
@@ -22,11 +23,13 @@ import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
 import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.ByIdViewModel;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
+import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity
     ByIdFragment byIdFragment;
     FavoritesFragment favoritesFragment;
     FragmentManager fragmentManager;
+    Prediction prediction;
 
 
     @Override
@@ -75,6 +79,8 @@ public class MainActivity extends AppCompatActivity
         }
         mutableStatusMessage.observe(this, this::getStatusMessage);
         mutableErrorMessage.observe(this, this::getErrorMessage);
+        mutableBus.observe(this, bus -> mainActivityViewModel.getWaypoints(prediction.getRt()));
+
         setTabListeners();
     }
 
@@ -142,6 +148,10 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(binding.getRoot(), R.string.snackbar_no_predictions,
                         Snackbar.LENGTH_LONG).show();
                 break;
+            case "NULL_BUS_COORDS" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_null_bus_coords,
+                        BaseTransientBottomBar.LENGTH_LONG).show();
+                break;
         }
     }
 
@@ -156,7 +166,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
                 break;
             case "ROUTE_POLYLINE_READY" :
-                Bus b = mutableBus.getValue();
                 mutableStatusMessage.setValue("LOADED");
                 intent.putExtra("POLYLINE_TYPE", "ROUTE");
                 startActivity(intent);
@@ -230,13 +239,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onIdItemSelected(int position) {
+        prediction = byIdFragment.predictionList.get(position);
         mutableStatusMessage.setValue("LOADING");
         mainActivityViewModel.getBusLocation(byIdFragment.predictionList.get(position).getVid());
-        mutableBus.observe(this, bus -> {
-            String s = byIdFragment.predictionList.get(position).getRt();
-            mainActivityViewModel.getWaypoints(s);
-        });
-
     }
 
     @Override

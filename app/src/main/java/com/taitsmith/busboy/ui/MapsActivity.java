@@ -20,6 +20,7 @@ import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMapsBinding;
 import com.taitsmith.busboy.obj.Bus;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.polylineCoords;
 import static com.taitsmith.busboy.ui.MainActivity.mutableBus;
 
@@ -31,6 +32,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng cameraFocus; //these depends on whether we're
     float zoom;         //displaying a route or direction map
     Bus bus;
+    SupportMapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,22 +43,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (getIntent().getStringExtra("POLYLINE_TYPE").equals("ROUTE")) {
             bus = mutableBus.getValue();
-            zoom = 15;
-            cameraFocus = new LatLng(bus.getLatitude(), bus.longitude);
+            try {
+
+                zoom = 15;
+                cameraFocus = new LatLng(bus.getLatitude(), bus.longitude);
+            } catch (NullPointerException e) {
+                mutableErrorMessage.setValue("NULL_BUS_COORDS");
+            }
         } else {
             cameraFocus = polylineCoords.get(0);
             zoom = 15;
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment == null) {
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+        }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
+        googleMap.clear();
 
         if (polylineCoords.size() == 0) {
             Snackbar.make(binding.getRoot(), R.string.snackbar_no_polyline,
