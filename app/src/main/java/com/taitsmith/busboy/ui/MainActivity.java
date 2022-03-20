@@ -226,6 +226,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNearbyItemSelected(int position) {
+        mutableStatusMessage.setValue("LOADING");
         Bundle bundle = new Bundle();
         bundle.putString("BY_ID", NearbyViewModel.stopList.get(position).getStopId());
         byIdFragment.setArguments(bundle);
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNearbyLongClick(int position) {
+        mutableStatusMessage.setValue("LOADING");
         Stop stop = NearbyViewModel.stopList.get(position);
         String start = Double.toString(NearbyViewModel.loc.getLatitude()).concat(",")
                 .concat(Double.toString(NearbyViewModel.loc.getLongitude()));

@@ -4,6 +4,7 @@ import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.obj.StopDestinationResponse;
 import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.WaypointResponse;
@@ -41,8 +42,8 @@ public interface ApiInterface {
                                     @Query("token") String token);
 
     @GET("stop/{stopID}/destinations")//get destinations for given stop so we can display NB/SB/EB/WB
-    Call<List<RouteDestination>> getStopDirection(@Path("stopID") String stopId,
-                                                  @Query("token") String token);
+    Call<StopDestinationResponse> getStopDestinations(@Path("stopID") String stopId,
+                                                      @Query("token") String token);
 
     @GET("route/{route}/waypoints")//get lat/lon waypoints so we can draw the route on a map
     Call<List<WaypointResponse>> getRouteWaypoints(@Path("route") String route,

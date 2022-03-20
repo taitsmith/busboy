@@ -1,6 +1,5 @@
 package com.taitsmith.busboy.ui;
 
-
 import android.content.Context;
 import android.os.Bundle;
 
@@ -20,10 +19,12 @@ import com.taitsmith.busboy.utils.NearbyAdapter;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
+import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyFragment extends Fragment {
@@ -34,6 +35,7 @@ public class NearbyFragment extends Fragment {
     ListView nearbyStopListView;
     NearbyFragmentBinding binding;
     List<Stop> nearbyStopList;
+    List<List<RouteDestination>> destinationList;
     NearbyAdapter nearbyAdapter;
 
     public static NearbyFragment newInstance() {
@@ -53,7 +55,6 @@ public class NearbyFragment extends Fragment {
             listItemLongListener.onNearbyLongClick(i);
             return true;
         });
-
         return  binding.getRoot();
     }
 
@@ -61,9 +62,7 @@ public class NearbyFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
-
         nearbyViewModel.checkLocationPerm();
-
         setObservers();
     }
 
@@ -83,7 +82,6 @@ public class NearbyFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-
         listItemListener = null;
         listItemLongListener = null;
     }
@@ -93,20 +91,28 @@ public class NearbyFragment extends Fragment {
         super.onDestroyView();
         mutableSimpleLocation.removeObservers(getViewLifecycleOwner());
         nearbyViewModel.mutableNearbyStops.removeObservers(getViewLifecycleOwner());
-
     }
 
     private void setObservers() {
         nearbyViewModel.mutableNearbyStops.observe(getViewLifecycleOwner(), stops -> {
+            destinationList = new ArrayList<>();
             this.nearbyStopList = stops;
-            nearbyAdapter = new NearbyAdapter(nearbyStopList);
-            nearbyStopListView.setAdapter(nearbyAdapter);
+            for (Stop stop : nearbyStopList) {
+                nearbyViewModel.getStopDestinations(stop.getStopId());
+            }
+//            NearbyViewModel.mutableHashMap.setValue(destinationHashMap);
         });
 
         mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
             NearbyViewModel.loc = simpleLocation;
             nearbyViewModel.getNearbyStops();
             loc.endUpdates();
+        });
+
+        NearbyViewModel.mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
+            nearbyAdapter = new NearbyAdapter(stringListHashMap, nearbyStopList);
+            nearbyStopListView.setAdapter(nearbyAdapter);
+
         });
     }
 }

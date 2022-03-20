@@ -32,7 +32,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     public static List<LatLng> polylineCoords;
 
     ApiInterface googleApiInterface, acTransitApiInterface;
-    String googleApiKey;
+    String directionsApiKey;
 
     public MainActivityViewModel(Application application) {
         super(application);
@@ -42,14 +42,14 @@ public class MainActivityViewModel extends AndroidViewModel {
         polylineCoords = new ArrayList<>();
         acTransitApiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         googleApiInterface = ApiClient.getMapsClient().create(ApiInterface.class);
-        googleApiKey = application.getString(R.string.google_maps_key);
+        directionsApiKey = application.getString(R.string.google_directions_key);
     }
 
     public void getDirectionsToStop(String start, String stop) {
         Call<DirectionResponseData> call = googleApiInterface.getNavigationToStop(start,
                 stop,
                 "walking",
-                googleApiKey);
+                directionsApiKey);
         call.enqueue(new Callback<DirectionResponseData>() {
             @Override
             public void onResponse(Call<DirectionResponseData> call, Response<DirectionResponseData> response) {

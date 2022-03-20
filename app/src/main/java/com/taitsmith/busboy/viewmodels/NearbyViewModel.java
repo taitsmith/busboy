@@ -11,10 +11,13 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.obj.StopDestinationResponse;
+import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.utils.ApiClient;
 import com.taitsmith.busboy.utils.ApiInterface;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import im.delight.android.location.SimpleLocation;
@@ -28,9 +31,11 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatu
 
 public class NearbyViewModel extends AndroidViewModel {
     public MutableLiveData<List<Stop>> mutableNearbyStops;
+    public static MutableLiveData<HashMap<String, List<RouteDestination>>> mutableHashMap;
     public static MutableLiveData<SimpleLocation> mutableSimpleLocation;
     public static List<Stop> stopList;
     public static SimpleLocation loc;
+    public static HashMap<String, List<RouteDestination>> destinationHashMap;
 
     ApiInterface apiInterface;
     String rt;
@@ -41,8 +46,10 @@ public class NearbyViewModel extends AndroidViewModel {
         loc = new SimpleLocation(application.getApplicationContext());
         mutableSimpleLocation = new MutableLiveData<>();
         mutableNearbyStops = new MutableLiveData<>();
+        mutableHashMap = new MutableLiveData<>();
         stopList = new ArrayList<>();
         distance = 2000;
+        destinationHashMap = new HashMap<>();
     }
 
     @SuppressLint("MissingPermission") //won't end up here without permissions
@@ -66,7 +73,6 @@ public class NearbyViewModel extends AndroidViewModel {
                     stopList.clear();
                     stopList.addAll(response.body());
                     mutableNearbyStops.setValue(stopList);
-                    mutableStatusMessage.setValue("LOADED");
                 }
             }
 
@@ -75,6 +81,30 @@ public class NearbyViewModel extends AndroidViewModel {
                 Log.d("NEARBY ERROR", t.getMessage());
             }
         });
+    }
+
+    public void getStopDestinations(String stopId) {
+        List<RouteDestination> destinationList = new ArrayList<>();
+        apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
+        Call<StopDestinationResponse> call = apiInterface.getStopDestinations(stopId, acTransitApiKey);
+        call.enqueue(new Callback<StopDestinationResponse>() {
+            @Override
+            public void onResponse(Call<StopDestinationResponse> call, Response<StopDestinationResponse> response) {
+                if (response.body() == null || response.body().routeDestinations == null) {
+                    mutableErrorMessage.setValue("ERROR");
+                } else {
+                    destinationList.addAll(response.body().routeDestinations);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StopDestinationResponse> call, Throwable t) {
+                Log.d("DESTINATION FAILURE: ", t.getMessage());
+            }
+        });
+        destinationHashMap.put(stopId, destinationList);
+        mutableHashMap.setValue(destinationHashMap);
+        mutableStatusMessage.setValue("LOADED");
     }
 
     public void checkLocationPerm() {
