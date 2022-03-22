@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import im.delight.android.location.SimpleLocation;
+import okhttp3.Route;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -83,28 +84,24 @@ public class NearbyViewModel extends AndroidViewModel {
         });
     }
 
-    public void getStopDestinations(String stopId) {
-        List<RouteDestination> destinationList = new ArrayList<>();
+    public HashMap<String, List<RouteDestination>> getDestinationHashMap(List<String> stopList) {
+        HashMap<String, List<RouteDestination>> destinationHashMap = new HashMap<>();
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
-        Call<StopDestinationResponse> call = apiInterface.getStopDestinations(stopId, acTransitApiKey);
-        call.enqueue(new Callback<StopDestinationResponse>() {
-            @Override
-            public void onResponse(Call<StopDestinationResponse> call, Response<StopDestinationResponse> response) {
-                if (response.body() == null || response.body().routeDestinations == null) {
-                    mutableErrorMessage.setValue("ERROR");
-                } else {
-                    destinationList.addAll(response.body().routeDestinations);
+        for (String s : stopList) {
+            Call<StopDestinationResponse> call = apiInterface.getStopDestinations(s, acTransitApiKey);
+            call.enqueue(new Callback<StopDestinationResponse>() {
+                @Override
+                public void onResponse(Call<StopDestinationResponse> call, Response<StopDestinationResponse> response) {
+                    destinationHashMap.put(s, response.body().routeDestinations);
                 }
-            }
 
-            @Override
-            public void onFailure(Call<StopDestinationResponse> call, Throwable t) {
-                Log.d("DESTINATION FAILURE: ", t.getMessage());
-            }
-        });
-        destinationHashMap.put(stopId, destinationList);
-        mutableHashMap.setValue(destinationHashMap);
-        mutableStatusMessage.setValue("LOADED");
+                @Override
+                public void onFailure(Call<StopDestinationResponse> call, Throwable t) {
+                    Log.d("DESTINATION FAILURE: ", t.getMessage());
+                }
+            });
+        }
+        return destinationHashMap;
     }
 
     public void checkLocationPerm() {

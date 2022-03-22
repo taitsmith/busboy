@@ -5,6 +5,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath 'io.reactivex.rxjava3:rxjava:3.0.4'
     }
 }
 
@@ -15,6 +16,9 @@ allprojects {
 
         maven {
             url "https://jitpack.io"
+            }
+        maven {
+            url "https://oss.jfrog.org/libs-snapshot"
         }
     }
 }

@@ -5,7 +5,6 @@ import com.taitsmith.busboy.obj.BusRoute;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopDestinationResponse;
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.obj.WaypointResponse;
 

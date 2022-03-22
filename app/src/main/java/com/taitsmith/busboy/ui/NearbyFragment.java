@@ -6,8 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +23,14 @@ import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
+import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableHashMap;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocation;
+import static com.taitsmith.busboy.viewmodels.NearbyViewModel.stopList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class NearbyFragment extends Fragment {
@@ -35,7 +41,7 @@ public class NearbyFragment extends Fragment {
     ListView nearbyStopListView;
     NearbyFragmentBinding binding;
     List<Stop> nearbyStopList;
-    List<List<RouteDestination>> destinationList;
+    List<String> stopNameList;
     NearbyAdapter nearbyAdapter;
 
     public static NearbyFragment newInstance() {
@@ -95,12 +101,14 @@ public class NearbyFragment extends Fragment {
 
     private void setObservers() {
         nearbyViewModel.mutableNearbyStops.observe(getViewLifecycleOwner(), stops -> {
-            destinationList = new ArrayList<>();
+            stopNameList = new ArrayList<>();
             this.nearbyStopList = stops;
-            for (Stop stop : nearbyStopList) {
-                nearbyViewModel.getStopDestinations(stop.getStopId());
+            for (Stop stop : stops) {
+                stopNameList.add(stop.getStopId());
             }
-//            NearbyViewModel.mutableHashMap.setValue(destinationHashMap);
+            HashMap<String, List<RouteDestination>> destinationHashMap =
+                    nearbyViewModel.getDestinationHashMap(stopNameList);
+            mutableHashMap.setValue(destinationHashMap);
         });
 
         mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
@@ -109,10 +117,10 @@ public class NearbyFragment extends Fragment {
             loc.endUpdates();
         });
 
-        NearbyViewModel.mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
-            nearbyAdapter = new NearbyAdapter(stringListHashMap, nearbyStopList);
+        mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
+            nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
             nearbyStopListView.setAdapter(nearbyAdapter);
-
+            mutableStatusMessage.setValue("LOADED");
         });
     }
 }
