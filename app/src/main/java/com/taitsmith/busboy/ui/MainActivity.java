@@ -116,9 +116,8 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 break;
             case "Favorites":
-                fragmentManager.beginTransaction()
-                        .replace(binding.mainFragmentContainer.getId(),favoritesFragment)
-                        .commit();
+                Snackbar.make(binding.getRoot(), R.string.snackbar_favorites_in_progress,
+                        BaseTransientBottomBar.LENGTH_LONG).show();
                 break;
             case "Help":
                 MainActivityViewModel.mutableStatusMessage.setValue("HELP_REQUESTED");

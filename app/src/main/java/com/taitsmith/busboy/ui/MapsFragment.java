@@ -19,7 +19,7 @@ import com.taitsmith.busboy.R;
 
 public class MapsFragment extends Fragment {
 
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
+    private final OnMapReadyCallback callback = new OnMapReadyCallback() {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             LatLng sydney = new LatLng(-34, 151);

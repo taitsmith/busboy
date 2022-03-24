@@ -61,7 +61,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline"
-        app:layout_constraintBottom_toTopOf="@id/main_tab_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:srcCompat="@drawable/ic_busflag"
         tools:layout_editor_absoluteY="191dp"
         android:contentDescription="@string/accessibility_busflag_img_desc" />

@@ -14,7 +14,7 @@ public class WaypointResponse {
     private String routeAlpha;
     @SerializedName("Patterns")
     @Expose
-    private List<Pattern> patterns = null;
+    private final List<Pattern> patterns = null;
 
     public String getBooking() {
         return booking;
@@ -48,7 +48,7 @@ public class WaypointResponse {
         private Integer totalDistance;
         @SerializedName("Waypoints")
         @Expose
-        private List<Waypoint> waypoints = null;
+        private final List<Waypoint> waypoints = null;
 
         public List<Waypoint> getWaypoints() {
             return waypoints;

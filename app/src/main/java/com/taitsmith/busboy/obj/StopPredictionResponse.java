@@ -35,7 +35,7 @@ public class StopPredictionResponse {
 
         @SerializedName("prd")
         @Expose
-        private List<Prediction> prd = null;
+        private final List<Prediction> prd = null;
 
         public List<Prediction> getPrd() {
             return prd;

@@ -10,10 +10,6 @@ import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Predictio
 
 import java.util.List;
 
-/** A very cool list view adapter to display a list of upcoming buses at the
- * selected stop. Eventually users will be able to select a list item for more
- * info.
- */
 public class PredictionAdapter extends BaseAdapter {
     List<Prediction> predictionList;
     ListItemScheduleBinding binding;

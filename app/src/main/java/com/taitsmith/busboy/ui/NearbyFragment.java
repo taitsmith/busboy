@@ -51,6 +51,7 @@ public class NearbyFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         binding = NearbyFragmentBinding.inflate(inflater, container, false);
         nearbyStopListView = binding.nearbyListView;
 
@@ -118,8 +119,8 @@ public class NearbyFragment extends Fragment {
         mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
             if (nearbyAdapter == null) {
                 nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
-                nearbyStopListView.setAdapter(nearbyAdapter);
             } else {
+                nearbyStopListView.setAdapter(nearbyAdapter);
                 nearbyAdapter.notifyDataSetChanged();
             }
             mutableStatusMessage.setValue("LOADED");

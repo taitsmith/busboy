@@ -16,10 +16,12 @@
     <string name="dialog_help">You can search for nearby stops if you\'ve granted busboy permission
         to view your location and have the location setting enabled. If you\'re already at your stop,
         you can find upcoming busses by entering your stop ID (found at the bottom of the sign) and
-        pressing the \'By ID\' button.\n\nLong-pressing a \'nearby\' stop will display a map of
-        walking directions from your location to the stop.\n\nBusboy is currently in a beta testing state,
-        so there are potential bugs. For bug reports and feature requests, please file an issue on
-        github.com/taitsmith/busboy or send an email to busboy@taitsmith.com</string>
+        pressing the search button.\n\nLong-pressing a \'nearby\' stop will display a map of
+        walking directions from your location to the stop, and short-pressing will display a list of
+        upcoming busses for that stop. Short pressing a bus prediction will display the current location
+        of that bus on a map.\n\nBusboy is currently in a beta testing state, so there are potential bugs.
+        For bug reports and feature requests, please file an issue on github.com/taitsmith/busboy or
+        send an email to busboy@taitsmith.com</string>
     <string name="dialog_in_beta">Busboy is currently in a beta testing state, so there are potential
         bugs. For bug reports and feature requests, please file an issue on github.com/taitsmith/busboy
         or send an email to busboy@taitsmith.com</string>
@@ -31,7 +33,7 @@
         this stop.</string>
     <string name="snackbar_no_polyline">Looks like there aren\'t any directions</string>
     <string name="snackbar_null_bus_coords">Looks like there\'s no data for this bus</string>
-    <string name="snackbar_favorites_in_progress">The Favorites option is coming soon.</string>
+    <string name="snackbar_favorites_in_progress">There\'s nothing here yet… check back later.</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
