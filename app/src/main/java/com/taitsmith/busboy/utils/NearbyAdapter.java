@@ -7,17 +7,16 @@ import android.widget.BaseAdapter;
 
 import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
 import com.taitsmith.busboy.obj.Stop;
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 
 import java.util.HashMap;
 import java.util.List;
 
 public class NearbyAdapter extends BaseAdapter {
-    HashMap<String, List<RouteDestination>> destinationList;
+    HashMap<String, String> destinationList;
     List<Stop> stopList;
     ListItemNearbyBinding binding;
 
-    public NearbyAdapter(HashMap<String, List<RouteDestination>> destinationList,
+    public NearbyAdapter(HashMap<String, String> destinationList,
                          List<Stop> stopList) {
         this.destinationList = destinationList;
         this.stopList = stopList;
@@ -54,7 +53,6 @@ public class NearbyAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder holder;
-        StringBuilder builder = new StringBuilder();
         Stop stop = stopList.get(position);
         if (view == null) {
             binding = ListItemNearbyBinding.inflate(
@@ -70,18 +68,9 @@ public class NearbyAdapter extends BaseAdapter {
         }
 
         binding.setStop(stop);
-        try {
-            for (RouteDestination destination : destinationList.get(stop.getStopId())) {
-                builder.append(destination.routeId)
-                        .append(" ")
-                        .append(destination.destination)
-                        .append("\n");
-            }
 
-            binding.listItemLinesServed.setText(builder.toString());
-        } catch (NullPointerException e) {
-            binding.listItemLinesServed.setText("No data on lines served");
-        }
+
+        binding.listItemLinesServed.setText(destinationList.get(stop.getStopId()));
 
         return holder.view;
     }

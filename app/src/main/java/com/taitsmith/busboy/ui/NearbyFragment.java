@@ -106,9 +106,7 @@ public class NearbyFragment extends Fragment {
             for (Stop stop : stops) {
                 stopNameList.add(stop.getStopId());
             }
-            HashMap<String, List<RouteDestination>> destinationHashMap =
-                    nearbyViewModel.getDestinationHashMap(stopNameList);
-            mutableHashMap.setValue(destinationHashMap);
+            nearbyViewModel.getDestinationHashMap(stopNameList);
         });
 
         mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
@@ -118,8 +116,12 @@ public class NearbyFragment extends Fragment {
         });
 
         mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
-            nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
-            nearbyStopListView.setAdapter(nearbyAdapter);
+            if (nearbyAdapter == null) {
+                nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
+                nearbyStopListView.setAdapter(nearbyAdapter);
+            } else {
+                nearbyAdapter.notifyDataSetChanged();
+            }
             mutableStatusMessage.setValue("LOADED");
         });
     }

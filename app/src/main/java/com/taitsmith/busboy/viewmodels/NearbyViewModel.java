@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import im.delight.android.location.SimpleLocation;
-import okhttp3.Route;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,11 +31,10 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatu
 
 public class NearbyViewModel extends AndroidViewModel {
     public MutableLiveData<List<Stop>> mutableNearbyStops;
-    public static MutableLiveData<HashMap<String, List<RouteDestination>>> mutableHashMap;
+    public static MutableLiveData<HashMap<String, String>> mutableHashMap;
     public static MutableLiveData<SimpleLocation> mutableSimpleLocation;
     public static List<Stop> stopList;
     public static SimpleLocation loc;
-    public static HashMap<String, List<RouteDestination>> destinationHashMap;
 
     ApiInterface apiInterface;
     String rt;
@@ -50,7 +48,6 @@ public class NearbyViewModel extends AndroidViewModel {
         mutableHashMap = new MutableLiveData<>();
         stopList = new ArrayList<>();
         distance = 2000;
-        destinationHashMap = new HashMap<>();
     }
 
     @SuppressLint("MissingPermission") //won't end up here without permissions
@@ -61,7 +58,7 @@ public class NearbyViewModel extends AndroidViewModel {
         Call<List<Stop>> call = apiInterface.getNearbyStops(
                 loc.getLatitude(),
                 loc.getLongitude(),
-                2000,
+                750,
                 true,
                 rt,
                 acTransitApiKey);
@@ -84,15 +81,24 @@ public class NearbyViewModel extends AndroidViewModel {
         });
     }
 
-    public HashMap<String, List<RouteDestination>> getDestinationHashMap(List<String> stopList) {
-        HashMap<String, List<RouteDestination>> destinationHashMap = new HashMap<>();
+    public void getDestinationHashMap(List<String> stopList) {
+        HashMap<String, String> destinationHashMap = new HashMap<>(stopList.size());
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         for (String s : stopList) {
             Call<StopDestinationResponse> call = apiInterface.getStopDestinations(s, acTransitApiKey);
             call.enqueue(new Callback<StopDestinationResponse>() {
                 @Override
                 public void onResponse(Call<StopDestinationResponse> call, Response<StopDestinationResponse> response) {
-                    destinationHashMap.put(s, response.body().routeDestinations);
+                    StringBuilder sb = new StringBuilder();
+                    for (RouteDestination d : response.body().routeDestinations) {
+                        sb.append(d.routeId)
+                                .append(" ")
+                                .append(d.destination)
+                                .append("\n");
+                        Log.d("HASHMAP RESPONSE: ", sb.toString());
+                        destinationHashMap.put(s, sb.toString());
+                        mutableHashMap.setValue(destinationHashMap);
+                    }
                 }
 
                 @Override
@@ -101,7 +107,6 @@ public class NearbyViewModel extends AndroidViewModel {
                 }
             });
         }
-        return destinationHashMap;
     }
 
     public void checkLocationPerm() {
