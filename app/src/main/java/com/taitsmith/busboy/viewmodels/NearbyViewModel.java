@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
+import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.obj.StopDestinationResponse;
 import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
@@ -56,9 +57,9 @@ public class NearbyViewModel extends AndroidViewModel {
 
         apiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
         Call<List<Stop>> call = apiInterface.getNearbyStops(
-                37.8530,
-                -122.2708,
-                750,
+                loc.getLatitude(),
+                loc.getLongitude(),
+                1000,
                 true,
                 rt,
                 acTransitApiKey);
