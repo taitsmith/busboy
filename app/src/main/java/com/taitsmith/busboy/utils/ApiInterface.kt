@@ -1,61 +1,69 @@
-package com.taitsmith.busboy.utils;
+package com.taitsmith.busboy.utils
 
-import com.taitsmith.busboy.obj.Bus;
-import com.taitsmith.busboy.obj.BusRoute;
-import com.taitsmith.busboy.obj.DirectionResponseData;
-import com.taitsmith.busboy.obj.Stop;
-import com.taitsmith.busboy.obj.StopDestinationResponse;
-import com.taitsmith.busboy.obj.StopPredictionResponse;
-import com.taitsmith.busboy.obj.WaypointResponse;
+import com.taitsmith.busboy.obj.*
+import retrofit2.http.GET
+import retrofit2.Call
+import retrofit2.http.Path
+import retrofit2.http.Query
 
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-
-public interface ApiInterface {
-
+interface ApiInterface {
     //returns predictions for given route at stop, otherwise all routes if rt == null
     @GET("actrealtime/prediction/")
-    Call<StopPredictionResponse> getStopPredictionList(@Query("stpid") String stopId,
-                                                       @Query("rt") String routeId,
-                                                       @Query("token") String token);
+    fun getStopPredictionList(
+        @Query("stpid") stopId: String?,
+        @Query("rt") routeId: String?,
+        @Query("token") token: String?
+    ): Call<StopPredictionResponse?>?
 
     //TODO delete these two, do we actually use them?
-    @GET("routes")//list all AC Transit routes
-    Call<List<BusRoute>> getRoutes(@Query("token") String token);
+    @GET("routes")
+    fun  //list all AC Transit routes
+            getRoutes(@Query("token") token: String?): Call<List<BusRoute?>?>?
 
     @GET("route/{routeName}/directions")
-    Call<List<String>> getRouteDirections(@Path("routeName") String routeName,
-                                          @Query("token") String token);
+    fun getRouteDirections(
+        @Path("routeName") routeName: String?,
+        @Query("token") token: String?
+    ): Call<List<String?>?>?
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
-    Call<List<Stop>> getNearbyStops(@Path("latitude") double latitude,
-                                    @Path("longitude") double longitude,
-                                    @Query("distance") int distance,
-                                    @Query("active") boolean active,
-                                    @Query("routeName") String routeName,
-                                    @Query("token") String token);
+    fun getNearbyStops(
+        @Path("latitude") latitude: Double,
+        @Path("longitude") longitude: Double,
+        @Query("distance") distance: Int,
+        @Query("active") active: Boolean,
+        @Query("routeName") routeName: String?,
+        @Query("token") token: String?
+    ): Call<List<Stop?>?>?
 
-    @GET("stop/{stopID}/destinations")//get destinations for given stop so we can display NB/SB/EB/WB
-    Call<StopDestinationResponse> getStopDestinations(@Path("stopID") String stopId,
-                                                      @Query("token") String token);
+    @GET("stop/{stopID}/destinations")
+    fun  //get destinations for given stop so we can display NB/SB/EB/WB
+            getStopDestinations(
+        @Path("stopID") stopId: String?,
+        @Query("token") token: String?
+    ): Call<StopDestinationResponse?>?
 
-    @GET("route/{route}/waypoints")//get lat/lon waypoints so we can draw the route on a map
-    Call<List<WaypointResponse>> getRouteWaypoints(@Path("route") String route,
-                                                   @Query("token") String token);
+    @GET("route/{route}/waypoints")
+     fun  //get lat/lon waypoints so we can draw the route on a map
+            getRouteWaypoints(
+        @Path("route") route: String?,
+        @Query("token") token: String?
+    ): Call<List<WaypointResponse?>?>?
 
-    @GET("vehicle/{vehicleId}")//get info about a bus so we can put it on the map
-    Call<Bus> getVehicleInfo(@Path("vehicleId") String vehicleId,
-                             @Query("token") String token);
+    @GET("vehicle/{vehicleId}")
+     fun  //get info about a bus so we can put it on the map
+            getVehicleInfo(
+        @Path("vehicleId") vehicleId: String?,
+        @Query("token") token: String?
+    ): Call<Bus?>?
 
-    @GET("maps/api/directions/json") //talk to google and get walking directions from our location to the selected stop
-    Call<DirectionResponseData> getNavigationToStop(@Query(value = "origin", encoded = true) String origin,
-                                                    @Query(value = "destination", encoded = true) String destination,
-                                                    @Query("mode") String mode,
-                                                    @Query("key") String apiKey);
-
+    @GET("maps/api/directions/json")
+     fun  //talk to google and get walking directions from our location to the selected stop
+            getNavigationToStop(
+        @Query(value = "origin", encoded = true) origin: String?,
+        @Query(value = "destination", encoded = true) destination: String?,
+        @Query("mode") mode: String?,
+        @Query("key") apiKey: String?
+    ): Call<DirectionResponseData?>?
 }

@@ -27,7 +27,6 @@ import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Predictio
 import java.util.List;
 
 public class ByIdFragment extends Fragment {
-
     ByIdViewModel byIdViewModel;
     ByIdFragmentBinding binding;
 

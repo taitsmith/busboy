@@ -1,47 +1,51 @@
-package com.taitsmith.busboy.obj;
+package com.taitsmith.busboy.obj
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
+import com.google.gson.annotations.SerializedName
+import com.google.gson.annotations.Expose
+import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination
 
 /**
-When we call the AC Transit API to get nearby stops, we also want to figure out which way those
- stops go (NB/SB/EB/WB). The call to find nearby stops doesn't include this, so we need to make
- a separate call for each stop returned to find which direction it goes.
-
- **/
-public class StopDestinationResponse {
+ * When we call the AC Transit API to get nearby stops, we also want to figure out which way those
+ * stops go (NB/SB/EB/WB). The call to find nearby stops doesn't include this, so we need to make
+ * a separate call for each stop returned to find which direction it goes.
+ *
+ */
+class StopDestinationResponse {
     @SerializedName("StopId")
     @Expose
-    public Integer stopId;
+    var stopId: Int? = null
+
     @SerializedName("Status")
     @Expose
-    public String status;
+    var status: String? = null
+
     @SerializedName("RouteDestinations")
     @Expose
-    public List<RouteDestination> routeDestinations = null;
+    var routeDestinations: List<RouteDestination>? = null
 
-    public static class RouteDestination {
-
+    class RouteDestination {
         @SerializedName("RouteId")
         @Expose
-        public String routeId;
+        var routeId: String? = null
+
         @SerializedName("DirectionId")
         @Expose
-        public Integer directionId;
+        var directionId: Int? = null
+
         @SerializedName("Direction")
         @Expose
-        public String direction;
+        var direction: String? = null
+
         @SerializedName("Destination")
         @Expose
-        public String destination;
+        var destination: String? = null
+
         @SerializedName("FinalPassingTime")
         @Expose
-        public String finalPassingTime;
+        var finalPassingTime: String? = null
+
         @SerializedName("Status")
         @Expose
-        public String status;
-
+        var status: String? = null
     }
 }
