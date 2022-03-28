@@ -118,6 +118,10 @@ public class StopPredictionResponse {
             public String getVid() {
                 return vid;
             }
+
+            public Integer getDyn() {
+                return dyn;
+            }
         }
     }
 }

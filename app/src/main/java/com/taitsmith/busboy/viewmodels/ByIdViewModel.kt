@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 import java.lang.IndexOutOfBoundsException
 import java.lang.NullPointerException
 import java.util.ArrayList
@@ -37,10 +38,12 @@ class ByIdViewModel : ViewModel() {
                     } else {
                         predictionList.clear()
                         try {
-                            predictionList.addAll(response.body()!!.bustimeResponse.prd)
-                        } catch (e: NullPointerException) {
-                            MainActivityViewModel.mutableErrorMessage.value = "NULL_PRED_RESPONSE"
-                        } catch (e: IndexOutOfBoundsException) {
+                            for (pred in response.body()!!.bustimeResponse.prd) {
+                                if (pred.dyn == 0) { //non-zero dyn means cancelled or not stopping
+                                    predictionList.add(pred)
+                                }
+                            }
+                        } catch (e: Exception) {
                             MainActivityViewModel.mutableErrorMessage.value = "NULL_PRED_RESPONSE"
                         }
                         if (predictionList.size == 0) MainActivityViewModel.mutableErrorMessage.value= "BAD INPUT"
@@ -60,10 +63,5 @@ class ByIdViewModel : ViewModel() {
 
     companion object {
         lateinit var predictionList: MutableList<Prediction>
-    }
-
-    init {
-        predictionList = ArrayList()
-        mutableStopPredictions = MutableLiveData()
     }
 }
