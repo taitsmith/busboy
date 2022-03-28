@@ -21,7 +21,8 @@ import java.util.ArrayList
 
 class ByIdViewModel : ViewModel() {
     lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
-    private val apiInterface: ApiInterface? = ApiClient.getAcTransitClient().create(ApiInterface::class.java)
+    private val apiInterface: ApiInterface? = ApiClient.getAcTransitClient()
+        .create(ApiInterface::class.java)
     var rt: String? = null
 
     fun getStopPredictions(stopId: String?) {
@@ -63,5 +64,10 @@ class ByIdViewModel : ViewModel() {
 
     companion object {
         lateinit var predictionList: MutableList<Prediction>
+    }
+
+    init {
+        predictionList = ArrayList()
+        mutableStopPredictions = MutableLiveData()
     }
 }
