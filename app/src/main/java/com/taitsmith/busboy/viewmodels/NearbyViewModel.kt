@@ -56,6 +56,7 @@ class NearbyViewModel(application: Application) : AndroidViewModel(application) 
 
                 override fun onFailure(call: Call<List<Stop?>?>, t: Throwable) {
                     Log.d("NEARBY ERROR", t.message!!)
+                    MainActivityViewModel.mutableErrorMessage.value = "CALL FAILURE"
                 }
             })
         }

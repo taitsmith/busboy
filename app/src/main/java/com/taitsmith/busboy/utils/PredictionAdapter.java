@@ -49,6 +49,7 @@ public class PredictionAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder holder;
+        Prediction p = predictionList.get(position);
 
         if (view == null) {
             binding = ListItemScheduleBinding.inflate(
@@ -63,7 +64,7 @@ public class PredictionAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
-        binding.setPrediction(predictionList.get(position));
+        binding.setPrediction(p);
 
         return holder.view;
     }

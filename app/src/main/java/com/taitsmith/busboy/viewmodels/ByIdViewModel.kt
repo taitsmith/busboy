@@ -4,20 +4,16 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction
-import com.taitsmith.busboy.utils.ApiInterface
-import com.taitsmith.busboy.utils.ApiClient
 import com.taitsmith.busboy.obj.StopPredictionResponse
+import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction
 import com.taitsmith.busboy.ui.MainActivity
+import com.taitsmith.busboy.utils.ApiClient
+import com.taitsmith.busboy.utils.ApiInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
-import java.lang.IndexOutOfBoundsException
-import java.lang.NullPointerException
-import java.util.ArrayList
 
 class ByIdViewModel : ViewModel() {
     lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
@@ -39,9 +35,11 @@ class ByIdViewModel : ViewModel() {
                     } else {
                         predictionList.clear()
                         try {
-                            for (pred in response.body()!!.bustimeResponse.prd) {
-                                if (pred.dyn == 0) { //non-zero dyn means cancelled or not stopping
-                                    predictionList.add(pred)
+                            for (p in response.body()!!.bustimeResponse.prd) {
+                                if (p.dyn == 0) { //non-zero dyn means cancelled or not stopping
+                                    if (p.prdctdn == "1" || p.prdctdn == "Due") p.prdctdn = "Arriving"
+                                    else p.prdctdn = "in " + p.prdctdn + " minutes"
+                                    predictionList.add(p)
                                 }
                             }
                         } catch (e: Exception) {
@@ -57,6 +55,7 @@ class ByIdViewModel : ViewModel() {
 
                 override fun onFailure(call: Call<StopPredictionResponse?>, t: Throwable) {
                     Log.d("BUS LIST FAILURE", t.message!!)
+                    MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
         }

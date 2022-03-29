@@ -115,13 +115,13 @@ public class StopPredictionResponse {
 
             public String getStpnm() { return stpnm; }
 
-            public String getVid() {
-                return vid;
-            }
+            public String getVid() {return vid;}
 
-            public Integer getDyn() {
-                return dyn;
-            }
+            public Integer getDyn() { return dyn; }
+
+            public String getPrdctdn() { return prdctdn; }
+
+            public void setPrdctdn(String prdctdn) { this.prdctdn = prdctdn;}
         }
     }
 }

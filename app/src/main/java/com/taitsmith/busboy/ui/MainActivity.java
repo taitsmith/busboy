@@ -151,6 +151,11 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(binding.getRoot(), R.string.snackbar_null_bus_coords,
                         BaseTransientBottomBar.LENGTH_LONG).show();
                 break;
+            case "CALL_FAILURE" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_network_error,
+                        Snackbar.LENGTH_LONG).show();
+                hideUi(false);
+                break;
         }
     }
 
@@ -170,13 +175,21 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
                 break;
             case "LOADING":
-                binding.mainFragmentContainer.setVisibility(View.INVISIBLE);
-                binding.progressBar.setVisibility(View.VISIBLE);
+                hideUi(true);
                 break;
             case "LOADED":
-                binding.mainFragmentContainer.setVisibility(View.VISIBLE);
-                binding.progressBar.setVisibility(View.INVISIBLE);
+                hideUi(false);
                 break;
+        }
+    }
+
+    private void hideUi(boolean shouldHide) {
+        if (shouldHide) {
+            binding.mainFragmentContainer.setVisibility(View.INVISIBLE);
+            binding.progressBar.setVisibility(View.VISIBLE);
+        } else {
+            binding.mainFragmentContainer.setVisibility(View.VISIBLE);
+            binding.progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
