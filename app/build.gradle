@@ -13,8 +13,8 @@ android {
         applicationId "com.taitsmith.busboy"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 4
-        versionName "beta_3_kotlin"
+        versionCode 5
+        versionName "beta_4_countdown"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
     }

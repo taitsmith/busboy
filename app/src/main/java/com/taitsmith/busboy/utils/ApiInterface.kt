@@ -15,11 +15,6 @@ interface ApiInterface {
         @Query("token") token: String?
     ): Call<StopPredictionResponse?>?
 
-    //TODO delete these two, do we actually use them?
-    @GET("routes")
-    fun  //list all AC Transit routes
-            getRoutes(@Query("token") token: String?): Call<List<BusRoute?>?>?
-
     @GET("route/{routeName}/directions")
     fun getRouteDirections(
         @Path("routeName") routeName: String?,
