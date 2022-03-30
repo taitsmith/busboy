@@ -11,6 +11,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.di.AcTransitRetrofit;
+import com.taitsmith.busboy.di.MapsRetrofit;
 import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.WaypointResponse;
@@ -21,14 +23,27 @@ import com.taitsmith.busboy.obj.WaypointResponse.Pattern.Waypoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
+@HiltViewModel
 public class MainActivityViewModel extends AndroidViewModel {
     public static MutableLiveData<String> mutableStatusMessage;
     public static MutableLiveData<String> mutableErrorMessage;
     public static List<LatLng> polylineCoords;
+
+    @AcTransitRetrofit
+    @Inject
+    Retrofit acTransitRetrofit;
+    @MapsRetrofit
+    @Inject
+    Retrofit mapsRetrofit;
 
     ApiInterface googleApiInterface, acTransitApiInterface;
     String directionsApiKey;
@@ -39,8 +54,8 @@ public class MainActivityViewModel extends AndroidViewModel {
         mutableErrorMessage = new MutableLiveData<>();
 
         polylineCoords = new ArrayList<>();
-        acTransitApiInterface = MapsRetrofitModule.INSTANCE.provideMapsRetrofit().create(ApiInterface.class);
-        googleApiInterface = MapsRetrofitModule.INSTANCE.provideMapsRetrofit().create(ApiInterface.class);
+        acTransitApiInterface = acTransitRetrofit.create(ApiInterface.class);
+        googleApiInterface = mapsRetrofit.create(ApiInterface.class);
         directionsApiKey = application.getString(R.string.google_directions_key);
     }
 

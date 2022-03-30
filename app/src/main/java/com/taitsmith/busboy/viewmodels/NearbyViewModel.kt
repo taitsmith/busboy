@@ -5,14 +5,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.taitsmith.busboy.utils.ApiInterface
-import com.taitsmith.busboy.di.MapsRetrofitModule
 import com.taitsmith.busboy.ui.MainActivity
 import com.taitsmith.busboy.obj.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.di.MapsRetrofit
+import com.taitsmith.busboy.di.AcTransitRetrofit
 import com.taitsmith.busboy.obj.Stop
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
@@ -29,12 +28,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NearbyViewModel @Inject constructor(application: Application,
+                                          @AcTransitRetrofit acTransitRetrofit: Retrofit
                                           ) : AndroidViewModel(application) {
 
-    @MapsRetrofit
-    @Inject lateinit var mapsRetrofit: Retrofit
+
     lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
-    private val apiInterface: ApiInterface? = MapsRetrofitModule.provideMapsRetrofit().create(ApiInterface::class.java)
+    private val apiInterface: ApiInterface? = acTransitRetrofit.create(ApiInterface::class.java)
     var rt: String? = null
     var distance: Int
 
