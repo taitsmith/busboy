@@ -5,27 +5,36 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.taitsmith.busboy.utils.ApiInterface
-import com.taitsmith.busboy.utils.ApiClient
+import com.taitsmith.busboy.di.MapsRetrofitModule
 import com.taitsmith.busboy.ui.MainActivity
 import com.taitsmith.busboy.obj.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.taitsmith.busboy.di.MapsRetrofit
 import com.taitsmith.busboy.obj.Stop
+import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 import java.lang.StringBuilder
 import java.util.ArrayList
 import java.util.HashMap
+import javax.inject.Inject
 
-class NearbyViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class NearbyViewModel @Inject constructor(application: Application,
+                                          ) : AndroidViewModel(application) {
+
+    @MapsRetrofit
+    @Inject lateinit var mapsRetrofit: Retrofit
     lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
-    private val apiInterface: ApiInterface? = ApiClient.getAcTransitClient().create(ApiInterface::class.java)
+    private val apiInterface: ApiInterface? = MapsRetrofitModule.provideMapsRetrofit().create(ApiInterface::class.java)
     var rt: String? = null
     var distance: Int
 

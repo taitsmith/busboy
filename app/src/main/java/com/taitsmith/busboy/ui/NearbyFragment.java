@@ -6,10 +6,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +19,6 @@ import com.taitsmith.busboy.utils.NearbyAdapter;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
@@ -30,11 +27,14 @@ import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocat
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.stopList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class NearbyFragment extends Fragment {
     static NearbyViewModel nearbyViewModel;
+
 
     OnItemClickListener listItemListener;
     OnItemLongClickListener listItemLongListener;

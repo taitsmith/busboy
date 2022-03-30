@@ -6,7 +6,6 @@ import static com.taitsmith.busboy.ui.MainActivity.mutableBus;
 import android.app.Application;
 import android.util.Log;
 
-
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
@@ -15,7 +14,7 @@ import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.DirectionResponseData;
 import com.taitsmith.busboy.obj.WaypointResponse;
-import com.taitsmith.busboy.utils.ApiClient;
+import com.taitsmith.busboy.di.MapsRetrofitModule;
 import com.taitsmith.busboy.utils.ApiInterface;
 import com.taitsmith.busboy.obj.WaypointResponse.Pattern.Waypoint;
 
@@ -40,8 +39,8 @@ public class MainActivityViewModel extends AndroidViewModel {
         mutableErrorMessage = new MutableLiveData<>();
 
         polylineCoords = new ArrayList<>();
-        acTransitApiInterface = ApiClient.getAcTransitClient().create(ApiInterface.class);
-        googleApiInterface = ApiClient.getMapsClient().create(ApiInterface.class);
+        acTransitApiInterface = MapsRetrofitModule.INSTANCE.provideMapsRetrofit().create(ApiInterface.class);
+        googleApiInterface = MapsRetrofitModule.INSTANCE.provideMapsRetrofit().create(ApiInterface.class);
         directionsApiKey = application.getString(R.string.google_directions_key);
     }
 

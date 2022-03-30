@@ -23,7 +23,6 @@ import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
 import com.taitsmith.busboy.obj.Bus;
 import com.taitsmith.busboy.obj.Stop;
-import com.taitsmith.busboy.obj.StopPredictionResponse;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.ByIdViewModel;
@@ -34,8 +33,11 @@ import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Predictio
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 
+
+import dagger.hilt.android.AndroidEntryPoint;
 import im.delight.android.location.SimpleLocation;
 
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity
         implements OnItemClickListener, OnItemLongClickListener {
 
@@ -54,7 +56,6 @@ public class MainActivity extends AppCompatActivity
     FavoritesFragment favoritesFragment;
     FragmentManager fragmentManager;
     Prediction prediction;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,13 +107,11 @@ public class MainActivity extends AppCompatActivity
             case "By ID":
                 fragmentManager.beginTransaction()
                         .replace(binding.mainFragmentContainer.getId(), byIdFragment)
-                        .addToBackStack(null)
                         .commit();
                 break;
             case "Nearby":
                 fragmentManager.beginTransaction()
                         .replace(binding.mainFragmentContainer.getId(), nearbyFragment)
-                        .addToBackStack(null)
                         .commit();
                 break;
             case "Favorites":
