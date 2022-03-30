@@ -1,7 +1,7 @@
 # busboy
 Don't you hate it when you wait twenty minutes for the 51A, and then three show up at the same time? Busboy doesn't prevent that unfortunately, but it does allow you see that all three will be arriving simultaneously. 
 
-Busboy uses Retrofit and Kotlin Coroutines to make its network calls. It's built on MVVM design patterns and uses LiveData and all the standard fancy tools.
+Busboy uses Retrofit and Kotlin Coroutines to make its network calls, and Hilt for dependency injection. It's built on MVVM design patterns and uses LiveData and all the standard fancy tools.
 
 Already at a bus stop? Busboy can use your stop's ID to tell you what buses are coming.  
 <img src="https://www.taitsmith.com/images/ss_main_busflag.png" width=250>
