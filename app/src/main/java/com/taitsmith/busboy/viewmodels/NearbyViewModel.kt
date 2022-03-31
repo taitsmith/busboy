@@ -12,7 +12,6 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.di.AcTransitRetrofit
 import com.taitsmith.busboy.obj.Stop
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
@@ -21,18 +20,18 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import java.lang.StringBuilder
 import java.util.ArrayList
 import java.util.HashMap
 import javax.inject.Inject
 
 @HiltViewModel
-class NearbyViewModel @Inject constructor(application: Application,
+class NearbyViewModel @Inject constructor(application: Application
                                           ) : AndroidViewModel(application) {
 
     @AcTransitApiInterface
     @Inject lateinit var acTransitApiInterface: ApiInterface
+
     lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
     var rt: String? = null
     var distance: Int
@@ -53,9 +52,9 @@ class NearbyViewModel @Inject constructor(application: Application,
                     call: Call<List<Stop?>?>,
                     response: Response<List<Stop?>?>
                 ) {
-                    if (response.body() == null || response.code() == 404) MainActivityViewModel.mutableErrorMessage.setValue(
-                        "404"
-                    ) else {
+                    if (response.body() == null || response.code() == 404)
+                        MainActivityViewModel.mutableErrorMessage.setValue("404")
+                    else {
                         stopList.clear()
                         stopList.addAll(response.body()!!)
                         mutableNearbyStops.setValue(stopList)

@@ -13,13 +13,52 @@
         android:layout_height="match_parent"
         tools:context=".ui.NearbyFragment">
 
+        <EditText
+            android:id="@+id/nearbyEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/nearby_edit_text_hint"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:maxLength="5"
+            android:minHeight="48dp"
+            android:textColorHint="#546E7A"
+            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
+            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/nearbySearchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_button_text"
+            app:layout_constraintStart_toStartOf="@id/nearbyVertGuideline"
+            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"/>
+
         <ListView
             android:id="@+id/nearbyListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/nearbyHorizGuideline" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/nearbyHorizGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.15" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/nearbyVertGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".75"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

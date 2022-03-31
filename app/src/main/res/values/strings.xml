@@ -2,9 +2,9 @@
     <string name="app_name">Busboy</string>
 
     <!-- buttons etc -->
-    <string name="search_id_button_text">Search by stop Id</string>
-    <string name="search_nearby_button_text">Search nearby</string>
+    <string name="search_button_text">Search</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
+    <string name="nearby_edit_text_hint">Enter a search distance (in feet)</string>
 
     <!-- dialogs -->
     <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
@@ -36,6 +36,7 @@
     <string name="snackbar_favorites_in_progress">There\'s nothing here yet… check back later.</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="snackbar_network_error">Looks like a network issue, try again shortly</string>
+    <string name="snackbar_bad_distance">Please enter a distance between 500 and 5000 feet</string>
     <string name="toast_something_wrong">Something went wrong…</string>
     <string name="toast_enable_location">Please enable location permission</string>
 

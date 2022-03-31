@@ -155,6 +155,11 @@ public class MainActivity extends AppCompatActivity
                         Snackbar.LENGTH_LONG).show();
                 hideUi(false);
                 break;
+            case "BAD_DISTANCE" :
+                Snackbar.make(binding.getRoot(),R.string.snackbar_bad_distance,
+                        BaseTransientBottomBar.LENGTH_LONG).show();
+                hideUi(false);
+                break;
         }
     }
 

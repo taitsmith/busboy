@@ -20,6 +20,7 @@ import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
+import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableHashMap;
@@ -35,7 +36,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class NearbyFragment extends Fragment {
     static NearbyViewModel nearbyViewModel;
 
-
     OnItemClickListener listItemListener;
     OnItemLongClickListener listItemLongListener;
     ListView nearbyStopListView;
@@ -43,10 +43,6 @@ public class NearbyFragment extends Fragment {
     List<Stop> nearbyStopList;
     List<String> stopNameList;
     NearbyAdapter nearbyAdapter;
-
-    public static NearbyFragment newInstance() {
-        return new NearbyFragment();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -61,6 +57,16 @@ public class NearbyFragment extends Fragment {
         nearbyStopListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
             listItemLongListener.onNearbyLongClick(i);
             return true;
+        });
+
+        binding.nearbySearchButton.setOnClickListener(view -> {
+            int distance = Integer.parseInt(binding.nearbyEditText.getText().toString());
+            if (distance < 500 || distance > 5000) {
+                mutableErrorMessage.setValue("BAD_DISTANCE");
+            } else {
+                nearbyViewModel.setDistance(distance);
+                nearbyViewModel.getNearbyStops();
+            }
         });
         return  binding.getRoot();
     }
