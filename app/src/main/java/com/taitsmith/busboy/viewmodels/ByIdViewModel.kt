@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.di.AcTransitRetrofit
+import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.obj.StopPredictionResponse
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction
 import com.taitsmith.busboy.ui.MainActivity
@@ -15,20 +15,21 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 @HiltViewModel
-class ByIdViewModel @Inject constructor(@AcTransitRetrofit acTransitRetrofit: Retrofit): ViewModel() {
+class ByIdViewModel @Inject constructor(): ViewModel() {
+
+    @AcTransitApiInterface
+    @Inject lateinit var acTransitApiInterface: ApiInterface
 
     lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
-    private val apiInterface: ApiInterface = acTransitRetrofit.create(ApiInterface::class.java)
     var rt: String? = null
 
     fun getStopPredictions(stopId: String?) {
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
-            val call = apiInterface?.getStopPredictionList(stopId, rt, MainActivity.acTransitApiKey)
+            val call = acTransitApiInterface.getStopPredictionList(stopId, rt, MainActivity.acTransitApiKey)
             call!!.enqueue(object : Callback<StopPredictionResponse?> {
                 override fun onResponse(
                     call: Call<StopPredictionResponse?>,

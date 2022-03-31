@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.AcTransitRetrofit
 import com.taitsmith.busboy.obj.Stop
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,19 +29,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NearbyViewModel @Inject constructor(application: Application,
-                                          @AcTransitRetrofit acTransitRetrofit: Retrofit
                                           ) : AndroidViewModel(application) {
 
-
+    @AcTransitApiInterface
+    @Inject lateinit var acTransitApiInterface: ApiInterface
     lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
-    private val apiInterface: ApiInterface? = acTransitRetrofit.create(ApiInterface::class.java)
     var rt: String? = null
     var distance: Int
 
     fun getNearbyStops() {
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
-            val call = apiInterface!!.getNearbyStops(
+            val call = acTransitApiInterface.getNearbyStops(
                 loc.latitude,
                 loc.longitude,
                 distance,
@@ -74,7 +74,7 @@ class NearbyViewModel @Inject constructor(application: Application,
         val destinationHashMap = HashMap<String, String>(stopList.size)
         viewModelScope.launch(Dispatchers.IO) {
             for (s in stopList) {
-                val call = apiInterface!!.getStopDestinations(s, MainActivity.acTransitApiKey)
+                val call = acTransitApiInterface.getStopDestinations(s, MainActivity.acTransitApiKey)
                 call!!.enqueue(object : Callback<StopDestinationResponse?> {
                     override fun onResponse(
                         call: Call<StopDestinationResponse?>,

@@ -15,12 +15,6 @@ interface ApiInterface {
         @Query("token") token: String?
     ): Call<StopPredictionResponse?>?
 
-    @GET("route/{routeName}/directions")
-    fun getRouteDirections(
-        @Path("routeName") routeName: String?,
-        @Query("token") token: String?
-    ): Call<List<String?>?>?
-
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
     fun getNearbyStops(
@@ -32,30 +26,30 @@ interface ApiInterface {
         @Query("token") token: String?
     ): Call<List<Stop?>?>?
 
+    //get destinations for given stop so we can display NB/SB/EB/WB
     @GET("stop/{stopID}/destinations")
-    fun  //get destinations for given stop so we can display NB/SB/EB/WB
-            getStopDestinations(
+    fun getStopDestinations(
         @Path("stopID") stopId: String?,
         @Query("token") token: String?
     ): Call<StopDestinationResponse?>?
 
+    //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")
-     fun  //get lat/lon waypoints so we can draw the route on a map
-            getRouteWaypoints(
+     fun getRouteWaypoints(
         @Path("route") route: String?,
         @Query("token") token: String?
     ): Call<List<WaypointResponse?>?>?
 
+    //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")
-     fun  //get info about a bus so we can put it on the map
-            getVehicleInfo(
+     fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String?,
         @Query("token") token: String?
     ): Call<Bus?>?
 
+    //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
-     fun  //talk to google and get walking directions from our location to the selected stop
-            getNavigationToStop(
+     fun getNavigationToStop(
         @Query(value = "origin", encoded = true) origin: String?,
         @Query(value = "destination", encoded = true) destination: String?,
         @Query("mode") mode: String?,

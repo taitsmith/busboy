@@ -5,7 +5,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import com.taitsmith.busboy.di.AcTransitRetrofit
 import javax.inject.Inject
 import retrofit2.Retrofit
 import com.taitsmith.busboy.di.MapsRetrofit
@@ -18,6 +17,8 @@ import com.taitsmith.busboy.obj.Bus
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.di.AcTransitApiInterface
+import com.taitsmith.busboy.di.MapsApiInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -27,17 +28,17 @@ import java.util.ArrayList
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(application: Application,
-                                                @AcTransitRetrofit acTransitRetrofit: Retrofit,
-                                                @MapsRetrofit mapsRetrofit: Retrofit
                                                 ) : AndroidViewModel(application) {
 
-    private var googleApiInterface: ApiInterface
-    private var acTransitApiInterface: ApiInterface
+    @AcTransitApiInterface
+    @Inject lateinit var acTransitApiInterface: ApiInterface
+    @MapsApiInterface
+    @Inject lateinit var mapsApiInterface: ApiInterface
     private var directionsApiKey: String
 
     fun getDirectionsToStop(start: String?, stop: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val call = googleApiInterface.getNavigationToStop(
+            val call = mapsApiInterface.getNavigationToStop(
                 start,
                 stop,
                 "walking",
@@ -68,29 +69,33 @@ class MainActivityViewModel @Inject constructor(application: Application,
     }
 
     fun getWaypoints(routeName: String?) {
-        val call = acTransitApiInterface.getRouteWaypoints(routeName, MainActivity.acTransitApiKey)
-        call!!.enqueue(object : Callback<List<WaypointResponse?>?> {
-            override fun onResponse(
-                call: Call<List<WaypointResponse?>?>,
-                response: Response<List<WaypointResponse?>?>
-            ) {
-                if (response.body() != null) {
-                    val waypointList = response.body()!![0]?.patterns?.get(0)?.waypoints
-                    polylineCoords.clear()
-                    for (wp in waypointList!!) {
-                        polylineCoords.add(LatLng(wp.latitude, wp.longitude))
+        viewModelScope.launch(Dispatchers.IO) {
+            val call =
+                acTransitApiInterface.getRouteWaypoints(routeName, MainActivity.acTransitApiKey)
+            call!!.enqueue(object : Callback<List<WaypointResponse?>?> {
+                override fun onResponse(
+                    call: Call<List<WaypointResponse?>?>,
+                    response: Response<List<WaypointResponse?>?>
+                ) {
+                    if (response.body() != null) {
+                        val waypointList = response.body()!![0]?.patterns?.get(0)?.waypoints
+                        polylineCoords.clear()
+                        for (wp in waypointList!!) {
+                            polylineCoords.add(LatLng(wp.latitude, wp.longitude))
+                        }
+                        mutableStatusMessage.value = "ROUTE_POLYLINE_READY"
                     }
-                    mutableStatusMessage.value = "ROUTE_POLYLINE_READY"
                 }
-            }
 
-            override fun onFailure(call: Call<List<WaypointResponse?>?>, t: Throwable) {
-                Log.d("waypoint failure ", t.message!!)
-            }
-        })
+                override fun onFailure(call: Call<List<WaypointResponse?>?>, t: Throwable) {
+                    Log.d("waypoint failure ", t.message!!)
+                }
+            })
+        }
     }
 
     fun getBusLocation(vehicleId: String?) {
+        viewModelScope.launch(Dispatchers.IO){
         val call = acTransitApiInterface.getVehicleInfo(vehicleId, MainActivity.acTransitApiKey)
         call!!.enqueue(object : Callback<Bus?> {
             override fun onResponse(call: Call<Bus?>, response: Response<Bus?>) {
@@ -104,6 +109,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
                 mutableErrorMessage.value = "404"
             }
         })
+        }
     }
 
     companion object {
@@ -116,8 +122,6 @@ class MainActivityViewModel @Inject constructor(application: Application,
         mutableStatusMessage = MutableLiveData()
         mutableErrorMessage = MutableLiveData()
         polylineCoords = ArrayList()
-        acTransitApiInterface = acTransitRetrofit.create(ApiInterface::class.java)
-        googleApiInterface = mapsRetrofit.create(ApiInterface::class.java)
         directionsApiKey = application.getString(R.string.google_directions_key)
     }
 }
