@@ -1,23 +1,40 @@
 package com.taitsmith.busboy.di
 
-import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.OkHttpClient
 import retrofit2.converter.gson.GsonConverterFactory
+import dagger.Module
+import dagger.Provides
 import javax.inject.Qualifier
 
-@Retention(AnnotationRetention.BINARY)
+@Qualifier
+annotation class MapsRetrofit
+
 @Qualifier
 annotation class AcTransitRetrofit
 
-@InstallIn(SingletonComponent::class)
 @Module
-object AcTransitRetrofitModule {
+@InstallIn(ViewModelComponent::class)
+object MapsRetrofitModule {
+
+    @MapsRetrofit
+    @Provides
+    fun provideMapsRetrofit(): Retrofit {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        val client: OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("https://maps.googleapis.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+    }
 
     @AcTransitRetrofit
     @Provides
@@ -34,5 +51,4 @@ object AcTransitRetrofitModule {
             .client(client)
             .build()
     }
-
 }
