@@ -26,11 +26,9 @@ import java.util.HashMap
 import javax.inject.Inject
 
 @HiltViewModel
-class NearbyViewModel @Inject constructor(application: Application
+class NearbyViewModel @Inject constructor(application: Application,
+                                          @AcTransitApiInterface private val acTransitApiInterface: ApiInterface
                                           ) : AndroidViewModel(application) {
-
-    @AcTransitApiInterface
-    @Inject lateinit var acTransitApiInterface: ApiInterface
 
     lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
     var rt: String? = null
@@ -81,10 +79,10 @@ class NearbyViewModel @Inject constructor(application: Application
                     ) {
                         val sb = StringBuilder()
                         val destinations = response.body()?.routeDestinations!!
-                        for (d in destinations) {
-                            sb.append(d.routeId)
+                        destinations.forEach {
+                            sb.append(it.routeId)
                                 .append(" ")
-                                .append(d.destination)
+                                .append(it.destination)
                                 .append("\n")
                             destinationHashMap[s] = sb.toString()
                             mutableHashMap.value = destinationHashMap

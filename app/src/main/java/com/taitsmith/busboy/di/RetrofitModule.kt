@@ -18,7 +18,7 @@ annotation class AcTransitRetrofit
 
 @Module
 @InstallIn(ViewModelComponent::class)
-object MapsRetrofitModule {
+object RetrofitModule {
 
     @MapsRetrofit
     @Provides

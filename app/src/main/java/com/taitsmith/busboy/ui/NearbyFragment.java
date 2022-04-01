@@ -132,4 +132,6 @@ public class NearbyFragment extends Fragment {
             mutableStatusMessage.setValue("LOADED");
         });
     }
+
+
 }

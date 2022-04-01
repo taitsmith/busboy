@@ -41,10 +41,6 @@ public class ByIdFragment extends Fragment {
     EditText stopIdEditText;
     PredictionAdapter predictionAdapter;
 
-    public static ByIdFragment newInstance() {
-        return new ByIdFragment();
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -94,6 +90,12 @@ public class ByIdFragment extends Fragment {
                     predictionAdapter = new PredictionAdapter(predictionList);
                     predictionListView.setAdapter(predictionAdapter);
                     binding.busFlagIV.setVisibility(View.INVISIBLE);
+
+                    try {
+                        binding.stopNameTextView.setText(predictions.get(0).getStpnm());
+                    } catch (NullPointerException | IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
                     mutableStatusMessage.setValue("LOADED");
                 }
         );
