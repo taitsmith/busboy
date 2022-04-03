@@ -62,7 +62,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
 
                 override fun onFailure(call: Call<DirectionResponseData?>, t: Throwable) {
                     Log.d("DIRECTIONS FAILURE: ", t.message!!)
-
+                    mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
         }
@@ -89,6 +89,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
 
                 override fun onFailure(call: Call<List<WaypointResponse?>?>, t: Throwable) {
                     Log.d("waypoint failure ", t.message!!)
+                    mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
         }
@@ -106,7 +107,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
             }
 
             override fun onFailure(call: Call<Bus?>, t: Throwable) {
-                mutableErrorMessage.value = "404"
+                mutableErrorMessage.value = "CALL_FAILURE"
             }
         })
         }

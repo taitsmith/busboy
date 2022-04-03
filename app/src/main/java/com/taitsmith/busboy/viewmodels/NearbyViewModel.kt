@@ -61,7 +61,7 @@ class NearbyViewModel @Inject constructor(application: Application,
 
                 override fun onFailure(call: Call<List<Stop?>?>, t: Throwable) {
                     Log.d("NEARBY ERROR", t.message!!)
-                    MainActivityViewModel.mutableErrorMessage.value = "CALL FAILURE"
+                    MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
         }
@@ -90,7 +90,8 @@ class NearbyViewModel @Inject constructor(application: Application,
                     }
 
                     override fun onFailure(call: Call<StopDestinationResponse?>, t: Throwable) {
-                        Log.d("GET DESTINATION ", "FAILURE")
+                        Log.d("GET DESTINATION ", t.message!!)
+                        MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
                     }
                 })
             }

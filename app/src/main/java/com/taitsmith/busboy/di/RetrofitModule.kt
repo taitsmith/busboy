@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import retrofit2.converter.gson.GsonConverterFactory
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 
 @Qualifier
@@ -27,6 +28,7 @@ object RetrofitModule {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
         val client: OkHttpClient = OkHttpClient.Builder()
             .addInterceptor(interceptor)
+            .callTimeout(10, TimeUnit.SECONDS)
             .build()
 
         return Retrofit.Builder()
@@ -43,6 +45,7 @@ object RetrofitModule {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
         val client: OkHttpClient = OkHttpClient.Builder()
             .addInterceptor(interceptor)
+            .callTimeout(10, TimeUnit.SECONDS)
             .build()
 
         return Retrofit.Builder()
