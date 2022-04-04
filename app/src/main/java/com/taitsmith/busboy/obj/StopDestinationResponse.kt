@@ -2,7 +2,6 @@ package com.taitsmith.busboy.obj
 
 import com.google.gson.annotations.SerializedName
 import com.google.gson.annotations.Expose
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination
 
 /**
  * When we call the AC Transit API to get nearby stops, we also want to figure out which way those

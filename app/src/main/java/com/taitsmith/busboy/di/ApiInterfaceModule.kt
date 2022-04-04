@@ -22,7 +22,6 @@ object ApiInterfaceModule {
     @Provides
     fun provideAcTransitInterface(@AcTransitRetrofit acTransitRetrofit: Retrofit
     ): ApiInterface {
-
         return acTransitRetrofit.create(ApiInterface::class.java)
     }
 

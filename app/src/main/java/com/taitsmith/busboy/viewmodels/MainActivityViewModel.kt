@@ -1,13 +1,10 @@
 package com.taitsmith.busboy.viewmodels
 
-
 import dagger.hilt.android.lifecycle.HiltViewModel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import javax.inject.Inject
-import retrofit2.Retrofit
-import com.taitsmith.busboy.di.MapsRetrofit
 import com.taitsmith.busboy.utils.ApiInterface
 import com.taitsmith.busboy.obj.DirectionResponseData
 import com.taitsmith.busboy.obj.WaypointResponse

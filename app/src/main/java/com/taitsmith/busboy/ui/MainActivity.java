@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void getErrorMessage(String s) {
+        hideUi(false);
         switch (s) {
             case "NO_PERMISSION" : //we don't have permission to access location
                 ActivityCompat.requestPermissions(this,
@@ -144,7 +145,6 @@ public class MainActivity extends AppCompatActivity
             case "404" :
                 Snackbar.make(binding.getRoot(), R.string.snackbar_404,
                         Snackbar.LENGTH_LONG).show();
-                mutableStatusMessage.setValue("LOADED");
                 break;
             case "NO_LOC_ENABLED" : //we have permission but location setting isn't on
                 askToEnableLoc();
@@ -164,12 +164,10 @@ public class MainActivity extends AppCompatActivity
             case "CALL_FAILURE" :
                 Snackbar.make(binding.getRoot(), R.string.snackbar_network_error,
                         Snackbar.LENGTH_LONG).show();
-                hideUi(false);
                 break;
             case "BAD_DISTANCE" :
                 Snackbar.make(binding.getRoot(),R.string.snackbar_bad_distance,
                         BaseTransientBottomBar.LENGTH_LONG).show();
-                hideUi(false);
                 break;
         }
     }

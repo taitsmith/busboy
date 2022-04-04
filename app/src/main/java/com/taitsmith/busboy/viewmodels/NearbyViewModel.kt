@@ -10,16 +10,13 @@ import com.taitsmith.busboy.obj.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.annotation.UiThread
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.obj.Stop
-import com.taitsmith.busboy.ui.MainActivityFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

@@ -1,7 +1,5 @@
 package com.taitsmith.busboy.obj;
 
-import androidx.annotation.StringRes;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
