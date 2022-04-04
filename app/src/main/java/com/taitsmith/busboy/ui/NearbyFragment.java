@@ -123,12 +123,8 @@ public class NearbyFragment extends Fragment {
         });
 
         mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
-            if (nearbyAdapter == null) {
-                nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
-            } else {
-                nearbyStopListView.setAdapter(nearbyAdapter);
-                nearbyAdapter.notifyDataSetChanged();
-            }
+            nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
+            nearbyStopListView.setAdapter(nearbyAdapter);
             mutableStatusMessage.setValue("LOADED");
         });
     }

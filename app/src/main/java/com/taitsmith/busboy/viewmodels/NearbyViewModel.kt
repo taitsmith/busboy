@@ -10,16 +10,20 @@ import com.taitsmith.busboy.obj.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.annotation.UiThread
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.obj.Stop
+import com.taitsmith.busboy.ui.MainActivityFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 import java.lang.StringBuilder
 import java.util.ArrayList
 import java.util.HashMap
@@ -35,6 +39,7 @@ class NearbyViewModel @Inject constructor(application: Application,
     var distance: Int
 
     fun getNearbyStops() {
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getNearbyStops(
@@ -55,7 +60,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                     else {
                         stopList.clear()
                         stopList.addAll(response.body()!!)
-                        mutableNearbyStops.setValue(stopList)
+                        mutableNearbyStops.value = stopList
                     }
                 }
 
@@ -68,15 +73,14 @@ class NearbyViewModel @Inject constructor(application: Application,
     }
 
     fun getDestinationHashMap(stopList: List<String>) {
-        val destinationHashMap = HashMap<String, String>(stopList.size)
         viewModelScope.launch(Dispatchers.IO) {
+            val destinationHashMap = HashMap<String, String>(stopList.size)
             for (s in stopList) {
+                MainActivity.mutableNearbyStatusUpdater.postValue(s)
                 val call = acTransitApiInterface.getStopDestinations(s, MainActivity.acTransitApiKey)
-                call!!.enqueue(object : Callback<StopDestinationResponse?> {
-                    override fun onResponse(
-                        call: Call<StopDestinationResponse?>,
-                        response: Response<StopDestinationResponse?>
-                    ) {
+                try {
+                    val response: Response<StopDestinationResponse?> = call!!.execute()
+                    if (response.isSuccessful) {
                         val sb = StringBuilder()
                         val destinations = response.body()?.routeDestinations!!
                         destinations.forEach {
@@ -85,18 +89,16 @@ class NearbyViewModel @Inject constructor(application: Application,
                                 .append(it.destination)
                                 .append("\n")
                             destinationHashMap[s] = sb.toString()
-                            mutableHashMap.value = destinationHashMap
                         }
+                    } else {
+                        MainActivityViewModel.mutableErrorMessage.postValue("404")
                     }
-
-                    override fun onFailure(call: Call<StopDestinationResponse?>, t: Throwable) {
-                        Log.d("GET DESTINATION ", t.message!!)
-                        MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
-                    }
-                })
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
+            mutableHashMap.postValue(destinationHashMap)
         }
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
     }
 
     fun checkLocationPerm() {

@@ -5,6 +5,7 @@
     <string name="search_button_text">Search</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
     <string name="nearby_edit_text_hint">Search distance (in feet)</string>
+    <string name="nearby_status_update">Getting lines for nearby stop %1$s</string>
 
     <!-- dialogs -->
     <string name="dialog_no_location">It looks like you\'ve given busboy permission to see
@@ -27,7 +28,7 @@
         or send an email to busboy@taitsmith.com</string>
 
     <!-- snackbars && toasts-->
-    <string name="snackbar_404">Looks like something went wrong</string>
+    <string name="snackbar_404">Nothing found (Your search returned a 404 error)</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>

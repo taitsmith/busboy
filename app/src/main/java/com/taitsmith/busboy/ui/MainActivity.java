@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity
 
     public static String acTransitApiKey;
     public static MutableLiveData<Bus> mutableBus;
+    public static MutableLiveData<String> mutableNearbyStatusUpdater;
 
     TabLayout mainTabLayout;
     NearbyFragment nearbyFragment;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity
     FavoritesFragment favoritesFragment;
     FragmentManager fragmentManager;
     Prediction prediction;
+    TextView nearbyStatusUpdateTv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +68,10 @@ public class MainActivity extends AppCompatActivity
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         mainTabLayout = binding.mainTabLayout;
+        nearbyStatusUpdateTv = binding.nearbyStatusUpdater;
 
         mutableBus = new MutableLiveData<>();
+        mutableNearbyStatusUpdater = new MutableLiveData<>();
 
         fragmentManager = getSupportFragmentManager();
         nearbyFragment = new NearbyFragment();
@@ -78,11 +83,17 @@ public class MainActivity extends AppCompatActivity
                     .replace(binding.mainFragmentContainer.getId(), byIdFragment)
                     .commit();
         }
+
+        setObservers();
+        setTabListeners();
+    }
+
+    private void setObservers() {
         mutableStatusMessage.observe(this, this::getStatusMessage);
         mutableErrorMessage.observe(this, this::getErrorMessage);
-        mutableBus.observe(this, bus -> mainActivityViewModel.getWaypoints(prediction.getRt()));
-
-        setTabListeners();
+        mutableBus.observe(this, bus ->
+                mainActivityViewModel.getWaypoints(prediction.getRt()));
+        mutableNearbyStatusUpdater.observe(this, this::updateNearbyStatusText);
     }
 
     private void setTabListeners() {
@@ -194,6 +205,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             binding.mainFragmentContainer.setVisibility(View.VISIBLE);
             binding.progressBar.setVisibility(View.INVISIBLE);
+            nearbyStatusUpdateTv.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -225,6 +237,11 @@ public class MainActivity extends AppCompatActivity
                     .setPositiveButton(R.string.dialog_got_it, null)
                     .create()
                     .show();
+    }
+
+    private void updateNearbyStatusText(String s) {
+        nearbyStatusUpdateTv.setVisibility(View.VISIBLE);
+        nearbyStatusUpdateTv.setText(getString(R.string.nearby_status_update, s));
     }
 
     @Override
