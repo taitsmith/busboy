@@ -23,7 +23,7 @@
             android:maxLength="5"
             android:minHeight="48dp"
             android:textColorHint="#546E7A"
-            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
+            app:layout_constraintBottom_toTopOf="@id/buslineSpinner"
             app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +35,24 @@
             app:layout_constraintStart_toStartOf="@id/nearbyVertGuideline"
             app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"/>
+            app:layout_constraintBottom_toTopOf="@id/buslineSpinner"/>
+
+        <Spinner
+            android:id="@+id/buslineSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/nearbySearchButton"
+            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/nearbyHorizGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.25" />
+
 
         <ListView
             android:id="@+id/nearbyListView"
@@ -46,12 +63,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nearbyHorizGuideline" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/nearbyHorizGuideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.15" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nearbyVertGuideline"

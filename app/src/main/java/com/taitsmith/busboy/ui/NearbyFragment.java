@@ -11,8 +11,12 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 
+import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding;
 import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.utils.NearbyAdapter;
@@ -33,7 +37,7 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class NearbyFragment extends Fragment {
+public class NearbyFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     static NearbyViewModel nearbyViewModel;
 
     OnItemClickListener listItemListener;
@@ -43,6 +47,7 @@ public class NearbyFragment extends Fragment {
     List<Stop> nearbyStopList;
     List<String> stopNameList;
     NearbyAdapter nearbyAdapter;
+    Spinner buslineSpinner;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -58,6 +63,14 @@ public class NearbyFragment extends Fragment {
             listItemLongListener.onNearbyLongClick(i);
             return true;
         });
+
+        buslineSpinner = binding.buslineSpinner;
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.bus_lines, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        buslineSpinner.setAdapter(adapter);
+        buslineSpinner.setOnItemSelectedListener(this);
 
         binding.nearbySearchButton.setOnClickListener(view -> {
             int distance = Integer.parseInt(binding.nearbyEditText.getText().toString());
@@ -76,6 +89,7 @@ public class NearbyFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
         nearbyViewModel.checkLocationPerm();
+
         setObservers();
     }
 
@@ -130,4 +144,15 @@ public class NearbyFragment extends Fragment {
     }
 
 
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        String s = adapterView.getItemAtPosition(i).toString();
+        if (s.equals("All lines")) nearbyViewModel.setRt("");
+        else nearbyViewModel.setRt(s);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
 }
