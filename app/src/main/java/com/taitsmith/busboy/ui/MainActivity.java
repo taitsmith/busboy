@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -255,6 +256,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    //the four following are for listviews on nearby and by id fragments
     @Override
     public void onNearbyItemSelected(int position) {
         mutableStatusMessage.setValue("LOADING");

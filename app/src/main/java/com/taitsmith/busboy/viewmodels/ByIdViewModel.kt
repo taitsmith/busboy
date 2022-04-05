@@ -18,10 +18,9 @@ import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
-class ByIdViewModel @Inject constructor(): ViewModel() {
-
-    @AcTransitApiInterface
-    @Inject lateinit var acTransitApiInterface: ApiInterface
+class ByIdViewModel @Inject constructor(@AcTransitApiInterface
+                                        private val acTransitApiInterface: ApiInterface)
+                                        : ViewModel() {
 
     lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
     var rt: String? = null

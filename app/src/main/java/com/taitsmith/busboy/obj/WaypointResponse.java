@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.obj;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -32,12 +33,8 @@ public class WaypointResponse {
             @Expose
             private Double longitude;
 
-            public Double getLatitude() {
-                return latitude;
-            }
-
-            public Double getLongitude() {
-                return longitude;
+            public LatLng getLatLng() {
+                return new LatLng(latitude,longitude);
             }
         }
     }
