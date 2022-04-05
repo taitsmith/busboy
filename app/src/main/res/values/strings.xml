@@ -4,7 +4,7 @@
     <!-- buttons etc -->
     <string name="search_button_text">Search</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID</string>
-    <string name="nearby_edit_text_hint">Search distance (in feet)</string>
+    <string name="nearby_edit_text_hint">Search distance in feet (default 1000)</string>
     <string name="nearby_status_update">Getting lines for nearby stop %1$s</string>
 
     <!-- dialogs -->

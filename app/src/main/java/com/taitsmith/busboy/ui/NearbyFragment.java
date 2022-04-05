@@ -28,7 +28,6 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableError
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableHashMap;
-import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableSimpleLocation;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.stopList;
 
 import java.util.ArrayList;
@@ -73,13 +72,16 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         buslineSpinner.setOnItemSelectedListener(this);
 
         binding.nearbySearchButton.setOnClickListener(view -> {
-            int distance = Integer.parseInt(binding.nearbyEditText.getText().toString());
-            if (distance < 500 || distance > 5000) {
-                mutableErrorMessage.setValue("BAD_DISTANCE");
-            } else {
-                nearbyViewModel.setDistance(distance);
-                nearbyViewModel.getNearbyStops();
+            String s = binding.nearbyEditText.getText().toString();
+            if (s.length() > 0) {
+                int distance = Integer.parseInt(s);
+                if (distance < 500 || distance > 5000) {
+                    mutableErrorMessage.setValue("BAD_DISTANCE");
+                } else {
+                    nearbyViewModel.setDistance(distance);
+                }
             }
+            nearbyViewModel.getNearbyStops();
         });
         return  binding.getRoot();
     }
@@ -116,7 +118,6 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mutableSimpleLocation.removeObservers(getViewLifecycleOwner());
         nearbyViewModel.mutableNearbyStops.removeObservers(getViewLifecycleOwner());
     }
 
@@ -130,12 +131,6 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
             nearbyViewModel.getDestinationHashMap(stopNameList);
         });
 
-        mutableSimpleLocation.observe(getViewLifecycleOwner(), simpleLocation ->{
-            NearbyViewModel.loc = simpleLocation;
-            nearbyViewModel.getNearbyStops();
-            loc.endUpdates();
-        });
-
         mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
             nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
             nearbyStopListView.setAdapter(nearbyAdapter);
@@ -147,7 +142,7 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         String s = adapterView.getItemAtPosition(i).toString();
-        if (s.equals("All lines")) nearbyViewModel.setRt("");
+        if (s.equals("All lines")) nearbyViewModel.setRt(null);
         else nearbyViewModel.setRt(s);
     }
 

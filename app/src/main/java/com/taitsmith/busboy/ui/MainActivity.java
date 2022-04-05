@@ -248,10 +248,7 @@ public class MainActivity extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                NearbyViewModel.mutableSimpleLocation.setValue(NearbyViewModel.loc);
                 NearbyViewModel.loc.beginUpdates();
-                NearbyViewModel.loc.setListener(() ->
-                        NearbyViewModel.mutableSimpleLocation.setValue(NearbyViewModel.loc));
             }
         }
     }

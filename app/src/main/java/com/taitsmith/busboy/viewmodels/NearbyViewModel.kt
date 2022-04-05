@@ -107,10 +107,7 @@ class NearbyViewModel @Inject constructor(application: Application,
             if (!loc.hasLocationEnabled()) {
                 MainActivityViewModel.mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
             } else {
-                mutableSimpleLocation.value = loc
-                MainActivityViewModel.mutableStatusMessage.value = "LOADING"
                 loc.beginUpdates()
-                loc.setListener { getNearbyStops() }
             }
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
@@ -119,17 +116,15 @@ class NearbyViewModel @Inject constructor(application: Application,
 
     companion object {
         lateinit var mutableHashMap: MutableLiveData<HashMap<String, String>>
-        lateinit var mutableSimpleLocation: MutableLiveData<SimpleLocation>
         lateinit var stopList: MutableList<Stop?>
         lateinit var loc: SimpleLocation
     }
 
     init {
         loc = SimpleLocation(application.applicationContext)
-        mutableSimpleLocation = MutableLiveData()
         mutableNearbyStops = MutableLiveData()
         mutableHashMap = MutableLiveData()
         stopList = ArrayList()
-        distance = 2000
+        distance = 1000
     }
 }

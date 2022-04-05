@@ -15,7 +15,7 @@
 
         <EditText
             android:id="@+id/nearbyEditText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/nearby_edit_text_hint"
             android:importantForAutofill="no"
@@ -24,7 +24,7 @@
             android:minHeight="48dp"
             android:textColorHint="#546E7A"
             app:layout_constraintBottom_toTopOf="@id/buslineSpinner"
-            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
         <Button
@@ -32,19 +32,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_button_text"
-            app:layout_constraintStart_toStartOf="@id/nearbyVertGuideline"
-            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/buslineSpinner"/>
+            app:layout_constraintStart_toEndOf="@id/nearbyVertGuideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/nearbyEditText"
+            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"/>
 
         <Spinner
             android:id="@+id/buslineSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/nearbySearchButton"
+            app:layout_constraintTop_toBottomOf="@id/nearbyEditText"
             app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nearbyHorizGuideline"
