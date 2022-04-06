@@ -26,7 +26,6 @@ import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
-import static com.taitsmith.busboy.viewmodels.NearbyViewModel.loc;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableHashMap;
 import static com.taitsmith.busboy.viewmodels.NearbyViewModel.stopList;
 
@@ -92,6 +91,9 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
         nearbyViewModel.checkLocationPerm();
 
+        if (!MainActivity.enableNearbySearch) {
+            binding.nearbySearchButton.setEnabled(false);
+        }
         setObservers();
     }
 
@@ -132,7 +134,7 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         });
 
         mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
-            nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
+            if (nearbyAdapter == null) nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
             nearbyStopListView.setAdapter(nearbyAdapter);
             mutableStatusMessage.setValue("LOADED");
         });

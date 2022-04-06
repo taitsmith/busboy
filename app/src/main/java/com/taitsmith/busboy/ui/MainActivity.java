@@ -47,8 +47,10 @@ public class MainActivity extends AppCompatActivity
 
     private ActivityMainBinding binding;
 
+
     static MainActivityViewModel mainActivityViewModel;
 
+    public static boolean enableNearbySearch = false;
     public static String acTransitApiKey;
     public static MutableLiveData<Bus> mutableBus;
     public static MutableLiveData<String> mutableNearbyStatusUpdater;
@@ -249,6 +251,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 NearbyViewModel.loc.beginUpdates();
+                enableNearbySearch = true;
             }
         }
     }
