@@ -13,6 +13,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.obj.Stop
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,6 @@ import retrofit2.Response
 import java.lang.Exception
 import java.lang.StringBuilder
 import java.util.ArrayList
-import java.util.HashMap
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,28 +53,26 @@ class NearbyViewModel @Inject constructor(application: Application,
                     response: Response<List<Stop?>?>
                 ) {
                     if (response.body() == null || response.code() == 404)
-                        MainActivityViewModel.mutableErrorMessage.setValue("404")
+                        mutableErrorMessage.setValue("404")
                     else {
-                        stopList.clear()
                         stopList.addAll(response.body()!!)
-                        mutableNearbyStops.value = stopList
+                        getLinesServed(stopList)
                     }
                 }
 
                 override fun onFailure(call: Call<List<Stop?>?>, t: Throwable) {
                     Log.d("NEARBY ERROR", t.message!!)
-                    MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
+                    mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
         }
     }
 
-    fun getDestinationHashMap(stopList: List<String>) {
+    fun getLinesServed(stopList: List<Stop?>) {
         viewModelScope.launch(Dispatchers.IO) {
-            val destinationHashMap = HashMap<String, String>(stopList.size)
             for (s in stopList) {
-                MainActivity.mutableNearbyStatusUpdater.postValue(s)
-                val call = acTransitApiInterface.getStopDestinations(s, MainActivity.acTransitApiKey)
+                MainActivity.mutableNearbyStatusUpdater.postValue(s!!.name)
+                val call = acTransitApiInterface.getStopDestinations(s.stopId, MainActivity.acTransitApiKey)
                 try {
                     val response: Response<StopDestinationResponse?> = call!!.execute()
                     if (response.isSuccessful) {
@@ -85,16 +83,17 @@ class NearbyViewModel @Inject constructor(application: Application,
                                 .append(" ")
                                 .append(it.destination)
                                 .append("\n")
-                            destinationHashMap[s] = sb.toString()
+                            s.linesServed = sb.toString()
                         }
                     } else {
-                        MainActivityViewModel.mutableErrorMessage.postValue("404")
+                        mutableErrorMessage.postValue("404")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    mutableErrorMessage.postValue("CALL_FAILURE")
                 }
             }
-            mutableHashMap.postValue(destinationHashMap)
+            mutableNearbyStops.postValue(stopList)
         }
     }
 
@@ -105,18 +104,17 @@ class NearbyViewModel @Inject constructor(application: Application,
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             if (!loc.hasLocationEnabled()) {
-                MainActivityViewModel.mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
+                mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
             } else {
                 loc.beginUpdates()
                 MainActivity.enableNearbySearch = true
             }
         } else {
-            MainActivityViewModel.mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
+            mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
         }
     }
 
     companion object {
-        lateinit var mutableHashMap: MutableLiveData<HashMap<String, String>>
         lateinit var stopList: MutableList<Stop?>
         lateinit var loc: SimpleLocation
     }
@@ -124,7 +122,6 @@ class NearbyViewModel @Inject constructor(application: Application,
     init {
         loc = SimpleLocation(application.applicationContext)
         mutableNearbyStops = MutableLiveData()
-        mutableHashMap = MutableLiveData()
         stopList = ArrayList()
         distance = 1000
     }

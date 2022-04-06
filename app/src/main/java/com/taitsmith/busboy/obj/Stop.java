@@ -3,6 +3,7 @@ package com.taitsmith.busboy.obj;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
+import java.util.List;
 
 public class Stop  {
     @SerializedName("StopId")
@@ -15,6 +16,8 @@ public class Stop  {
     Double longitude;
     @SerializedName("ScheduledTime")
     Date scheduledTime;
+
+    String linesServed;
 
     public String getStopId() {
         return stopId;
@@ -35,4 +38,8 @@ public class Stop  {
     public Date getScheduledTime() {
         return scheduledTime;
     }
+
+    public String getLinesServed() { return linesServed; }
+
+    public void setLinesServed(String linesServed) { this.linesServed = linesServed; }
 }

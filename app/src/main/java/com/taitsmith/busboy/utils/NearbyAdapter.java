@@ -16,9 +16,7 @@ public class NearbyAdapter extends BaseAdapter {
     List<Stop> stopList;
     ListItemNearbyBinding binding;
 
-    public NearbyAdapter(HashMap<String, String> destinationList,
-                         List<Stop> stopList) {
-        this.destinationList = destinationList;
+    public NearbyAdapter(List<Stop> stopList) {
         this.stopList = stopList;
     }
 
@@ -68,9 +66,6 @@ public class NearbyAdapter extends BaseAdapter {
         }
 
         binding.setStop(stop);
-
-
-        binding.listItemLinesServed.setText(destinationList.get(stop.getStopId()));
 
         return holder.view;
     }

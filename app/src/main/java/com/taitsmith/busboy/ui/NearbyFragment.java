@@ -26,10 +26,7 @@ import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
-import static com.taitsmith.busboy.viewmodels.NearbyViewModel.mutableHashMap;
-import static com.taitsmith.busboy.viewmodels.NearbyViewModel.stopList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -125,16 +122,7 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
 
     private void setObservers() {
         nearbyViewModel.mutableNearbyStops.observe(getViewLifecycleOwner(), stops -> {
-            stopNameList = new ArrayList<>();
-            this.nearbyStopList = stops;
-            for (Stop stop : stops) {
-                stopNameList.add(stop.getStopId());
-            }
-            nearbyViewModel.getDestinationHashMap(stopNameList);
-        });
-
-        mutableHashMap.observe(getViewLifecycleOwner(), stringListHashMap -> {
-            if (nearbyAdapter == null) nearbyAdapter = new NearbyAdapter(stringListHashMap, stopList);
+            if (nearbyAdapter == null) nearbyAdapter = new NearbyAdapter(stops);
             nearbyStopListView.setAdapter(nearbyAdapter);
             mutableStatusMessage.setValue("LOADED");
         });
