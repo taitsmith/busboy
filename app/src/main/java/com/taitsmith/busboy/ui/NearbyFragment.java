@@ -18,7 +18,6 @@ import android.widget.Spinner;
 
 import com.taitsmith.busboy.R;
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding;
-import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.utils.NearbyAdapter;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
@@ -27,7 +26,6 @@ import com.taitsmith.busboy.viewmodels.NearbyViewModel;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;
 
-import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -39,8 +37,6 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
     OnItemLongClickListener listItemLongListener;
     ListView nearbyStopListView;
     NearbyFragmentBinding binding;
-    List<Stop> nearbyStopList;
-    List<String> stopNameList;
     NearbyAdapter nearbyAdapter;
     Spinner buslineSpinner;
 
@@ -51,34 +47,14 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         binding = NearbyFragmentBinding.inflate(inflater, container, false);
         nearbyStopListView = binding.nearbyListView;
 
-        nearbyStopListView.setOnItemClickListener((adapterView, view, i, l) ->
-                listItemListener.onNearbyItemSelected(i));
-
-        nearbyStopListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
-            listItemLongListener.onNearbyLongClick(i);
-            return true;
-        });
-
         buslineSpinner = binding.buslineSpinner;
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.bus_lines, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         buslineSpinner.setAdapter(adapter);
-        buslineSpinner.setOnItemSelectedListener(this);
 
-        binding.nearbySearchButton.setOnClickListener(view -> {
-            String s = binding.nearbyEditText.getText().toString();
-            if (s.length() > 0) {
-                int distance = Integer.parseInt(s);
-                if (distance < 500 || distance > 5000) {
-                    mutableErrorMessage.setValue("BAD_DISTANCE");
-                } else {
-                    nearbyViewModel.setDistance(distance);
-                }
-            }
-            nearbyViewModel.getNearbyStops();
-        });
+        setListeners();
         return  binding.getRoot();
     }
 
@@ -88,9 +64,8 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         nearbyViewModel = new ViewModelProvider(requireActivity()).get(NearbyViewModel.class);
         nearbyViewModel.checkLocationPerm();
 
-        if (!MainActivity.enableNearbySearch) {
-            binding.nearbySearchButton.setEnabled(false);
-        }
+        if (!MainActivity.enableNearbySearch) binding.nearbySearchButton.setEnabled(false);
+
         setObservers();
     }
 
@@ -128,6 +103,32 @@ public class NearbyFragment extends Fragment implements AdapterView.OnItemSelect
         });
     }
 
+    private void setListeners() {
+        nearbyStopListView.setOnItemClickListener((adapterView, view, i, l) ->
+                listItemListener.onNearbyItemSelected(i));
+
+        nearbyStopListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            listItemLongListener.onNearbyLongClick(i);
+            return true;
+        });
+
+        buslineSpinner.setOnItemSelectedListener(this);
+
+        binding.nearbySearchButton.setOnClickListener(view -> {
+            String s = binding.nearbyEditText.getText().toString();
+            if (s.length() > 0) {
+                int distance = Integer.parseInt(s);
+                if (distance < 500 || distance > 5000) {
+                    mutableErrorMessage.setValue("BAD_DISTANCE");
+                } else {
+                    nearbyViewModel.setDistance(distance);
+                    binding.nearbyEditText.setText(null);
+                    binding.nearbyEditText.setHint(getString(R.string.neaby_edit_text_hint_updated, s));
+                }
+            }
+            nearbyViewModel.getNearbyStops();
+        });
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {

@@ -13,21 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.ByIdFragment">
-        <TextView
-            android:id="@+id/stopNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/stopEntryEditText"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
 
         <EditText
             android:id="@+id/stopEntryEditText"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:ems="10"
             android:hint="@string/stop_id_edit_text_hint"
             android:importantForAutofill="no"
@@ -35,28 +25,27 @@
             android:maxLength="5"
             android:minHeight="48dp"
             android:textColorHint="#546E7A"
-            app:layout_constraintBottom_toTopOf="@+id/searchByIdButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/stopNameTextView" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/byIdHorizGuideline"
+            app:layout_constraintEnd_toStartOf="@+id/searchByIdButton"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/searchByIdButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_button_text"
-            app:layout_constraintTop_toBottomOf="@id/stopEntryEditText"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/guideline"/>
-
+            app:layout_constraintStart_toEndOf="@id/stopEntryEditText"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/byIdHorizGuideline"/>
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
+            android:id="@+id/byIdHorizGuideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.25" />
+            app:layout_constraintGuide_percent="0.15" />
 
         <ImageView
             android:id="@+id/busFlagIV"
@@ -66,7 +55,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/byIdHorizGuideline"
             app:srcCompat="@drawable/ic_busflag"
             tools:ignore="ImageContrastCheck" />
 
@@ -77,14 +66,14 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="@+id/byIdHorizGuideline" />
 
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline4"
+            android:id="@+id/byIdVertGuideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

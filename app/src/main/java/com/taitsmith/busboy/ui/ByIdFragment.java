@@ -92,7 +92,8 @@ public class ByIdFragment extends Fragment {
                     binding.busFlagIV.setVisibility(View.INVISIBLE);
 
                     try {
-                        binding.stopNameTextView.setText(predictions.get(0).getStpnm());
+                        binding.stopEntryEditText.setText(null);
+                        binding.stopEntryEditText.setHint(predictions.get(0).getStpnm());
                     } catch (NullPointerException | IndexOutOfBoundsException e) {
                         e.printStackTrace();
                     }

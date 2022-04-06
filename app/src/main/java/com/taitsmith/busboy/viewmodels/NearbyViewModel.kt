@@ -55,6 +55,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                     if (response.body() == null || response.code() == 404)
                         mutableErrorMessage.setValue("404")
                     else {
+                        stopList.clear()
                         stopList.addAll(response.body()!!)
                         getLinesServed(stopList)
                     }
