@@ -40,8 +40,8 @@ class NearbyViewModel @Inject constructor(application: Application,
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getNearbyStops(
-                37.8412,
-                -122.2744,
+                loc.latitude,
+                loc.longitude,
                 distance,
                 true,
                 rt,

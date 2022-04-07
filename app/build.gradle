@@ -14,8 +14,8 @@ android {
         applicationId "com.taitsmith.busboy"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 6
-        versionName "beta_6"
+        versionCode 7
+        versionName "beta_7_theme_update"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
     }
