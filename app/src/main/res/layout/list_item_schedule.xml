@@ -11,18 +11,24 @@
             name="prediction"
             type="com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction" />
     </data>
+<androidx.cardview.widget.CardView
+    android:id="@+id/scheduleListCardView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/md_theme_light_surfaceVariant">
 
         <TextView
             android:id="@+id/routeNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_margin="8dp"
             android:text='@{prediction.rt.concat(" " + prediction.rtdir)}'
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -52,7 +58,8 @@
             android:text="@{prediction.prdctdn}"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@+id/routePredictionTime"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline3"
@@ -62,4 +69,5 @@
             app:layout_constraintGuide_percent="0.5" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
 </layout>

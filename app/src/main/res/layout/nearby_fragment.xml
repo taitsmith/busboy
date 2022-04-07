@@ -39,12 +39,12 @@
 
         <Spinner
             android:id="@+id/buslineSpinner"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/nearbyEditText"
             app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/nearbyVertGuideline"/>
+            app:layout_constraintEnd_toStartOf="@id/nearbyVertGuideline"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nearbyHorizGuideline"
@@ -58,6 +58,8 @@
             android:id="@+id/nearbyListView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

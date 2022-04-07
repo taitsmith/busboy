@@ -12,10 +12,18 @@
             type="com.taitsmith.busboy.obj.Stop" />
     </data>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/nearbyListCardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="4dp">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/md_theme_light_surfaceVariant">
 
         <TextView
             android:id="@+id/list_item_stop_name"
@@ -39,4 +47,5 @@
             app:layout_constraintTop_toBottomOf="@id/list_item_stop_name"
             app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </layout>

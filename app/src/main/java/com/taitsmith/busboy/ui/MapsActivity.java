@@ -75,7 +75,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             directionRoute = googleMap.addPolyline(new PolylineOptions());
             directionRoute.setPoints(polylineCoords);
             directionRoute.setColor(Color.RED);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraFocus, zoom));
+            try {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraFocus, zoom));
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                mutableErrorMessage.setValue("NULL_BUS_COORDS");
+            }
         }
 
         googleMap.addMarker(new MarkerOptions()
