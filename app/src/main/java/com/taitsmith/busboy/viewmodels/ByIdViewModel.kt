@@ -28,7 +28,7 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
     fun getStopPredictions(stopId: String?) {
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
-            val call = acTransitApiInterface.getStopPredictionList(stopId, rt, MainActivity.acTransitApiKey)
+            val call = acTransitApiInterface.getStopPredictionList(stopId, rt)
             call!!.enqueue(object : Callback<StopPredictionResponse?> {
                 override fun onResponse(
                     call: Call<StopPredictionResponse?>,

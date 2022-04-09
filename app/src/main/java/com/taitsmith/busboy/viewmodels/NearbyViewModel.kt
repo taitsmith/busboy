@@ -44,8 +44,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                 loc.longitude,
                 distance,
                 true,
-                rt,
-                MainActivity.acTransitApiKey
+                rt
             )
             call!!.enqueue(object : Callback<List<Stop?>?> {
                 override fun onResponse(
@@ -73,7 +72,7 @@ class NearbyViewModel @Inject constructor(application: Application,
         viewModelScope.launch(Dispatchers.IO) {
             for (s in stopList) {
                 MainActivity.mutableNearbyStatusUpdater.postValue(s!!.name)
-                val call = acTransitApiInterface.getStopDestinations(s.stopId, MainActivity.acTransitApiKey)
+                val call = acTransitApiInterface.getStopDestinations(s.stopId)
                 try {
                     val response: Response<StopDestinationResponse?> = call!!.execute()
                     if (response.isSuccessful) {

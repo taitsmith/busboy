@@ -68,7 +68,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
     fun getWaypoints(routeName: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             val call =
-                acTransitApiInterface.getRouteWaypoints(routeName, MainActivity.acTransitApiKey)
+                acTransitApiInterface.getRouteWaypoints(routeName)
             call!!.enqueue(object : Callback<List<WaypointResponse?>?> {
                 override fun onResponse(
                     call: Call<List<WaypointResponse?>?>,
@@ -94,7 +94,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
 
     fun getBusLocation(vehicleId: String?) {
         viewModelScope.launch(Dispatchers.IO){
-        val call = acTransitApiInterface.getVehicleInfo(vehicleId, MainActivity.acTransitApiKey)
+        val call = acTransitApiInterface.getVehicleInfo(vehicleId)
         call!!.enqueue(object : Callback<Bus?> {
             override fun onResponse(call: Call<Bus?>, response: Response<Bus?>) {
                 if (response.code() == 404) mutableErrorMessage.value = "404"
