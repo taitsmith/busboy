@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
@@ -45,24 +46,33 @@ public class ByIdFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = ByIdFragmentBinding.inflate(inflater, container, false);
+        
         predictionListView = binding.predictionListView;
         stopIdEditText = binding.stopEntryEditText;
+        
+        if (getArguments() != null) {
+            byIdViewModel.getStopPredictions(getArguments().get("BY_ID").toString());
+        }
+        
+        setListeners();
 
+        return binding.getRoot();
+    }
+
+    private void setListeners() {
         binding.searchByIdButton.setOnClickListener(this::search);
+        binding.addToFavoritesFab.setOnClickListener(this::addToFavorites);
 
         predictionListView.setOnItemClickListener((adapterView, view, i, l) ->
                 listItemListener.onIdItemSelected(i));
-        
+
         predictionListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
             longClickListener.onIdLongClick(i);
             return true;
         });
+    }
 
-        if (getArguments() != null) {
-            byIdViewModel.getStopPredictions(getArguments().get("BY_ID").toString());
-        }
-
-        return binding.getRoot();
+    private void addToFavorites(View view) {
     }
 
     @Override

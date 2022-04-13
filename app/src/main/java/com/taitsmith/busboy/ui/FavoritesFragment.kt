@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.ui.FavoritesFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -14,7 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class FavoritesFragment : Fragment() {
 
-    private val favoritesViewModel: FavoritesViewModel? = null
+    private val favoritesViewModel: FavoritesViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

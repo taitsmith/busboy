@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
+import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.obj.StopPredictionResponse
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction
 import com.taitsmith.busboy.ui.MainActivity
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ByIdViewModel @Inject constructor(@AcTransitApiInterface
-                                        private val acTransitApiInterface: ApiInterface)
+                                        private val acTransitApiInterface: ApiInterface,
+                                        private val databaseRepository: DatabaseRepository)
                                         : ViewModel() {
 
     lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
