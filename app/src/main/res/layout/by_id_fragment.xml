@@ -73,6 +73,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/byIdHorizGuideline" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addToFavoritesFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:contentDescription="@string/accessibility_favorites_fab"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:srcCompat="@drawable/add_favorite_fab_icon"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/byIdVertGuideline"

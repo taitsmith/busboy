@@ -41,7 +41,7 @@ class RoomRWTest {
     fun writeStopAndRead() {
         val stop: Stop = TestUtils.createStop()
         stopDao.insertAll(stop)
-        assertThat(stopDao.getAllStops()[0], equalTo(stop))
+        assertThat(stopDao.getAll()[0], equalTo(stop))
     }
 
     @Test
@@ -58,7 +58,7 @@ class RoomRWTest {
         val stop = TestUtils.createStop()
         stopDao.delete(stop)
 
-        val stopList = stopDao.getAllStops()
+        val stopList = stopDao.getAll()
 
         Assert.assertTrue(stopList.isEmpty())
     }

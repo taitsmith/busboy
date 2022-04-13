@@ -52,4 +52,5 @@
     <!-- strings for accessibility -->
     <string name="accessibility_busflag_img_desc">An image displaying a a picture of an AC Transit
         bus flag, with an arrow demonstrating where on the sign to find the stop ID information.</string>
+    <string name="accessibility_favorites_fab">Image of a heart denoting add this stop to favorites</string>
 </resources>
