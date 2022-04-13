@@ -1,8 +1,8 @@
 package com.taitsmith.busboy.obj
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import com.google.gson.annotations.Expose
 
 /**
  * When we call the AC Transit API to get nearby stops, we also want to figure out which way those
@@ -12,41 +12,29 @@ import com.google.gson.annotations.Expose
  */
 class StopDestinationResponse {
     @SerializedName("StopId")
-    @Expose
     var stopId: Int? = null
 
     @SerializedName("Status")
-    @Expose
     var status: String? = null
 
     @SerializedName("RouteDestinations")
-    @Expose
     var routeDestinations: List<RouteDestination>? = null
 
     @Entity
-    class RouteDestination {
-        @SerializedName("RouteId")//ex 51A
-        @Expose
-        var routeId: String? = null
+    data class RouteDestination (
 
-        @SerializedName("DirectionId")
-        @Expose
-        var directionId: Int? = null
+        @PrimaryKey val autoGenerate: Boolean,
+
+        @SerializedName("RouteId")//ex 51A
+        var routeId: String?,
 
         @SerializedName("Direction")//ex Northbound
-        @Expose
-        var direction: String? = null
+        var direction: String? = null,
 
         @SerializedName("Destination")//ex To Fruitvale BART
-        @Expose
-        var destination: String? = null
+        var destination: String?,
 
-        @SerializedName("FinalPassingTime")
-        @Expose
-        var finalPassingTime: String? = null
-
-        @SerializedName("Status")
-        @Expose
+        @SerializedName("Status")//for lines like 8XX and 6XX that have limited hours
         var status: String? = null
-    }
+    )
 }

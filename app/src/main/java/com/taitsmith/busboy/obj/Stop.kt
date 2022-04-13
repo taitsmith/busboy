@@ -3,7 +3,6 @@ package com.taitsmith.busboy.obj
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import java.util.*
 
 @Entity
 data class Stop(
@@ -21,7 +20,5 @@ data class Stop(
     @SerializedName("Longitude")
     var longitude: Double? = null,
 
-    @SerializedName("ScheduledTime")
-    var scheduledTime: Date? = null,
     var linesServed: String? = null
 )
