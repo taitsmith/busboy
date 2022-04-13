@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.obj
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
 import com.google.gson.annotations.Expose
 
@@ -22,8 +23,9 @@ class StopDestinationResponse {
     @Expose
     var routeDestinations: List<RouteDestination>? = null
 
+    @Entity
     class RouteDestination {
-        @SerializedName("RouteId")
+        @SerializedName("RouteId")//ex 51A
         @Expose
         var routeId: String? = null
 
@@ -31,11 +33,11 @@ class StopDestinationResponse {
         @Expose
         var directionId: Int? = null
 
-        @SerializedName("Direction")
+        @SerializedName("Direction")//ex Northbound
         @Expose
         var direction: String? = null
 
-        @SerializedName("Destination")
+        @SerializedName("Destination")//ex To Fruitvale BART
         @Expose
         var destination: String? = null
 
