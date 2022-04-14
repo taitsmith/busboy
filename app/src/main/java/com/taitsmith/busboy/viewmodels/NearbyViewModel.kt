@@ -105,6 +105,7 @@ class NearbyViewModel @Inject constructor(application: Application,
         ) {
             if (!loc.hasLocationEnabled()) {
                 mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
+                MainActivity.enableNearbySearch = false
             } else {
                 loc.beginUpdates()
                 MainActivity.enableNearbySearch = true

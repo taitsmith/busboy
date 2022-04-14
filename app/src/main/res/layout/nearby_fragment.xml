@@ -41,10 +41,11 @@
             android:id="@+id/buslineSpinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/nearbyEditText"
+            android:minHeight="48dp"
             app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
+            app:layout_constraintEnd_toStartOf="@id/nearbyVertGuideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/nearbyVertGuideline"/>
+            app:layout_constraintTop_toBottomOf="@id/nearbyEditText" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nearbyHorizGuideline"
