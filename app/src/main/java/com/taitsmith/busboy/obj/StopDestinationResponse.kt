@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.obj
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
@@ -23,7 +24,8 @@ class StopDestinationResponse {
     @Entity
     data class RouteDestination (
 
-        @PrimaryKey val autoGenerate: Boolean,
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo var id: Long? = null,
 
         @SerializedName("RouteId")//ex 51A
         var routeId: String?,

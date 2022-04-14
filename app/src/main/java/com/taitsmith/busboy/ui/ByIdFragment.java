@@ -8,7 +8,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
+
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +18,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding;
+import com.taitsmith.busboy.di.DatabaseRepository;
+import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.utils.PredictionAdapter;
@@ -26,21 +31,27 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
 
 import java.util.List;
+import java.util.Objects;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class ByIdFragment extends Fragment {
+
+    @Inject
+    DatabaseRepository repository;
+
     ByIdViewModel byIdViewModel;
     ByIdFragmentBinding binding;
-
     OnItemClickListener listItemListener;
     OnItemLongClickListener longClickListener;
     ListView predictionListView;
     List<Prediction> predictionList;
-
     EditText stopIdEditText;
     PredictionAdapter predictionAdapter;
+    Stop stop = new Stop();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -70,9 +81,6 @@ public class ByIdFragment extends Fragment {
             longClickListener.onIdLongClick(i);
             return true;
         });
-    }
-
-    private void addToFavorites(View view) {
     }
 
     @Override
@@ -116,9 +124,13 @@ public class ByIdFragment extends Fragment {
         if (binding.stopEntryEditText.getText().length() == 5) {
             mutableStatusMessage.setValue("LOADING");
             byIdViewModel.getStopPredictions(stopIdEditText.getText().toString());
+            stop.setStopId(stopIdEditText.getText().toString());
         } else {
             MainActivityViewModel.mutableErrorMessage.setValue("BAD_INPUT");
         }
+    }
+
+    private void addToFavorites(View view) {
     }
 
     @Override

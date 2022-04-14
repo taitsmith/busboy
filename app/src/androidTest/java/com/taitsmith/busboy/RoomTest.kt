@@ -20,6 +20,8 @@ class RoomRWTest {
     private lateinit var stopDao: StopDao
     private lateinit var routeDao: RouteDestinationDao
     private lateinit var db: BusboyDatabase
+    private val stop = TestUtils.createStop()
+    private val lines: List<StopDestinationResponse.RouteDestination> = TestUtils.createLines()
 
     @Before
     fun createDb() {
@@ -46,29 +48,24 @@ class RoomRWTest {
 
     @Test
     @Throws(Exception::class)
-    fun writeLineAndRead() {
-        val line: StopDestinationResponse.RouteDestination = TestUtils.createLine()
-        routeDao.insertAll(line)
-        assertThat(routeDao.getAll()[0], equalTo(line))
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun deleteStops() {
-        val stop = TestUtils.createStop()
         stopDao.delete(stop)
-
         val stopList = stopDao.getAll()
-
         Assert.assertTrue(stopList.isEmpty())
     }
 
     @Test
     @Throws(Exception::class)
+    fun writeLineAndRead() {
+        routeDao.insertAll(lines[0], lines[1],  lines[2])
+        assertThat(routeDao.getAll()[1], equalTo(lines[1]))
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun deleteLines() {
-        val line = TestUtils.createLine()
-        routeDao.delete(line)
-        val lineList = routeDao.getAll()
-        Assert.assertTrue(lineList.isEmpty())
+        routeDao.delete(lines[1])
+        val routeList = routeDao.getAll()
+        assertThat(routeList.size, equalTo(2))
     }
 }

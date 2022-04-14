@@ -12,4 +12,7 @@ interface StopDao {
 
     @Delete
     fun delete(stop: Stop)
+
+    @Update
+    fun updateStops(vararg stops: Stop)
 }
