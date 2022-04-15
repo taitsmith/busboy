@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity
 
     private ActivityMainBinding binding;
 
-
     static MainActivityViewModel mainActivityViewModel;
 
     public static boolean enableNearbySearch = false;

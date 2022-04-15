@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.DatabaseRepository
+import com.taitsmith.busboy.obj.Stop
 import com.taitsmith.busboy.obj.StopPredictionResponse
 import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction
-import com.taitsmith.busboy.ui.MainActivity
 import com.taitsmith.busboy.utils.ApiInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +67,9 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
         }
     }
 
+    fun addStopToFavorites(stop: Stop) {
+        databaseRepository.addStops(stop)
+    }
     companion object {
         lateinit var predictionList: MutableList<Prediction>
     }
