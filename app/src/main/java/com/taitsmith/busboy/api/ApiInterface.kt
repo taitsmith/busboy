@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.utils
+package com.taitsmith.busboy.api
 
 import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.api.StopDestinationResponse

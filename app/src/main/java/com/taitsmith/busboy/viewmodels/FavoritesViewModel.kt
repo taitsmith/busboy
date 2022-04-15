@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
-import com.taitsmith.busboy.utils.ApiInterface
+import com.taitsmith.busboy.api.ApiInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

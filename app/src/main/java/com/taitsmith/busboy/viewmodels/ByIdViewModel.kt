@@ -9,7 +9,7 @@ import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction
-import com.taitsmith.busboy.utils.ApiInterface
+import com.taitsmith.busboy.api.ApiInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

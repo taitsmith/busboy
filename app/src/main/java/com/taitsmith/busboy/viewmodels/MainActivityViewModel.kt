@@ -5,7 +5,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import javax.inject.Inject
-import com.taitsmith.busboy.utils.ApiInterface
+import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.api.WaypointResponse
 import com.taitsmith.busboy.ui.MainActivity

@@ -1,6 +1,6 @@
 package com.taitsmith.busboy.di
 
-import com.taitsmith.busboy.utils.ApiInterface
+import com.taitsmith.busboy.api.ApiInterface
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

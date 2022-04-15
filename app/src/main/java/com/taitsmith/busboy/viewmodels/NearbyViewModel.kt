@@ -4,7 +4,7 @@ import android.Manifest
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.taitsmith.busboy.utils.ApiInterface
+import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.ui.MainActivity
 import com.taitsmith.busboy.api.StopDestinationResponse
 import androidx.core.content.ContextCompat
