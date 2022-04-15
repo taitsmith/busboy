@@ -25,13 +25,11 @@ import java.util.ArrayList
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(application: Application,
+                                                @AcTransitApiInterface private val acTransitApiInterface: ApiInterface,
+                                                @MapsApiInterface private val mapsApiInterface: ApiInterface
                                                 ) : AndroidViewModel(application) {
 
-    @AcTransitApiInterface
-    @Inject lateinit var acTransitApiInterface: ApiInterface
-    @MapsApiInterface
-    @Inject lateinit var mapsApiInterface: ApiInterface
-    private var directionsApiKey: String
+    private val directionsApiKey: String
 
     fun getDirectionsToStop(start: String?, stop: String?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -46,14 +44,11 @@ class MainActivityViewModel @Inject constructor(application: Application,
                     call: Call<DirectionResponse?>,
                     response: Response<DirectionResponse?>
                 ) {
-
                     val stepList = response.body()!!
                         .routeList[0]
                         .tripList[0].stepList
                     polylineCoords.clear()
-                    for (step in stepList) {
-                        polylineCoords.add(step.endCoords.returnCoords())
-                    }
+                    stepList.forEach { polylineCoords.add(it.endCoords.returnCoords()) }
                     mutableStatusMessage.value = "DIRECTION_POLYLINE_READY"
                 }
 
@@ -67,8 +62,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
 
     fun getWaypoints(routeName: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val call =
-                acTransitApiInterface.getRouteWaypoints(routeName)
+            val call = acTransitApiInterface.getRouteWaypoints(routeName)
             call!!.enqueue(object : Callback<List<WaypointResponse?>?> {
                 override fun onResponse(
                     call: Call<List<WaypointResponse?>?>,
@@ -99,7 +93,10 @@ class MainActivityViewModel @Inject constructor(application: Application,
             override fun onResponse(call: Call<Bus?>, response: Response<Bus?>) {
                 if (response.code() == 404) mutableErrorMessage.value = "404"
                 if (response.body() != null) {
-                    MainActivity.mutableBus.value = response.body()
+                    val bus = response.body()
+                    if (bus?.latitude != null && bus.longitude != null) {
+                        MainActivity.mutableBus.value = response.body()
+                    } else mutableErrorMessage.value = "NULL_BUS_COORDS"
                 }
             }
 

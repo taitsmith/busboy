@@ -24,6 +24,7 @@ import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableError
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.polylineCoords;
 import static com.taitsmith.busboy.ui.MainActivity.mutableBus;
 
+@SuppressWarnings("ConstantConditions")
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     GoogleMap googleMap;
@@ -41,20 +42,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        //if we're showing a bus location along a route
         if (getIntent().getStringExtra("POLYLINE_TYPE").equals("ROUTE")) {
             bus = mutableBus.getValue();
-            try {
-                zoom = 15;
-                cameraFocus = new LatLng(bus.latitude, bus.longitude);
-            } catch (NullPointerException e) {
-                mutableErrorMessage.setValue("NULL_BUS_COORDS");
-            }
-        } else {
+            zoom = 15;
+            cameraFocus = new LatLng(bus.latitude, bus.longitude); //checked for null when created
+        } else { //we're just showing walking directions to a stop
             cameraFocus = polylineCoords.get(0);
             zoom = 15;
         }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         if (mapFragment == null) {
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
@@ -79,6 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 mutableErrorMessage.setValue("NULL_BUS_COORDS");
+                onBackPressed();
             }
         }
 
@@ -90,14 +88,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             .position(polylineCoords.get(polylineCoords.size() - 1))
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
-        try { //we should really check to make sure the bus coords aren't null before this
+        if (bus != null) { //only want to do this if we're showing a bus route
             googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(bus.getLatitude(), bus.getLongitude()))
+                    .position(new LatLng(bus.latitude, bus.longitude))
                     .title("THE BUS")
-                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        } catch (NullPointerException e) {
-            mutableErrorMessage.setValue("NULL_BUS_COORDS");
-            onBackPressed();
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         }
     }
 }

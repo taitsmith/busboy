@@ -3,7 +3,7 @@ package com.taitsmith.busboy.data
 import com.google.gson.annotations.SerializedName
 import com.google.gson.annotations.Expose
 
-class Bus {
+class Bus() {
     @SerializedName("VehicleId")
     @Expose
     var vehicleId: Int? = null
@@ -12,10 +12,12 @@ class Bus {
     @Expose
     var currentTripId: Int? = null
 
+    @JvmField
     @SerializedName("Latitude")
     @Expose
     var latitude: Double? = null
 
+    @JvmField
     @SerializedName("Longitude")
     @Expose
     var longitude: Double? = null
@@ -27,4 +29,5 @@ class Bus {
     @SerializedName("TimeLastReported")
     @Expose
     var timeLastReported: String? = null
+
 }
