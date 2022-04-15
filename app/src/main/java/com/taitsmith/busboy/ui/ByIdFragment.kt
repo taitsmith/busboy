@@ -2,10 +2,8 @@ package com.taitsmith.busboy.ui
 
 import android.content.Context
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse
+import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse
 import android.widget.EditText
 import com.taitsmith.busboy.utils.PredictionAdapter
 import android.view.LayoutInflater
@@ -17,7 +15,7 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
-import com.taitsmith.busboy.obj.Stop
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel

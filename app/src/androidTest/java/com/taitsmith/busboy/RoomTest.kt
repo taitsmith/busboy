@@ -4,7 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.AndroidJUnit4
-import com.taitsmith.busboy.obj.*
+import com.taitsmith.busboy.api.StopDestinationResponse
+import com.taitsmith.busboy.data.*
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After

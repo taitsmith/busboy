@@ -1,7 +1,7 @@
 package com.taitsmith.busboy
 
-import com.taitsmith.busboy.obj.Stop
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination
+import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.api.StopDestinationResponse.RouteDestination
 
 object TestUtils {
 

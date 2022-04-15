@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.obj
+package com.taitsmith.busboy.data
 
 import androidx.room.*
 

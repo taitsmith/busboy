@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.obj
+package com.taitsmith.busboy.api
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

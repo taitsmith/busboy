@@ -2,7 +2,7 @@ package com.taitsmith.busboy.di
 
 import android.content.Context
 import androidx.room.Room
-import com.taitsmith.busboy.obj.BusboyDatabase
+import com.taitsmith.busboy.data.BusboyDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

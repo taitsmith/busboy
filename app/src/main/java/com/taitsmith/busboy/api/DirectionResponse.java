@@ -1,11 +1,11 @@
-package com.taitsmith.busboy.obj;
+package com.taitsmith.busboy.api;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class DirectionResponseData {
+public class DirectionResponse {
     @SerializedName("geocoded_waypoints")
     List<Object> geoWaypoints;
     @SerializedName("routes")

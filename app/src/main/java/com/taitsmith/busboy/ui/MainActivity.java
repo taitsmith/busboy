@@ -21,15 +21,15 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.google.android.material.tabs.TabLayout;
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.data.Bus;
+import com.taitsmith.busboy.data.Stop;
 import com.taitsmith.busboy.databinding.ActivityMainBinding;
-import com.taitsmith.busboy.obj.Bus;
-import com.taitsmith.busboy.obj.Stop;
 import com.taitsmith.busboy.utils.OnItemClickListener;
 import com.taitsmith.busboy.utils.OnItemLongClickListener;
 import com.taitsmith.busboy.viewmodels.ByIdViewModel;
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel;
 import com.taitsmith.busboy.viewmodels.NearbyViewModel;
-import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
+import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableStatusMessage;

@@ -1,4 +1,4 @@
-package com.taitsmith.busboy.obj;
+package com.taitsmith.busboy.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.taitsmith.busboy.databinding.ListItemScheduleBinding;
-import com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction;
+import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction;
 
 import java.util.List;
 

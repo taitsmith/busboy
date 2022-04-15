@@ -6,13 +6,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.taitsmith.busboy.utils.ApiInterface
 import com.taitsmith.busboy.ui.MainActivity
-import com.taitsmith.busboy.obj.StopDestinationResponse
+import com.taitsmith.busboy.api.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.obj.Stop
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation

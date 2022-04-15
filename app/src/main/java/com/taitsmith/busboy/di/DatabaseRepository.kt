@@ -1,9 +1,9 @@
 package com.taitsmith.busboy.di
 
-import com.taitsmith.busboy.obj.RouteDestinationDao
-import com.taitsmith.busboy.obj.Stop
-import com.taitsmith.busboy.obj.StopDao
-import com.taitsmith.busboy.obj.StopDestinationResponse.RouteDestination
+import com.taitsmith.busboy.data.RouteDestinationDao
+import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.data.StopDao
+import com.taitsmith.busboy.api.StopDestinationResponse.RouteDestination
 import javax.inject.Inject
 
 class DatabaseRepository @Inject constructor(

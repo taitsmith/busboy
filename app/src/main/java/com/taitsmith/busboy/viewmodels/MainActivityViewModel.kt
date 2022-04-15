@@ -6,11 +6,11 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import javax.inject.Inject
 import com.taitsmith.busboy.utils.ApiInterface
-import com.taitsmith.busboy.obj.DirectionResponseData
-import com.taitsmith.busboy.obj.WaypointResponse
+import com.taitsmith.busboy.api.DirectionResponse
+import com.taitsmith.busboy.api.WaypointResponse
 import com.taitsmith.busboy.ui.MainActivity
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.obj.Bus
+import com.taitsmith.busboy.data.Bus
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.R
@@ -41,10 +41,10 @@ class MainActivityViewModel @Inject constructor(application: Application,
                 "walking",
                 directionsApiKey
             )
-            call!!.enqueue(object : Callback<DirectionResponseData?>{
+            call!!.enqueue(object : Callback<DirectionResponse?>{
                 override fun onResponse(
-                    call: Call<DirectionResponseData?>,
-                    response: Response<DirectionResponseData?>
+                    call: Call<DirectionResponse?>,
+                    response: Response<DirectionResponse?>
                 ) {
 
                     val stepList = response.body()!!
@@ -57,7 +57,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
                     mutableStatusMessage.value = "DIRECTION_POLYLINE_READY"
                 }
 
-                override fun onFailure(call: Call<DirectionResponseData?>, t: Throwable) {
+                override fun onFailure(call: Call<DirectionResponse?>, t: Throwable) {
                     Log.d("DIRECTIONS FAILURE: ", t.message!!)
                     mutableErrorMessage.value = "CALL_FAILURE"
                 }

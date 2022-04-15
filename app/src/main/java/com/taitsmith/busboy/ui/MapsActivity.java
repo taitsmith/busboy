@@ -17,8 +17,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.taitsmith.busboy.R;
+import com.taitsmith.busboy.data.Bus;
 import com.taitsmith.busboy.databinding.ActivityMapsBinding;
-import com.taitsmith.busboy.obj.Bus;
 
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.mutableErrorMessage;
 import static com.taitsmith.busboy.viewmodels.MainActivityViewModel.polylineCoords;
@@ -44,9 +44,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (getIntent().getStringExtra("POLYLINE_TYPE").equals("ROUTE")) {
             bus = mutableBus.getValue();
             try {
-
                 zoom = 15;
-                cameraFocus = new LatLng(bus.getLatitude(), bus.longitude);
+                cameraFocus = new LatLng(bus.latitude, bus.longitude);
             } catch (NullPointerException e) {
                 mutableErrorMessage.setValue("NULL_BUS_COORDS");
             }
@@ -91,11 +90,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             .position(polylineCoords.get(polylineCoords.size() - 1))
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
-        if (bus != null) {
+        try { //we should really check to make sure the bus coords aren't null before this
             googleMap.addMarker(new MarkerOptions()
                 .position(new LatLng(bus.getLatitude(), bus.getLongitude()))
                     .title("THE BUS")
                      .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        } catch (NullPointerException e) {
+            mutableErrorMessage.setValue("NULL_BUS_COORDS");
+            onBackPressed();
         }
     }
 }

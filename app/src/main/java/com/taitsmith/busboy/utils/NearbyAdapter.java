@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.taitsmith.busboy.databinding.ListItemNearbyBinding;
-import com.taitsmith.busboy.obj.Stop;
+import com.taitsmith.busboy.data.Stop;
 
 import java.util.HashMap;
 import java.util.List;

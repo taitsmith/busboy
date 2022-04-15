@@ -1,6 +1,10 @@
 package com.taitsmith.busboy.utils
 
-import com.taitsmith.busboy.obj.*
+import com.taitsmith.busboy.api.DirectionResponse
+import com.taitsmith.busboy.api.StopDestinationResponse
+import com.taitsmith.busboy.api.StopPredictionResponse
+import com.taitsmith.busboy.api.WaypointResponse
+import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
 import retrofit2.http.GET
 import retrofit2.Call
@@ -55,5 +59,5 @@ interface ApiInterface {
         @Query(value = "destination", encoded = true) destination: String?,
         @Query("mode") mode: String?,
         @Query("key") apiKey: String?
-    ): Call<DirectionResponseData?>?
+    ): Call<DirectionResponse?>?
 }

@@ -9,7 +9,7 @@
             type="com.taitsmith.busboy.ui.NearbyFragment" />
         <variable
             name="stop"
-            type="com.taitsmith.busboy.obj.Stop" />
+            type="com.taitsmith.busboy.data.Stop" />
     </data>
 
     <androidx.cardview.widget.CardView

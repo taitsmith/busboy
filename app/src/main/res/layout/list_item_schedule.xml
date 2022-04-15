@@ -9,7 +9,7 @@
             type="com.taitsmith.busboy.utils.PredictionAdapter" />
         <variable
             name="prediction"
-            type="com.taitsmith.busboy.obj.StopPredictionResponse.BustimeResponse.Prediction" />
+            type="com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction" />
     </data>
 <androidx.cardview.widget.CardView
     android:id="@+id/scheduleListCardView"
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text='@{prediction.rt.concat(" " + prediction.rtdir)}'
+            android:text='@{prediction.rt.concat(" ") + prediction.rtdir}'
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
