@@ -118,8 +118,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
     }
 
-    override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-        val s = adapterView.getItemAtPosition(i).toString()
+    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val s = p0?.getItemAtPosition(p2).toString()
         if (s == "All lines") nearbyViewModel.rt = null
         else nearbyViewModel.rt = s
     }
