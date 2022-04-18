@@ -74,4 +74,10 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:2.4.2"
     androidTestImplementation 'androidx.test:core-ktx:1.4.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
+    implementation "androidx.core:core-ktx:+"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

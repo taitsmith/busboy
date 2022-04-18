@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
+import android.widget.AbsListView
 import android.widget.AdapterView
 import android.widget.ListView
 import androidx.fragment.app.Fragment
@@ -53,8 +54,8 @@ class ByIdFragment : Fragment() {
     }
 
     private fun setListeners() {
-        binding.searchByIdButton.setOnClickListener { view: View -> search(view) }
-        binding.addToFavoritesFab.setOnClickListener { view: View -> addToFavorites(view) }
+        binding.searchByIdButton.setOnClickListener { search() }
+        binding.addToFavoritesFab.setOnClickListener { addToFavorites() }
         predictionListView.onItemClickListener =
             AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
                 listItemListener.onIdItemSelected(i)
@@ -64,11 +65,20 @@ class ByIdFragment : Fragment() {
                 longClickListener.onIdLongClick(i)
                 true
             }
+
+        predictionListView.setOnScrollListener(object: AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
+            //hide the fab when we get to the bottom of the list, unless the whole list is visible
+            override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {
+                if (p1 == (p3 - p2) && (p2 != p3)) binding.addToFavoritesFab.visibility = View.INVISIBLE
+                else binding.addToFavoritesFab.visibility = View.VISIBLE
+            }
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        byIdViewModel = ViewModelProvider(requireActivity()).get(ByIdViewModel::class.java)
+        byIdViewModel = ViewModelProvider(requireActivity())[ByIdViewModel::class.java]
         setObserver()
     }
 
@@ -105,7 +115,7 @@ class ByIdFragment : Fragment() {
         }
     }
 
-    private fun search(view: View) {
+    private fun search() {
         if (binding.stopEntryEditText.text.length == 5) {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             byIdViewModel.getStopPredictions(stopIdEditText.text.toString())
@@ -115,7 +125,8 @@ class ByIdFragment : Fragment() {
         }
     }
 
-    private fun addToFavorites(view: View) {}
+    private fun addToFavorites() {}
+
     override fun onDetach() {
         super.onDetach()
         listItemListener
@@ -127,3 +138,4 @@ class ByIdFragment : Fragment() {
         byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
     }
 }
+
