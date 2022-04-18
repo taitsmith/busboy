@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -217,7 +218,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void askToEnableLoc() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setCancelable(false);
             builder.setMessage(R.string.dialog_no_location)
                 .setPositiveButton(R.string.dialog_no_loc_positive, (dialogInterface, i) ->
