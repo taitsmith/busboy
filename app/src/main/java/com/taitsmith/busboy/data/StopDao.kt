@@ -15,4 +15,8 @@ interface StopDao {
 
     @Update
     fun updateStops(vararg stops: Stop)
+
+    @Query("DELETE FROM stop")
+    fun deleteAll()
+
 }

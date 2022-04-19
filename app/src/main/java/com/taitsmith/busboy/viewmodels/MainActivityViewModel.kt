@@ -71,9 +71,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
                     if (response.body() != null) {
                         val waypointList = response.body()!![0]?.patterns?.get(0)?.waypoints
                         polylineCoords.clear()
-                        for (wp in waypointList!!) {
-                            polylineCoords.add(wp.latLng)
-                        }
+                        waypointList!!.forEach { polylineCoords.add(it.latLng) }
                         mutableStatusMessage.value = "ROUTE_POLYLINE_READY"
                     }
                 }

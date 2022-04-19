@@ -24,11 +24,16 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                                         private val databaseRepository: DatabaseRepository)
                                         : ViewModel() {
 
-    lateinit var mutableStopPredictions: MutableLiveData<List<Prediction>>
     var rt: String? = null
 
-    fun getStopPredictions(stopId: String?) {
+    lateinit var stop: Stop
+    var mutableStopPredictions: MutableLiveData<List<Prediction>>
+
+    fun getStopPredictions(stopId: String) {
         if (rt == null) rt = ""
+
+        stop = Stop(id = stopId.toLong(), stopId = stopId)
+
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getStopPredictionList(stopId, rt)
             call!!.enqueue(object : Callback<StopPredictionResponse?> {
@@ -67,8 +72,13 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
         }
     }
 
-    fun addStopToFavorites(stop: Stop) {
-        databaseRepository.addStops(stop)
+    fun addStopToFavorites() {
+        if (!stop.stopId.equals(null)) {
+            viewModelScope.launch(Dispatchers.IO) {
+                databaseRepository.addStops(stop)
+            }
+        }
+
     }
     companion object {
         lateinit var predictionList: MutableList<Prediction>

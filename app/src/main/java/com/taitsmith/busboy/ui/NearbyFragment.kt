@@ -78,8 +78,9 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
+        binding.unbind()
+        super.onDestroyView()
     }
 
     private fun setObservers() {

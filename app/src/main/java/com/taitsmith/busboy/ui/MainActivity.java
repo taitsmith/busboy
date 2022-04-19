@@ -215,6 +215,7 @@ public class MainActivity extends AppCompatActivity
          mutableStatusMessage.removeObservers(this);
          binding = null;
          mainActivityViewModel = null;
+         fragmentManager = null;
     }
 
     private void askToEnableLoc() {

@@ -12,6 +12,7 @@ class DatabaseRepository @Inject constructor(
     fun getAllStops() = stopDao.getAll()
     fun addStops(vararg stops: Stop) = stopDao.insertAll(*stops)
     fun deleteStop(stop: Stop) = stopDao.delete(stop)
+    fun deleteAll() = stopDao.deleteAll()
 
     fun getAllLines() = routeDao.getAll()
     fun addLines(vararg lines: RouteDestination) = routeDao.insertAll(*lines)

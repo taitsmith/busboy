@@ -1,9 +1,5 @@
 package com.taitsmith.busboy.api
 
-import com.taitsmith.busboy.api.DirectionResponse
-import com.taitsmith.busboy.api.StopDestinationResponse
-import com.taitsmith.busboy.api.StopPredictionResponse
-import com.taitsmith.busboy.api.WaypointResponse
 import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
 import retrofit2.http.GET

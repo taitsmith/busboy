@@ -37,7 +37,6 @@ class ByIdFragment : Fragment() {
     var predictionList: List<BustimeResponse.Prediction>? = null
     private lateinit var stopIdEditText: EditText
     private lateinit var predictionAdapter: PredictionAdapter
-    var stop: Stop = Stop()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +54,7 @@ class ByIdFragment : Fragment() {
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
-        binding.addToFavoritesFab.setOnClickListener { addToFavorites() }
+        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
         predictionListView.onItemClickListener =
             AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
                 listItemListener.onIdItemSelected(i)
@@ -79,7 +78,7 @@ class ByIdFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         byIdViewModel = ViewModelProvider(requireActivity())[ByIdViewModel::class.java]
-        setObserver()
+        setObservers()
     }
 
     override fun onAttach(context: Context) {
@@ -95,7 +94,7 @@ class ByIdFragment : Fragment() {
         }
     }
 
-    private fun setObserver() {
+    private fun setObservers() {
         byIdViewModel.mutableStopPredictions.observe(
             viewLifecycleOwner
         ) { predictions: List<BustimeResponse.Prediction> ->
@@ -104,10 +103,10 @@ class ByIdFragment : Fragment() {
             predictionListView.adapter = predictionAdapter
             binding.busFlagIV.visibility = View.INVISIBLE
             try {
+                val s = predictions[0].stpnm
                 binding.stopEntryEditText.text = null
-                binding.stopEntryEditText.hint = predictions[0].stpnm
-            } catch (e: NullPointerException) {
-                e.printStackTrace()
+                binding.stopEntryEditText.hint = s
+                byIdViewModel.stop.name = s
             } catch (e: IndexOutOfBoundsException) {
                 e.printStackTrace()
             }
@@ -119,18 +118,9 @@ class ByIdFragment : Fragment() {
         if (binding.stopEntryEditText.text.length == 5) {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             byIdViewModel.getStopPredictions(stopIdEditText.text.toString())
-            stop.stopId = stopIdEditText.text.toString()
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         }
-    }
-
-    private fun addToFavorites() {}
-
-    override fun onDetach() {
-        super.onDetach()
-        listItemListener
-        longClickListener
     }
 
     override fun onDestroyView() {
