@@ -5,7 +5,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 
 @Qualifier
@@ -20,14 +24,37 @@ object ApiInterfaceModule {
 
     @AcTransitApiInterface
     @Provides
-    fun provideAcTransitInterface(@AcTransitRetrofit acTransitRetrofit: Retrofit
-    ): ApiInterface {
-        return acTransitRetrofit.create(ApiInterface::class.java)
+    fun provideAcTransitInterface(): ApiInterface {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        val client: OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .callTimeout(10, TimeUnit.SECONDS)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.actransit.org/transit/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+        return retrofit.create(ApiInterface::class.java)
     }
 
     @MapsApiInterface
     @Provides
-    fun provideMapsInterface(@MapsRetrofit mapsRetrofit: Retrofit): ApiInterface {
-        return mapsRetrofit.create(ApiInterface::class.java)
+    fun provideMapsInterface(): ApiInterface {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        val client: OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .callTimeout(10, TimeUnit.SECONDS)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://maps.googleapis.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+        return retrofit.create(ApiInterface::class.java)
     }
 }
