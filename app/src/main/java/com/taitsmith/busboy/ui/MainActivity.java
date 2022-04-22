@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showHelp() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setMessage(R.string.dialog_help)
                     .setPositiveButton(R.string.dialog_got_it, null)
                     .create()
