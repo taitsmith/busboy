@@ -1,7 +1,9 @@
 package com.taitsmith.busboy.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
@@ -23,13 +25,17 @@ class FavoritesViewModel @Inject constructor(application: Application,
                                              private val databaseRepository: DatabaseRepository
                         ): AndroidViewModel(application) {
 
-    private lateinit var favoriteStopsList: List<Stop>
     private lateinit var favoriteLinesList: List<StopDestinationResponse.RouteDestination>
+    val stopList: MutableLiveData<List<Stop>> by lazy {
+        MutableLiveData<List<Stop>>()
+    }
 
     fun getFavoriteStops() {
         viewModelScope.launch(Dispatchers.IO) {
-            favoriteStopsList = databaseRepository.getAllStops()
-            if (favoriteStopsList.isEmpty()) mutableErrorMessage.value = "NO_FAV_STOPS"
+            val stops = databaseRepository.getAllStops()
+
+            if (stops.isEmpty()) mutableErrorMessage.postValue("NO_FAVORITE_STOPS")
+            else stopList.postValue(stops)
         }
     }
 
@@ -37,8 +43,5 @@ class FavoritesViewModel @Inject constructor(application: Application,
         viewModelScope.launch(Dispatchers.IO) {
             favoriteLinesList = databaseRepository.getAllLines()
         }
-    }
-
-    init {
     }
 }

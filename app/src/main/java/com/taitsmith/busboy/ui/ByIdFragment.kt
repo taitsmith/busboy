@@ -16,13 +16,11 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
-import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import java.lang.ClassCastException
 import java.lang.IndexOutOfBoundsException
-import java.lang.NullPointerException
 
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {

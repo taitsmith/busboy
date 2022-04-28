@@ -128,8 +128,9 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 break;
             case "Favorites":
-                Snackbar.make(binding.getRoot(), R.string.snackbar_favorites_in_progress,
-                        BaseTransientBottomBar.LENGTH_LONG).show();
+                fragmentManager.beginTransaction()
+                        .replace(binding.mainFragmentContainer.getId(), favoritesFragment)
+                        .commit();
                 break;
             case "Help":
                 MainActivityViewModel.mutableStatusMessage.setValue("HELP_REQUESTED");
@@ -169,7 +170,11 @@ public class MainActivity extends AppCompatActivity
                 break;
             case "BAD_DISTANCE" :
                 Snackbar.make(binding.getRoot(),R.string.snackbar_bad_distance,
-                        BaseTransientBottomBar.LENGTH_LONG).show();
+                        Snackbar.LENGTH_LONG).show();
+                break;
+            case "NO_FAVORITE_STOPS" :
+                Snackbar.make(binding.getRoot(), R.string.snackbar_no_favorites,
+                        Snackbar.LENGTH_LONG).show();
                 break;
         }
     }
