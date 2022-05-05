@@ -1,50 +1,51 @@
 package com.taitsmith.busboy.ui
 
 import android.Manifest
-
-import dagger.hilt.android.AndroidEntryPoint
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import android.widget.TextView
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.NavController
-import android.os.Bundle
-import androidx.databinding.DataBindingUtil
-import com.taitsmith.busboy.R
-import androidx.lifecycle.ViewModelProvider
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
-import com.taitsmith.busboy.data.Bus
-import androidx.core.app.ActivityCompat
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import android.content.Intent
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.StopPredictionResponse
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
-import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickListener {
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainTabLayout: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
+    lateinit var prediction: StopPredictionResponse.BustimeResponse.Prediction
 
     private var nearbyStatusUpdateTv: TextView? = null
 
     var nearbyFragment: NearbyFragment? = null
     var byIdFragment: ByIdFragment? = null
     var favoritesFragment: FavoritesFragment? = null
-    var prediction: StopPredictionResponse.BustimeResponse.Prediction? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,9 +72,16 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     private fun setTabListeners() {
         mainTabLayout.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.byId -> navController.navigate(R.id.byIdFragment)
-                R.id.nearby -> navController.navigate(R.id.nearbyFragment)
+                R.id.byId -> {
+                    navController.popBackStack()
+                    navController.navigate(R.id.byIdFragment)
+                }
+                R.id.nearby -> {
+                    navController.popBackStack()
+                    navController.navigate(R.id.nearbyFragment)
+                }
                 R.id.favorites -> navController.navigate(R.id.favoritesFragment)
+                R.id.help -> showHelp()
             }
             true
         }
@@ -84,7 +92,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         MainActivityViewModel.mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
         mutableBus!!.observe(this) {
             mainActivityViewModel!!.getWaypoints(
-                prediction!!.rt
+                prediction.rt
             )
         }
         mutableNearbyStatusUpdater!!.observe(this) { s: String -> updateNearbyStatusText(s) }
@@ -96,52 +104,42 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         when (s) {
             "NO_PERMISSION" -> ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSION_REQUEST_FINE_LOCATION
-            )
+                PERMISSION_REQUEST_FINE_LOCATION)
             "404" -> Snackbar.make(
                 binding.root, R.string.snackbar_404,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "NO_LOC_ENABLED" -> askToEnableLoc()
             "BAD_INPUT" -> Snackbar.make(
                 binding.root, R.string.snackbar_bad_input,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "NULL_PRED_RESPONSE" -> Snackbar.make(
                 binding.root, R.string.snackbar_no_predictions,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "NULL_BUS_COORDS" -> Snackbar.make(
                 binding.root, R.string.snackbar_null_bus_coords,
-                BaseTransientBottomBar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "CALL_FAILURE" -> Snackbar.make(
                 binding.root, R.string.snackbar_network_error,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "BAD_DISTANCE" -> Snackbar.make(
                 binding.root, R.string.snackbar_bad_distance,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
             "NO_FAVORITE_STOPS" -> Snackbar.make(
                 binding.root, R.string.snackbar_no_favorites,
-                Snackbar.LENGTH_LONG
-            ).show()
+                Snackbar.LENGTH_LONG).show()
         }
     }
 
     private fun getStatusMessage(s: String) {
-        val intent = Intent(this, MapsActivity::class.java)
         when (s) {
             "HELP_REQUESTED" -> showHelp()
             "DIRECTION_POLYLINE_READY" -> {
-                intent.putExtra("POLYLINE_TYPE", "DIRECTION")
-                startActivity(intent)
+                val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
+                navController.navigate(action)
             }
             "ROUTE_POLYLINE_READY" -> {
-                MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-                intent.putExtra("POLYLINE_TYPE", "ROUTE")
-                startActivity(intent)
+                val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
+                navController.navigate(action)
             }
             "LOADING" -> hideUi(true)
             "LOADED" -> hideUi(false)
@@ -222,9 +220,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     }
 
     override fun onIdItemSelected(position: Int) {
-        prediction = byIdFragment!!.predictionList!![position]
+        prediction = ByIdViewModel.predictionList[position]
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        mainActivityViewModel!!.getBusLocation(byIdFragment!!.predictionList!![position].vid)
+        mainActivityViewModel!!.getBusLocation(prediction.vid)
     }
 
     override fun onNearbyLongClick(position: Int) {
@@ -236,7 +234,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         mainActivityViewModel!!.getDirectionsToStop(start, end)
     }
 
-    override fun onIdLongClick(position: Int) {}
+    override fun onIdLongClick(position: Int) {
+        navController.navigate(R.id.mapsFragment)
+    }
 
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
