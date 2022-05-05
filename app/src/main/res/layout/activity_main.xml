@@ -22,18 +22,21 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mainFragmentContainer"
+        app:layout_constraintTop_toTopOf="@+id/navHostFragment"
         />
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/mainFragmentContainer"
+        android:id="@+id/navHostFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/main_tab_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/md_theme_light_secondaryContainer"/>
+        android:background="@color/md_theme_light_secondaryContainer"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -46,45 +49,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.tabs.TabLayout
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/main_tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mainFragmentContainer"
-        android:background="@color/md_theme_light_surfaceVariant">
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_by_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/by_id_icon"
-            android:text="@string/tab_layout_by_stop" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_nearby"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/nearby_tab_icon"
-            android:text="@string/tab_layout_nearby" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_favorites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/favorites_tab_icon"
-            android:text="@string/tab_layout_favorites" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/tab_item_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/help_tab_icon"
-            android:text="@string/tab_layout_help" />
-
-    </com.google.android.material.tabs.TabLayout>
+        app:layout_constraintTop_toBottomOf="@+id/navHostFragment"
+        android:background="@color/md_theme_light_surfaceVariant"
+        app:menu="@menu/bottom_nav"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
