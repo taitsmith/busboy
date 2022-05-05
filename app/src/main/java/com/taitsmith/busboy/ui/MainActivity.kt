@@ -1,0 +1,250 @@
+package com.taitsmith.busboy.ui
+
+import android.Manifest
+
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.widget.TextView
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.NavController
+import android.os.Bundle
+import androidx.databinding.DataBindingUtil
+import com.taitsmith.busboy.R
+import androidx.lifecycle.ViewModelProvider
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.data.Bus
+import androidx.core.app.ActivityCompat
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import android.content.Intent
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.content.DialogInterface
+import android.content.pm.PackageManager
+import android.view.View
+import androidx.lifecycle.MutableLiveData
+import androidx.navigation.ui.setupWithNavController
+import com.taitsmith.busboy.api.StopPredictionResponse
+import com.taitsmith.busboy.databinding.ActivityMainBinding
+import com.taitsmith.busboy.utils.OnItemClickListener
+import com.taitsmith.busboy.utils.OnItemLongClickListener
+import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import com.taitsmith.busboy.viewmodels.ByIdViewModel
+import im.delight.android.location.SimpleLocation
+
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickListener {
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var mainTabLayout: BottomNavigationView
+    private lateinit var navController: NavController
+    private lateinit var navHostFragment: NavHostFragment
+
+    private var nearbyStatusUpdateTv: TextView? = null
+
+    var nearbyFragment: NearbyFragment? = null
+    var byIdFragment: ByIdFragment? = null
+    var favoritesFragment: FavoritesFragment? = null
+    var prediction: StopPredictionResponse.BustimeResponse.Prediction? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        acTransitApiKey = getString(R.string.ac_transit_key)
+        mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
+        mainTabLayout = binding.mainTabLayout
+        nearbyStatusUpdateTv = binding.nearbyStatusUpdater
+        mutableBus = MutableLiveData()
+        mutableNearbyStatusUpdater = MutableLiveData()
+        navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
+        navController = navHostFragment.navController
+        nearbyFragment = NearbyFragment()
+        mainTabLayout.setupWithNavController(navController)
+        byIdFragment = ByIdFragment()
+        favoritesFragment = FavoritesFragment()
+
+        setObservers()
+        setTabListeners()
+    }
+
+    private fun setTabListeners() {
+        mainTabLayout.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.byId -> navController.navigate(R.id.byIdFragment)
+                R.id.nearby -> navController.navigate(R.id.nearbyFragment)
+                R.id.favorites -> navController.navigate(R.id.favoritesFragment)
+            }
+            true
+        }
+    }
+
+    private fun setObservers() {
+        MainActivityViewModel.mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
+        MainActivityViewModel.mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
+        mutableBus!!.observe(this) {
+            mainActivityViewModel!!.getWaypoints(
+                prediction!!.rt
+            )
+        }
+        mutableNearbyStatusUpdater!!.observe(this) { s: String -> updateNearbyStatusText(s) }
+    }
+
+
+    private fun getErrorMessage(s: String) {
+        hideUi(false)
+        when (s) {
+            "NO_PERMISSION" -> ActivityCompat.requestPermissions(
+                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                PERMISSION_REQUEST_FINE_LOCATION
+            )
+            "404" -> Snackbar.make(
+                binding.root, R.string.snackbar_404,
+                Snackbar.LENGTH_LONG
+            ).show()
+            "NO_LOC_ENABLED" -> askToEnableLoc()
+            "BAD_INPUT" -> Snackbar.make(
+                binding.root, R.string.snackbar_bad_input,
+                Snackbar.LENGTH_LONG
+            ).show()
+            "NULL_PRED_RESPONSE" -> Snackbar.make(
+                binding.root, R.string.snackbar_no_predictions,
+                Snackbar.LENGTH_LONG
+            ).show()
+            "NULL_BUS_COORDS" -> Snackbar.make(
+                binding.root, R.string.snackbar_null_bus_coords,
+                BaseTransientBottomBar.LENGTH_LONG
+            ).show()
+            "CALL_FAILURE" -> Snackbar.make(
+                binding.root, R.string.snackbar_network_error,
+                Snackbar.LENGTH_LONG
+            ).show()
+            "BAD_DISTANCE" -> Snackbar.make(
+                binding.root, R.string.snackbar_bad_distance,
+                Snackbar.LENGTH_LONG
+            ).show()
+            "NO_FAVORITE_STOPS" -> Snackbar.make(
+                binding.root, R.string.snackbar_no_favorites,
+                Snackbar.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun getStatusMessage(s: String) {
+        val intent = Intent(this, MapsActivity::class.java)
+        when (s) {
+            "HELP_REQUESTED" -> showHelp()
+            "DIRECTION_POLYLINE_READY" -> {
+                intent.putExtra("POLYLINE_TYPE", "DIRECTION")
+                startActivity(intent)
+            }
+            "ROUTE_POLYLINE_READY" -> {
+                MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+                intent.putExtra("POLYLINE_TYPE", "ROUTE")
+                startActivity(intent)
+            }
+            "LOADING" -> hideUi(true)
+            "LOADED" -> hideUi(false)
+        }
+    }
+
+    private fun hideUi(shouldHide: Boolean) {
+        if (shouldHide) {
+            binding.navHostFragment.visibility = View.INVISIBLE
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.navHostFragment.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.INVISIBLE
+            nearbyStatusUpdateTv!!.visibility = View.INVISIBLE
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MainActivityViewModel.mutableStatusMessage.removeObservers(this)
+        mainActivityViewModel = null
+    }
+
+    private fun askToEnableLoc() {
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setCancelable(false)
+        builder.setMessage(R.string.dialog_no_location)
+            .setPositiveButton(R.string.dialog_no_loc_positive) { _: DialogInterface?, _: Int ->
+                SimpleLocation.openSettings(
+                    this
+                )
+            }
+            .setNegativeButton(R.string.dialog_no_loc_negative) { _: DialogInterface?, _: Int ->
+                Snackbar.make(
+                    binding.root, R.string.snackbar_location_disabled,
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+            .create()
+            .show()
+    }
+
+    private fun showHelp() {
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setMessage(R.string.dialog_help)
+            .setPositiveButton(R.string.dialog_got_it, null)
+            .create()
+            .show()
+    }
+
+    private fun updateNearbyStatusText(s: String) {
+        nearbyStatusUpdateTv!!.visibility = View.VISIBLE
+        nearbyStatusUpdateTv!!.text = getString(R.string.nearby_status_update, s)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
+            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                NearbyViewModel.loc.beginUpdates()
+                enableNearbySearch = true
+            }
+        }
+    }
+
+    //the four following are for listviews on nearby and by id fragments
+    override fun onNearbyItemSelected(position: Int) {
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+        val bundle = Bundle()
+        bundle.putString("BY_ID", NearbyViewModel.stopList[position]!!.stopId)
+        byIdFragment!!.arguments = bundle
+        ByIdViewModel.predictionList.clear()
+        navController.navigate(R.id.nearbyFragment)
+    }
+
+    override fun onIdItemSelected(position: Int) {
+        prediction = byIdFragment!!.predictionList!![position]
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+        mainActivityViewModel!!.getBusLocation(byIdFragment!!.predictionList!![position].vid)
+    }
+
+    override fun onNearbyLongClick(position: Int) {
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+        val (_, _, _, latitude, longitude) = NearbyViewModel.stopList[position]!!
+        val start =
+            NearbyViewModel.loc.latitude.toString() + "," + NearbyViewModel.loc.longitude.toString()
+        val end = (latitude!!).toString() + "," + (longitude!!).toString()
+        mainActivityViewModel!!.getDirectionsToStop(start, end)
+    }
+
+    override fun onIdLongClick(position: Int) {}
+
+    companion object {
+        private const val PERMISSION_REQUEST_FINE_LOCATION = 6
+        var mainActivityViewModel: MainActivityViewModel? = null
+        var enableNearbySearch = false
+        var acTransitApiKey: String? = null
+        @JvmField
+        var mutableBus: MutableLiveData<Bus>? = null
+        var mutableNearbyStatusUpdater: MutableLiveData<String>? = null
+    }
+}
