@@ -45,10 +45,10 @@ class MainActivityViewModel @Inject constructor(application: Application,
                     response: Response<DirectionResponse?>
                 ) {
                     val stepList = response.body()!!
-                        .routeList[0]
-                        .tripList[0].stepList
+                        .routeList?.get(0)
+                        ?.tripList?.get(0)?.stepList
                     polylineCoords.clear()
-                    stepList.forEach { polylineCoords.add(it.endCoords.returnCoords()) }
+                    stepList!!.forEach { polylineCoords.add(it.endCoords!!.returnCoords()) }
                     mutableStatusMessage.value = "DIRECTION_POLYLINE_READY"
                 }
 

@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.utils.OnItemClickListener

@@ -97,7 +97,7 @@ class ByIdFragment : Fragment() {
             viewLifecycleOwner
         ) { predictions: List<BustimeResponse.Prediction> ->
             predictionList = predictions
-            predictionAdapter = PredictionAdapter(predictionList)
+            predictionAdapter = PredictionAdapter(predictionList!!)
             predictionListView.adapter = predictionAdapter
             binding.busFlagIV.visibility = View.INVISIBLE
             try {
