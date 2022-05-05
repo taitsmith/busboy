@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/byId"
+        android:icon="@drawable/by_id_icon"
+        android:contentDescription="@string/tab_layout_by_stop"
+        android:title="@string/tab_layout_by_stop" />
+    <item
+        android:id="@+id/nearby"
+        android:icon="@drawable/nearby_tab_icon"
+        android:contentDescription="@string/tab_layout_nearby"
+        android:title="@string/tab_layout_nearby" />
+    <item
+        android:id="@+id/favorites"
+        android:icon="@drawable/favorites_tab_icon"
+        android:contentDescription="@string/tab_layout_favorites"
+        android:title="@string/tab_layout_favorites" />
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/help_tab_icon"
+        android:contentDescription="@string/tab_layout_help"
+        android:title="@string/tab_layout_help" />
+</menu>

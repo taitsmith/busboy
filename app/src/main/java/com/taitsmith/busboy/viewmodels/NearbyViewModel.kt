@@ -71,8 +71,8 @@ class NearbyViewModel @Inject constructor(application: Application,
     fun getLinesServed(stopList: List<Stop?>) {
         viewModelScope.launch(Dispatchers.IO) {
             for (s in stopList) {
-                MainActivity.mutableNearbyStatusUpdater.postValue(s!!.name)
-                val call = acTransitApiInterface.getStopDestinations(s.stopId)
+                MainActivity.mutableNearbyStatusUpdater?.postValue(s!!.name)
+                val call = acTransitApiInterface.getStopDestinations(s!!.stopId)
                 try {
                     val response: Response<StopDestinationResponse?> = call!!.execute()
                     if (response.isSuccessful) {

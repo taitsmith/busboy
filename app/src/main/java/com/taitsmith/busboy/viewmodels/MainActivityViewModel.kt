@@ -93,7 +93,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
                 if (response.body() != null) {
                     val bus = response.body()
                     if (bus?.latitude != null && bus.longitude != null) {
-                        MainActivity.mutableBus.value = response.body()
+                        MainActivity.mutableBus?.value = response.body()
                     } else mutableErrorMessage.value = "NULL_BUS_COORDS"
                 }
             }

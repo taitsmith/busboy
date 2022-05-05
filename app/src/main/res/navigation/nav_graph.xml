@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/byIdFragment">
+
+    <fragment
+        android:id="@+id/byIdFragment"
+        android:name="com.taitsmith.busboy.ui.ByIdFragment"
+        android:label="ByIdFragment" >
+        <action
+            android:id="@+id/action_byIdFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
+        <action
+            android:id="@+id/action_byIdFragment_to_nearbyFragment"
+            app:destination="@id/nearbyFragment" />
+        <action
+            android:id="@+id/action_byIdFragment_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.taitsmith.busboy.ui.FavoritesFragment"
+        android:label="FavoritesFragment" >
+        <action
+            android:id="@+id/action_favoritesFragment_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/nearbyFragment"
+        android:name="com.taitsmith.busboy.ui.NearbyFragment"
+        android:label="NearbyFragment" >
+        <action
+            android:id="@+id/action_nearbyFragment_to_byIdFragment"
+            app:destination="@id/byIdFragment" />
+        <action
+            android:id="@+id/action_nearbyFragment_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.taitsmith.busboy.ui.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps">
+        <argument
+            android:name="polylineType"
+            app:argType="string"
+            android:defaultValue="route" />
+    </fragment>
+</navigation>
