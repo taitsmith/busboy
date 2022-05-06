@@ -136,6 +136,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
                 navController.navigate(action)
             }
+            "FAVORITE_ADDED" -> Snackbar.make(
+                binding.root, R.string.snackbar_favorite_added,
+                Snackbar.LENGTH_LONG).show()
             "LOADING" -> hideUi(true)
             "LOADED" -> hideUi(false)
         }

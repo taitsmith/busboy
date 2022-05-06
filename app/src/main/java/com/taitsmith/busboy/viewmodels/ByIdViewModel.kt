@@ -36,10 +36,10 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
 
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getStopPredictionList(stopId, rt)
-            call!!.enqueue(object : Callback<StopPredictionResponse?> {
+            call.enqueue(object : Callback<StopPredictionResponse> {
                 override fun onResponse(
-                    call: Call<StopPredictionResponse?>,
-                    response: Response<StopPredictionResponse?>
+                    call: Call<StopPredictionResponse>,
+                    response: Response<StopPredictionResponse>
                 ) {
                     if (response.body() == null || response.code() == 404) {
                         MainActivityViewModel.mutableErrorMessage.value = "NULL_PRED_RESPONSE"
@@ -64,7 +64,7 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                     }
                 }
 
-                override fun onFailure(call: Call<StopPredictionResponse?>, t: Throwable) {
+                override fun onFailure(call: Call<StopPredictionResponse>, t: Throwable) {
                     Log.d("BUS LIST FAILURE", t.message!!)
                     MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
                 }
@@ -77,6 +77,7 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
             viewModelScope.launch(Dispatchers.IO) {
                 databaseRepository.addStops(stop)
             }
+            MainActivityViewModel.mutableStatusMessage.value = "FAVORITE_ADDED"
         }
 
     }
