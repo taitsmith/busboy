@@ -23,7 +23,7 @@ class MapsFragment : Fragment() {
 
     private val callback = OnMapReadyCallback { googleMap ->
         googleMap.clear()
-        val bus = MainActivity.mutableBus!!.value
+        val bus = MainActivity.mutableBus.value
 
         cameraFocus = if (args.polylineType == "route") LatLng(bus?.latitude!!, bus.longitude!!)
         else MainActivityViewModel.polylineCoords[0]

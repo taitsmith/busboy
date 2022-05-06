@@ -14,7 +14,8 @@ import android.widget.AbsListView
 import android.widget.AdapterView
 import android.widget.ListView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
@@ -25,13 +26,14 @@ import java.lang.IndexOutOfBoundsException
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
 
-    lateinit var byIdViewModel: ByIdViewModel
+    private val byIdViewModel: ByIdViewModel by viewModels()
+    private val args: ByIdFragmentArgs by navArgs()
+
     lateinit var binding: ByIdFragmentBinding
     private lateinit var listItemListener: OnItemClickListener
     private lateinit var longClickListener: OnItemLongClickListener
     private lateinit var predictionListView: ListView
 
-    @JvmField
     var predictionList: List<BustimeResponse.Prediction>? = null
     private lateinit var stopIdEditText: EditText
     private lateinit var predictionAdapter: PredictionAdapter
@@ -43,9 +45,7 @@ class ByIdFragment : Fragment() {
         binding = ByIdFragmentBinding.inflate(inflater, container, false)
         predictionListView = binding.predictionListView
         stopIdEditText = binding.stopEntryEditText
-        if (arguments != null) {
-            byIdViewModel.getStopPredictions(requireArguments()["BY_ID"].toString())
-        }
+        if (args.selectedNearbyStop != "none") byIdViewModel.getStopPredictions(args.selectedNearbyStop)
         setListeners()
         return binding.root
     }
@@ -75,7 +75,6 @@ class ByIdFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        byIdViewModel = ViewModelProvider(requireActivity())[ByIdViewModel::class.java]
         setObservers()
     }
 
@@ -124,6 +123,7 @@ class ByIdFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
+        binding.unbind()
     }
 }
 

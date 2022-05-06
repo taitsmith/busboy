@@ -18,6 +18,10 @@
         <action
             android:id="@+id/action_byIdFragment_to_mapsFragment"
             app:destination="@id/mapsFragment" />
+        <argument
+            android:name="selectedNearbyStop"
+            app:argType="string"
+            android:defaultValue="none"/>
     </fragment>
     <fragment
         android:id="@+id/favoritesFragment"

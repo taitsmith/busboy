@@ -2,11 +2,8 @@ package com.taitsmith.busboy.ui
 
 import android.Manifest
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -36,7 +33,7 @@ import im.delight.android.location.SimpleLocation
 class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mainTabLayout: BottomNavigationView
+    private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
     lateinit var prediction: StopPredictionResponse.BustimeResponse.Prediction
@@ -53,15 +50,13 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         acTransitApiKey = getString(R.string.ac_transit_key)
         mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
-        mainTabLayout = binding.mainTabLayout
+        bottomNavigationView = binding.mainTabLayout
         nearbyStatusUpdateTv = binding.nearbyStatusUpdater
-        mutableBus = MutableLiveData()
-        mutableNearbyStatusUpdater = MutableLiveData()
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
         nearbyFragment = NearbyFragment()
-        mainTabLayout.setupWithNavController(navController)
+        bottomNavigationView.setupWithNavController(navController)
         byIdFragment = ByIdFragment()
         favoritesFragment = FavoritesFragment()
 
@@ -70,7 +65,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     }
 
     private fun setTabListeners() {
-        mainTabLayout.setOnItemSelectedListener {
+        bottomNavigationView.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.byId -> {
                     navController.popBackStack()
@@ -90,12 +85,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     private fun setObservers() {
         MainActivityViewModel.mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
         MainActivityViewModel.mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
-        mutableBus!!.observe(this) {
+        mutableBus.observe(this) {
             mainActivityViewModel!!.getWaypoints(
                 prediction.rt
             )
         }
-        mutableNearbyStatusUpdater!!.observe(this) { s: String -> updateNearbyStatusText(s) }
+        mutableNearbyStatusUpdater.observe(this) { s -> updateNearbyStatusText(s) }
     }
 
 
@@ -160,7 +155,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     override fun onDestroy() {
         super.onDestroy()
         MainActivityViewModel.mutableStatusMessage.removeObservers(this)
+        MainActivityViewModel.mutableErrorMessage.removeObservers(this)
         mainActivityViewModel = null
+        binding.unbind()
     }
 
     private fun askToEnableLoc() {
@@ -211,12 +208,11 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
 
     //the four following are for listviews on nearby and by id fragments
     override fun onNearbyItemSelected(position: Int) {
+        val s = NearbyViewModel.stopList[position]!!.stopId
+        val action = NearbyFragmentDirections.actionNearbyFragmentToByIdFragment(s!!)
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        val bundle = Bundle()
-        bundle.putString("BY_ID", NearbyViewModel.stopList[position]!!.stopId)
-        byIdFragment!!.arguments = bundle
         ByIdViewModel.predictionList.clear()
-        navController.navigate(R.id.nearbyFragment)
+        navController.navigate(action)
     }
 
     override fun onIdItemSelected(position: Int) {
@@ -234,17 +230,14 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         mainActivityViewModel!!.getDirectionsToStop(start, end)
     }
 
-    override fun onIdLongClick(position: Int) {
-        navController.navigate(R.id.mapsFragment)
-    }
+    override fun onIdLongClick(position: Int) {}
 
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
         var mainActivityViewModel: MainActivityViewModel? = null
         var enableNearbySearch = false
         var acTransitApiKey: String? = null
-        @JvmField
-        var mutableBus: MutableLiveData<Bus>? = null
-        var mutableNearbyStatusUpdater: MutableLiveData<String>? = null
+        var mutableBus: MutableLiveData<Bus> = MutableLiveData()
+        var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
     }
 }
