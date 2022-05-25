@@ -16,4 +16,4 @@ Not at a bus stop? If you give Busboy permission to see your location, it can sh
 ![ss_directions](https://user-images.githubusercontent.com/18432394/162337188-68d3a3d0-1294-404b-b473-f0f1f4f807c8.png)
 
   
-Install from an [.apk](https://www.taitsmith.com/apks/busboy_debug_2022-04-07.apk) and verify with a [.sig](https://www.taitsmith.com/apks/busboy_debug_2022-04-07.apk.sig) and [this key](https://www.taitsmith.com/apks/ts_public.key). You can also build it yourself from the source, but you'll need to supply AC Transit and Google API keys.
+Install from an [.apk](https://www.taitsmith.com/apks/busboy_debug_2022-05-25.apk) and verify with a [.sig](https://www.taitsmith.com/apks/busboy_debug_2022-05-25.apk.sig) and [this key](https://www.taitsmith.com/apks/ts_public.key). You can also build it yourself from the source, but you'll need to supply AC Transit and Google API keys.
