@@ -31,7 +31,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
 
     private val directionsApiKey: String
 
-    fun getDirectionsToStop(start: String?, stop: String?) {
+    fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val call = mapsApiInterface.getNavigationToStop(
                 start,
@@ -60,7 +60,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
         }
     }
 
-    fun getWaypoints(routeName: String?) {
+    fun getWaypoints(routeName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getRouteWaypoints(routeName)
             call!!.enqueue(object : Callback<List<WaypointResponse?>?> {
@@ -84,7 +84,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
         }
     }
 
-    fun getBusLocation(vehicleId: String?) {
+    fun getBusLocation(vehicleId: String) {
         viewModelScope.launch(Dispatchers.IO){
         val call = acTransitApiInterface.getVehicleInfo(vehicleId)
         call!!.enqueue(object : Callback<Bus?> {
@@ -93,7 +93,7 @@ class MainActivityViewModel @Inject constructor(application: Application,
                 if (response.body() != null) {
                     val bus = response.body()
                     if (bus?.latitude != null && bus.longitude != null) {
-                        MainActivity.mutableBus?.value = response.body()
+                        MainActivity.mutableBus.value = response.body()
                     } else mutableErrorMessage.value = "NULL_BUS_COORDS"
                 }
             }

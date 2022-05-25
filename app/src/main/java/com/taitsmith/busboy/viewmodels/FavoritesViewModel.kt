@@ -33,7 +33,6 @@ class FavoritesViewModel @Inject constructor(application: Application,
     fun getFavoriteStops() {
         viewModelScope.launch(Dispatchers.IO) {
             val stops = databaseRepository.getAllStops()
-
             if (stops.isEmpty()) mutableErrorMessage.postValue("NO_FAVORITE_STOPS")
             else stopList.postValue(stops)
         }
@@ -43,5 +42,13 @@ class FavoritesViewModel @Inject constructor(application: Application,
         viewModelScope.launch(Dispatchers.IO) {
             favoriteLinesList = databaseRepository.getAllLines()
         }
+    }
+
+    companion object {
+        lateinit var favoriteStops: MutableList<Stop>
+    }
+
+    init {
+        favoriteStops = ArrayList()
     }
 }
