@@ -13,7 +13,6 @@ import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.di.ApiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
