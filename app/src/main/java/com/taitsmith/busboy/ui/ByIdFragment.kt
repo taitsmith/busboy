@@ -33,10 +33,10 @@ class ByIdFragment : Fragment() {
     private lateinit var listItemListener: OnItemClickListener
     private lateinit var longClickListener: OnItemLongClickListener
     private lateinit var predictionListView: ListView
-
-    var predictionList: List<BustimeResponse.Prediction>? = null
     private lateinit var stopIdEditText: EditText
     private lateinit var predictionAdapter: PredictionAdapter
+
+    var predictionList: List<BustimeResponse.Prediction>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -103,7 +103,7 @@ class ByIdFragment : Fragment() {
                 val s = predictions[0].stpnm
                 binding.stopEntryEditText.text = null
                 binding.stopEntryEditText.hint = s
-                byIdViewModel.stop.name = s
+                byIdViewModel.stop!!.name = s
             } catch (e: IndexOutOfBoundsException) {
                 e.printStackTrace()
             }

@@ -10,8 +10,10 @@ import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction
 import com.taitsmith.busboy.api.ApiInterface
+import com.taitsmith.busboy.di.ApiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -21,12 +23,13 @@ import javax.inject.Inject
 @HiltViewModel
 class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                                         private val acTransitApiInterface: ApiInterface,
-                                        private val databaseRepository: DatabaseRepository)
+                                        private val databaseRepository: DatabaseRepository,
+                                        private val apiRepository: ApiRepository)
                                         : ViewModel() {
 
     var rt: String? = null
 
-    lateinit var stop: Stop
+    var stop: Stop? = null
     var mutableStopPredictions: MutableLiveData<List<Prediction>>
 
     fun getStopPredictions(stopId: String) {
@@ -36,7 +39,7 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
 
         viewModelScope.launch(Dispatchers.IO) {
             val call = acTransitApiInterface.getStopPredictionList(stopId, rt)
-            call.enqueue(object : Callback<StopPredictionResponse> {
+            call!!.enqueue(object : Callback<StopPredictionResponse> {
                 override fun onResponse(
                     call: Call<StopPredictionResponse>,
                     response: Response<StopPredictionResponse>
@@ -56,7 +59,7 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                         } catch (e: Exception) {
                             MainActivityViewModel.mutableErrorMessage.value = "NULL_PRED_RESPONSE"
                         }
-                        if (predictionList.size == 0) MainActivityViewModel.mutableErrorMessage.value= "BAD INPUT"
+                        if (predictionList.size == 0) MainActivityViewModel.mutableErrorMessage.value= "BAD_INPUT"
                         else {
                             mutableStopPredictions.value = predictionList
                             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
@@ -73,20 +76,25 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
     }
 
     fun addStopToFavorites() {
-        if (!stop.stopId.equals(null)) {
+        if (stop == null) MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
+        else {
             viewModelScope.launch(Dispatchers.IO) {
-                databaseRepository.addStops(stop)
+                stop!!.linesServed = apiRepository.getLinesServed(stop!!.stopId!!)
+                databaseRepository.addStops(stop!!)
+                MainActivityViewModel.mutableStatusMessage.postValue("FAVORITE_ADDED")
             }
-            MainActivityViewModel.mutableStatusMessage.value = "FAVORITE_ADDED"
         }
-
     }
+
     companion object {
         lateinit var predictionList: MutableList<Prediction>
+        lateinit var mutableLinesServed: MutableLiveData<String>
+
     }
 
     init {
         predictionList = ArrayList()
         mutableStopPredictions = MutableLiveData()
+        mutableLinesServed = MutableLiveData()
     }
 }
