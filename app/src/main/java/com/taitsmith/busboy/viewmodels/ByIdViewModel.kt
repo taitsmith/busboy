@@ -88,7 +88,6 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
     companion object {
         lateinit var predictionList: MutableList<Prediction>
         lateinit var mutableLinesServed: MutableLiveData<String>
-
     }
 
     init {

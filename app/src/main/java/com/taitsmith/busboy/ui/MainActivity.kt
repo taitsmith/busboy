@@ -248,8 +248,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
         var mainActivityViewModel: MainActivityViewModel? = null
         var enableNearbySearch = false
-        lateinit var acTransitApiKey: String
         var mutableBus: MutableLiveData<Bus> = MutableLiveData()
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
+        lateinit var acTransitApiKey: String
     }
 }
