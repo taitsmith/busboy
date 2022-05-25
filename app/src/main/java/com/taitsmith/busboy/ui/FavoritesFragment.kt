@@ -23,7 +23,8 @@ import java.lang.ClassCastException
 class FavoritesFragment : Fragment() {
 
     private val favoritesViewModel: FavoritesViewModel by viewModels()
-    lateinit var binding: FavoritesFragmentBinding
+    private var _binding: FavoritesFragmentBinding? = null
+    private val binding get() = _binding!!
     lateinit var favoritesListView: ListView
 
     private lateinit var listItemListener: OnItemClickListener
@@ -32,7 +33,7 @@ class FavoritesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FavoritesFragmentBinding.inflate(inflater, container, false)
+        _binding = FavoritesFragmentBinding.inflate(inflater, container, false)
         favoritesListView = binding.favoritesListView
         favoritesListView.onItemClickListener =
             AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
@@ -58,7 +59,7 @@ class FavoritesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.unbind()
+        _binding = null
     }
 
     override fun onAttach(context: Context) {

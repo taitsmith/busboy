@@ -29,7 +29,8 @@ class ByIdFragment : Fragment() {
     private val byIdViewModel: ByIdViewModel by viewModels()
     private val args: ByIdFragmentArgs by navArgs()
 
-    lateinit var binding: ByIdFragmentBinding
+    private var _binding: ByIdFragmentBinding? = null
+    private val binding get() = _binding!!
     private lateinit var listItemListener: OnItemClickListener
     private lateinit var longClickListener: OnItemLongClickListener
     private lateinit var predictionListView: ListView
@@ -42,7 +43,7 @@ class ByIdFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = ByIdFragmentBinding.inflate(inflater, container, false)
+        _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         predictionListView = binding.predictionListView
         stopIdEditText = binding.stopEntryEditText
         if (args.selectedNearbyStop != "none") byIdViewModel.getStopPredictions(args.selectedNearbyStop)
@@ -123,7 +124,7 @@ class ByIdFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
-        binding.unbind()
+        _binding = null
     }
 }
 
