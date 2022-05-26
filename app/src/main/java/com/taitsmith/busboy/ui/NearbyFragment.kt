@@ -24,20 +24,23 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var listItemListener: OnItemClickListener
     private lateinit var listItemLongListener: OnItemLongClickListener
     private lateinit var nearbyStopListView: ListView
-    private lateinit var binding: NearbyFragmentBinding
     private lateinit var nearbySearchButton: Button
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
 
+    private var _binding: NearbyFragmentBinding? = null
+    private var _nearbyAdapter: NearbyAdapter? = null
+    private val binding get() = _binding!!
+    private val nearbyAdapter get() = _nearbyAdapter!!
+
     private val nearbyViewModel: NearbyViewModel by viewModels()
-    private var nearbyAdapter: NearbyAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = NearbyFragmentBinding.inflate(inflater, container, false)
+        _binding = NearbyFragmentBinding.inflate(inflater, container, false)
         buslineSpinner = binding.buslineSpinner
         nearbyStopListView = binding.nearbyListView
         nearbySearchButton = binding.nearbySearchButton
@@ -79,14 +82,16 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onDestroyView() {
-        nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
-        binding.unbind()
         super.onDestroyView()
+        nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
+        buslineSpinner.adapter = null
+        _nearbyAdapter = null
+        _binding = null
     }
 
     private fun setObservers() {
         nearbyViewModel.mutableNearbyStops.observe(viewLifecycleOwner) {
-            nearbyAdapter = NearbyAdapter(it)
+            _nearbyAdapter = NearbyAdapter(it)
             nearbyStopListView.adapter = nearbyAdapter
             MainActivityViewModel.mutableStatusMessage.setValue("LOADED")
         }

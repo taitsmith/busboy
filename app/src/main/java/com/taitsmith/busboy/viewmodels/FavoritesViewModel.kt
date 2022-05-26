@@ -1,18 +1,14 @@
 package com.taitsmith.busboy.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.di.MapsApiInterface
-import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
-import com.taitsmith.busboy.ui.MainActivity
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,10 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(application: Application,
-                                             @AcTransitApiInterface private val acTransitApiInterface: ApiInterface,
-                                             @MapsApiInterface private val mapsApiInterface: ApiInterface,
                                              private val databaseRepository: DatabaseRepository
-                        ): AndroidViewModel(application) {
+                                            ): AndroidViewModel(application) {
 
     private lateinit var favoriteLinesList: List<StopDestinationResponse.RouteDestination>
     val stopList: MutableLiveData<List<Stop>> by lazy {
@@ -38,17 +32,20 @@ class FavoritesViewModel @Inject constructor(application: Application,
         }
     }
 
-    fun getFavoriteLines() {
-        viewModelScope.launch(Dispatchers.IO) {
-            favoriteLinesList = databaseRepository.getAllLines()
-        }
-    }
-
     companion object {
         lateinit var favoriteStops: MutableList<Stop>
+        lateinit var stopToDelete: MutableLiveData<Stop>
+    }
+
+    fun deleteStop(stop: Stop) {
+        viewModelScope.launch(Dispatchers.IO) {
+            databaseRepository.deleteStop(stop)
+        }
+        mutableStatusMessage.value = "STOP_DELETED"
     }
 
     init {
         favoriteStops = ArrayList()
+        stopToDelete = MutableLiveData()
     }
 }
