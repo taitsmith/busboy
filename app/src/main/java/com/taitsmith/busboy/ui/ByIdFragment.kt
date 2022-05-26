@@ -124,6 +124,7 @@ class ByIdFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
+        predictionListView.adapter = null
         _binding = null
     }
 }

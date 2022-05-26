@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.data.Bus
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
@@ -140,8 +141,11 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
             "FAVORITE_ADDED" -> Snackbar.make(
                 binding.root, R.string.snackbar_favorite_added,
                 Snackbar.LENGTH_LONG).show()
+            "STOP_DELETED" -> Snackbar.make(binding.root, R.string.sanckbar_favorite_deleted,
+                Snackbar.LENGTH_LONG).show()
             "LOADING" -> hideUi(true)
             "LOADED" -> hideUi(false)
+
         }
     }
 
@@ -173,7 +177,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
                     this
                 )
             }
-            .setNegativeButton(R.string.dialog_no_loc_negative) { _: DialogInterface?, _: Int ->
+            .setNegativeButton(R.string.dialog_no_thanks) { _: DialogInterface?, _: Int ->
                 Snackbar.make(
                     binding.root, R.string.snackbar_location_disabled,
                     Snackbar.LENGTH_LONG
@@ -183,6 +187,17 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
             .show()
     }
 
+    private fun askToDeleteStop(stop: Stop) {
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setCancelable(false)
+        builder.setMessage(R.string.dialog_delete_stop)
+            .setPositiveButton(R.string.dialog_delete_stop_yes) { _: DialogInterface?, _: Int ->
+                FavoritesViewModel.stopToDelete.value = stop
+            }
+            .setNegativeButton(R.string.dialog_no_thanks, null)
+            .create()
+            .show()
+    }
     private fun showHelp() {
         val builder = MaterialAlertDialogBuilder(this)
         builder.setMessage(R.string.dialog_help)
@@ -243,6 +258,11 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     }
 
     override fun onIdLongClick(position: Int) {}
+
+    override fun onFavoriteLongClick(position: Int) {
+        val stop = FavoritesViewModel.favoriteStops[position]
+        askToDeleteStop(stop)
+    }
 
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
