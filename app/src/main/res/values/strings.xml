@@ -24,19 +24,21 @@
         of that bus on a map.\n\nBusboy is currently in a beta testing state, so there are potential bugs.
         For bug reports and feature requests, please file an issue on github.com/taitsmith/busboy or
         send an email to busboy@taitsmith.com</string>
+<<<<<<< HEAD
     <string name="dialog_in_beta">Busboy is currently in a beta testing state, so there are potential
         bugs. For bug reports and feature requests, please file an issue on github.com/taitsmith/busboy
         or send an email to busboy@taitsmith.com</string>
     <string name="dialog_delete_stop">Do you want to delete this stop from your favorites list? You
         can always re-add it later.</string>
     <string name="dialog_delete_stop_yes">Delete stop</string>
+=======
+>>>>>>> master
 
     <!-- snackbars -->
     <string name="snackbar_404">Nothing found (Your search returned a 404 error)</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
-    <string name="snackbar_no_polyline">Looks like there aren\'t any directions</string>
     <string name="snackbar_null_bus_coords">Looks like there\'s no data for this bus</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="snackbar_network_error">Looks like a network issue, try again shortly</string>
@@ -50,7 +52,6 @@
     <string name="tab_layout_nearby">Nearby</string>
     <string name="tab_layout_help">Help</string>
     <string name="tab_layout_favorites">Favorites</string>
-    <string name="title_activity_maps">MapsActivity</string>
 
     <!-- strings for accessibility -->
     <string name="accessibility_busflag_img_desc">An image displaying a a picture of an AC Transit
