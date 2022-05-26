@@ -99,32 +99,22 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     private fun getErrorMessage(s: String) {
         hideUi(false)
         when (s) {
+            "NO_LOC_ENABLED" -> askToEnableLoc()
             "NO_PERMISSION" -> ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 PERMISSION_REQUEST_FINE_LOCATION)
-            "404" -> Snackbar.make(
-                binding.root, R.string.snackbar_404,
-                Snackbar.LENGTH_LONG).show()
-            "NO_LOC_ENABLED" -> askToEnableLoc()
-            "BAD_INPUT" -> Snackbar.make(
-                binding.root, R.string.snackbar_bad_input,
-                Snackbar.LENGTH_LONG).show()
-            "NULL_PRED_RESPONSE" -> Snackbar.make(
-                binding.root, R.string.snackbar_no_predictions,
-                Snackbar.LENGTH_LONG).show()
-            "NULL_BUS_COORDS" -> Snackbar.make(
-                binding.root, R.string.snackbar_null_bus_coords,
-                Snackbar.LENGTH_LONG).show()
-            "CALL_FAILURE" -> Snackbar.make(
-                binding.root, R.string.snackbar_network_error,
-                Snackbar.LENGTH_LONG).show()
-            "BAD_DISTANCE" -> Snackbar.make(
-                binding.root, R.string.snackbar_bad_distance,
-                Snackbar.LENGTH_LONG).show()
-            "NO_FAVORITE_STOPS" -> Snackbar.make(
-                binding.root, R.string.snackbar_no_favorites,
-                Snackbar.LENGTH_LONG).show()
+            "404" -> showSnackbar(R.string.snackbar_404)
+            "BAD_INPUT" -> showSnackbar(R.string.snackbar_bad_input)
+            "NULL_PRED_RESPONSE" -> showSnackbar(R.string.snackbar_no_predictions)
+            "NULL_BUS_COORDS" -> showSnackbar(R.string.snackbar_null_bus_coords)
+            "CALL_FAILURE" -> showSnackbar(R.string.snackbar_network_error)
+            "BAD_DISTANCE" -> showSnackbar(R.string.snackbar_bad_distance)
+            "NO_FAVORITE_STOPS" -> showSnackbar(R.string.snackbar_no_favorites)
         }
+    }
+
+    private fun showSnackbar(message: Int) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
     private fun getStatusMessage(s: String) {
@@ -138,11 +128,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
                 navController.navigate(action)
             }
-            "FAVORITE_ADDED" -> Snackbar.make(
-                binding.root, R.string.snackbar_favorite_added,
-                Snackbar.LENGTH_LONG).show()
-            "STOP_DELETED" -> Snackbar.make(binding.root, R.string.sanckbar_favorite_deleted,
-                Snackbar.LENGTH_LONG).show()
+            "FAVORITE_ADDED" -> showSnackbar(R.string.snackbar_favorite_added)
+            "STOP_DELETED" -> showSnackbar(R.string.snackbar_favorite_deleted)
             "LOADING" -> hideUi(true)
             "LOADED" -> hideUi(false)
 
