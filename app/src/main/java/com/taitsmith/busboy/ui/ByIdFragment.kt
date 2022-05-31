@@ -2,7 +2,6 @@ package com.taitsmith.busboy.ui
 
 import dagger.hilt.android.AndroidEntryPoint
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import android.widget.EditText
 import com.taitsmith.busboy.utils.PredictionAdapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -31,7 +30,6 @@ class ByIdFragment : Fragment() {
     private val predictionListView get() = _predictionListView!!
     private val binding get() = _binding!!
 
-    private lateinit var stopIdEditText: EditText
     private lateinit var predictionAdapter: PredictionAdapter
 
     var predictionList: List<Prediction>? = null
@@ -42,8 +40,10 @@ class ByIdFragment : Fragment() {
     ): View {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
-        stopIdEditText = binding.stopEntryEditText
-//        if (args.selectedNearbyStop != "none") byIdViewModel.getStopPredictions(args.selectedNearbyStop)
+        if (args.selectedNearbyStop != null) {
+            byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!)
+            byIdViewModel.stop = args.selectedNearbyStop
+        }
         setListeners()
         return binding.root
     }
@@ -93,7 +93,7 @@ class ByIdFragment : Fragment() {
     private fun search() {
         if (binding.stopEntryEditText.text.length == 5) {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-            byIdViewModel.getStopPredictions(stopIdEditText.text.toString())
+            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString())
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         }
