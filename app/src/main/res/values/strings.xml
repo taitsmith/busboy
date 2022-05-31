@@ -18,12 +18,21 @@
     <string name="dialog_help">You can search for nearby stops if you\'ve granted busboy permission
         to view your location and have the location setting enabled. If you\'re already at your stop,
         you can find upcoming buses by entering your stop ID (found at the bottom of the sign) and
-        pressing the search button.\n\nLong-pressing a \'nearby\' stop will display a map of
-        walking directions from your location to the stop, and short-pressing will display a list of
-        upcoming buses for that stop. Short pressing a bus prediction will display the current location
-        of that bus on a map.\n\nBusboy is currently in a beta testing state, so there are potential bugs.
-        For bug reports and feature requests, please file an issue on github.com/taitsmith/busboy or
-        send an email to busboy@taitsmith.com</string>
+        pressing the search button.
+        \n\nNearby:
+        \nLong pressing a \'nearby\' stop will display a map of walking directions from your location
+        to the stop, and short-pressing will display a list of upcoming buses for that stop. By default,
+        Busboy shows you all stops within 1000 feet of your location. You can specify any distance
+        up to 5000 feet, or select a line from the drop-down menu to see only stops that serve that line.
+        \n\nPredictions:
+        \nShort pressing a bus prediction will display the current location of that bus on a map. Long
+        pressing a prediction will show you detailed information about that bus (its license plate,
+        VIN number, seating capacity etc). Clicking the heart button will add that stop to your
+        favorites.
+        \n\nFavorites:
+        \nShort pressing an item on your favorites list will show you upcoming buses for that stop.
+        \n\nFor bug reports, feature requests or contributions, please visit github.com/taitsmith/busboy
+        or send an email to busboy@taitsmith.com</string>
     <string name="dialog_delete_stop">Do you want to delete this stop from your favorites list? You
         can always re-add it later.</string>
     <string name="dialog_delete_stop_yes">Delete stop</string>
