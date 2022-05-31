@@ -20,12 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.data.Bus
-import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.viewmodels.FavoritesViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -175,17 +173,6 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
             .show()
     }
 
-    private fun askToDeleteStop(stop: Stop) {
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setCancelable(false)
-        builder.setMessage(R.string.dialog_delete_stop)
-            .setPositiveButton(R.string.dialog_delete_stop_yes) { _: DialogInterface?, _: Int ->
-                FavoritesViewModel.stopToDelete.value = stop
-            }
-            .setNegativeButton(R.string.dialog_no_thanks, null)
-            .create()
-            .show()
-    }
     private fun showHelp() {
         val builder = MaterialAlertDialogBuilder(this)
         builder.setMessage(R.string.dialog_help)
@@ -213,44 +200,13 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         }
     }
 
-    //the five following are for listviews on nearby, by id && favorites fragments
-    override fun onNearbyItemSelected(position: Int) {
-        val s = NearbyViewModel.stopList[position]!!.stopId
-        val action = NearbyFragmentDirections.actionNearbyFragmentToByIdFragment(s!!)
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        ByIdViewModel.predictionList.clear()
-        navController.navigate(action)
-    }
-
     override fun onIdItemSelected(position: Int) {
         prediction = ByIdViewModel.predictionList[position]
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         mainActivityViewModel!!.getBusLocation(prediction.vid!!)
     }
 
-    override fun onFavoriteItemSelected(position: Int) {
-        val s = FavoritesViewModel.favoriteStops[position].stopId
-        val action = FavoritesFragmentDirections.actionFavoritesFragmentToByIdFragment(s!!)
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        ByIdViewModel.predictionList.clear()
-        navController.navigate(action)
-    }
-
-    override fun onNearbyLongClick(position: Int) {
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        val (_, _, _, latitude, longitude) = NearbyViewModel.stopList[position]!!
-        val start =
-            NearbyViewModel.loc.latitude.toString() + "," + NearbyViewModel.loc.longitude.toString()
-        val end = (latitude!!).toString() + "," + (longitude!!).toString()
-        mainActivityViewModel!!.getDirectionsToStop(start, end)
-    }
-
     override fun onIdLongClick(position: Int) {}
-
-    override fun onFavoriteLongClick(position: Int) {
-        val stop = FavoritesViewModel.favoriteStops[position]
-        askToDeleteStop(stop)
-    }
 
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
