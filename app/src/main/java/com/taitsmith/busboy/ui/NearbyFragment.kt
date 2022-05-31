@@ -64,7 +64,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         adapter = NearbyAdapter ({ stop ->
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = NearbyFragmentDirections
-                .actionNearbyFragmentToByIdFragment(stop.stopId!!)
+                .actionNearbyFragmentToByIdFragment(stop)
             view.findNavController().navigate(action)
         }, {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"

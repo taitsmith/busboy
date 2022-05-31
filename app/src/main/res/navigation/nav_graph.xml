@@ -20,8 +20,7 @@
             app:destination="@id/mapsFragment" />
         <argument
             android:name="selectedNearbyStop"
-            app:argType="string"
-            android:defaultValue="none"/>
+            app:argType="com.taitsmith.busboy.data.Stop" />
     </fragment>
     <fragment
         android:id="@+id/favoritesFragment"
@@ -39,11 +38,11 @@
         android:name="com.taitsmith.busboy.ui.NearbyFragment"
         android:label="NearbyFragment" >
         <action
-            android:id="@+id/action_nearbyFragment_to_byIdFragment"
-            app:destination="@id/byIdFragment" />
-        <action
             android:id="@+id/action_nearbyFragment_to_mapsFragment"
             app:destination="@id/mapsFragment" />
+        <action
+            android:id="@+id/action_nearbyFragment_to_byIdFragment"
+            app:destination="@id/byIdFragment" />
     </fragment>
     <fragment
         android:id="@+id/mapsFragment"

@@ -1,57 +1,62 @@
 package com.taitsmith.busboy.utils
 
-import android.widget.BaseAdapter
-import android.view.ViewGroup
 import android.view.LayoutInflater
-import android.view.View
-import com.taitsmith.busboy.api.StopPredictionResponse
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ListItemScheduleBinding
 
-class PredictionAdapter(var predictionList: List<StopPredictionResponse.BustimeResponse.Prediction>) :
-    BaseAdapter() {
-    var binding: ListItemScheduleBinding? = null
-    override fun getCount(): Int {
-        return predictionList.size
-    }
+class PredictionAdapter(
+    private val onItemClicked: (Prediction) -> Unit,
+    private val onItemLongClicked: (Prediction) -> Unit
+): ListAdapter<Prediction, PredictionAdapter.PredictionViewHolder>(DiffCallback) {
 
-    override fun getItem(i: Int): Any? {
-        return null
-    }
+    companion object {
+        private val DiffCallback = object: DiffUtil.ItemCallback<Prediction>() {
+            override fun areItemsTheSame(oldItem: Prediction, newItem: Prediction): Boolean {
+                return oldItem.stpnm == newItem.stpnm
+            }
 
-    override fun getItemId(i: Int): Long {
-        return i.toLong()
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
-
-    override fun getViewTypeCount(): Int {
-        return if (predictionList.isEmpty()) {
-            1
-        } else predictionList.size
-    }
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val holder: ViewHolder
-        val p = predictionList[p0]
-        if (p1 == null) {
-            binding = ListItemScheduleBinding.inflate(
-                LayoutInflater.from(p2!!.context),
-                p2, false
-            )
-            holder = ViewHolder(binding!!)
-            holder.view = binding!!.root
-            holder.view.tag = holder
-        } else {
-            holder = p1.tag as ViewHolder
+            override fun areContentsTheSame(oldItem: Prediction, newItem: Prediction): Boolean {
+                return oldItem == newItem
+            }
         }
-        binding!!.prediction = p
-        return holder.view
     }
 
-    private class ViewHolder constructor(binding: ListItemScheduleBinding) {
-        var view: View = binding.root
+    override fun onCreateViewHolder( parent: ViewGroup, viewType: Int): PredictionViewHolder {
+        val viewHolder = PredictionViewHolder(
+            ListItemScheduleBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
 
+        viewHolder.itemView.setOnClickListener {
+            val position = viewHolder.bindingAdapterPosition
+            onItemClicked(getItem(position))
+        }
+
+        viewHolder.itemView.setOnLongClickListener {
+            val position = viewHolder.bindingAdapterPosition
+            onItemLongClicked(getItem(position))
+            true
+        }
+
+        return viewHolder
+    }
+
+    override fun onBindViewHolder(holder: PredictionViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    class PredictionViewHolder(
+        private var binding: ListItemScheduleBinding
+    ): RecyclerView.ViewHolder(binding.root) {
+        fun bind(prediction: Prediction) {
+            binding.prediction = prediction
+        }
     }
 }

@@ -20,9 +20,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.data.Bus
+import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
-import com.taitsmith.busboy.utils.OnItemClickListener
-import com.taitsmith.busboy.utils.OnItemLongClickListener
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
@@ -30,14 +29,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickListener {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
-    lateinit var prediction: StopPredictionResponse.BustimeResponse.Prediction
 
     private var nearbyStatusUpdateTv: TextView? = null
+
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
@@ -200,14 +199,6 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         }
     }
 
-    override fun onIdItemSelected(position: Int) {
-        prediction = ByIdViewModel.predictionList[position]
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-        mainActivityViewModel!!.getBusLocation(prediction.vid!!)
-    }
-
-    override fun onIdLongClick(position: Int) {}
-
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
         var mainActivityViewModel: MainActivityViewModel? = null
@@ -215,5 +206,6 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         var mutableBus: MutableLiveData<Bus> = MutableLiveData()
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
         lateinit var acTransitApiKey: String
+        lateinit var prediction: Prediction
     }
 }

@@ -44,7 +44,7 @@ class FavoritesFragment : Fragment() {
         val adapter = NearbyAdapter ({
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = FavoritesFragmentDirections
-                .actionFavoritesFragmentToByIdFragment(it.stopId!!)
+                .actionFavoritesFragmentToByIdFragment(it)
             view.findNavController().navigate(action)
         }, {
             favoritesViewModel.deleteStop(it)
