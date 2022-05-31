@@ -6,10 +6,15 @@ import com.taitsmith.busboy.utils.NearbyAdapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.coroutineScope
+import androidx.navigation.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding
@@ -17,21 +22,21 @@ import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.utils.OnItemClickListener
 import com.taitsmith.busboy.utils.OnItemLongClickListener
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import kotlinx.coroutines.launch
 import java.lang.ClassCastException
 
 @AndroidEntryPoint
 class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var listItemListener: OnItemClickListener
     private lateinit var listItemLongListener: OnItemLongClickListener
-    private lateinit var nearbyStopListView: ListView
+    private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
+    private lateinit var adapter: NearbyAdapter
 
     private var _binding: NearbyFragmentBinding? = null
-    private var _nearbyAdapter: NearbyAdapter? = null
     private val binding get() = _binding!!
-    private val nearbyAdapter get() = _nearbyAdapter!!
 
     private val nearbyViewModel: NearbyViewModel by viewModels()
 
@@ -42,7 +47,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     ): View {
         _binding = NearbyFragmentBinding.inflate(inflater, container, false)
         buslineSpinner = binding.buslineSpinner
-        nearbyStopListView = binding.nearbyListView
         nearbySearchButton = binding.nearbySearchButton
         nearbyEditText = binding.nearbyEditText
 
@@ -61,10 +65,21 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         nearbyViewModel.checkLocationPerm()
-        if (!MainActivity.enableNearbySearch) {
-            nearbySearchButton.isEnabled = false
-            nearbySearchButton.isClickable = false
-        }
+        if (!MainActivity.enableNearbySearch) nearbySearchButton.isEnabled = false
+
+        nearbyStopListView = binding.nearbyListView
+        nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
+
+        adapter = NearbyAdapter ({ stop ->
+            val action = FavoritesFragmentDirections
+                .actionFavoritesFragmentToByIdFragment(stop.stopId!!)
+            view.findNavController().navigate(action)
+        }, {
+            Log.d("LONG :" , it.name!!)
+        })
+
+        nearbyStopListView.adapter = adapter
+
         setObservers()
     }
 
@@ -85,29 +100,27 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         super.onDestroyView()
         nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
         buslineSpinner.adapter = null
-        _nearbyAdapter = null
         _binding = null
     }
 
     private fun setObservers() {
         nearbyViewModel.mutableNearbyStops.observe(viewLifecycleOwner) {
-            _nearbyAdapter = NearbyAdapter(it)
-            nearbyStopListView.adapter = nearbyAdapter
-            MainActivityViewModel.mutableStatusMessage.setValue("LOADED")
+            adapter.submitList(it)
+            MainActivityViewModel.mutableStatusMessage.value = "LOADED"
         }
     }
 
     private fun setListeners() {
-        nearbyStopListView.onItemClickListener =
-            AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-                listItemListener.onNearbyItemSelected(i)
-            }
-
-        nearbyStopListView.onItemLongClickListener =
-            AdapterView.OnItemLongClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-                listItemLongListener.onNearbyLongClick(i)
-                true
-            }
+//        nearbyStopListView.onItemClickListener =
+//            AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+//                listItemListener.onNearbyItemSelected(i)
+//            }
+//
+//        nearbyStopListView.onItemLongClickListener =
+//            AdapterView.OnItemLongClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+//                listItemLongListener.onNearbyLongClick(i)
+//                true
+//            }
 
         nearbySearchButton.setOnClickListener {
             val s = nearbyEditText.text.toString()

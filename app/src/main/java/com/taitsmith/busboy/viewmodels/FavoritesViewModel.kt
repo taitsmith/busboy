@@ -11,6 +11,8 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableEr
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,13 +26,7 @@ class FavoritesViewModel @Inject constructor(application: Application,
         MutableLiveData<List<Stop>>()
     }
 
-    fun getFavoriteStops() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val stops = databaseRepository.getAllStops()
-            if (stops.isEmpty()) mutableErrorMessage.postValue("NO_FAVORITE_STOPS")
-            else stopList.postValue(stops)
-        }
-    }
+    fun getFavoriteStops(): Flow<List<Stop>> = databaseRepository.getAllStops()
 
     companion object {
         lateinit var favoriteStops: MutableList<Stop>

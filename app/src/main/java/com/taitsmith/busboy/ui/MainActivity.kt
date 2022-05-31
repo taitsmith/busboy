@@ -34,13 +34,14 @@ import im.delight.android.location.SimpleLocation
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickListener {
 
-    private lateinit var binding: ActivityMainBinding
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
     lateinit var prediction: StopPredictionResponse.BustimeResponse.Prediction
 
     private var nearbyStatusUpdateTv: TextView? = null
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
 
     var nearbyFragment: NearbyFragment? = null
     var byIdFragment: ByIdFragment? = null
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         acTransitApiKey = getString(R.string.ac_transit_key)
         mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
         bottomNavigationView = binding.mainTabLayout
@@ -152,7 +153,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnItemLongClickLi
         MainActivityViewModel.mutableStatusMessage.removeObservers(this)
         MainActivityViewModel.mutableErrorMessage.removeObservers(this)
         mainActivityViewModel = null
-        binding.unbind()
+        _binding = null
     }
 
     private fun askToEnableLoc() {
