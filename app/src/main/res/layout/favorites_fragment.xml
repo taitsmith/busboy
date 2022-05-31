@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         tools:context=".ui.FavoritesFragment">
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/favoritesListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

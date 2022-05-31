@@ -59,9 +59,9 @@
             app:srcCompat="@drawable/ic_busflag"
             tools:ignore="ImageContrastCheck" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/predictionListView"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"

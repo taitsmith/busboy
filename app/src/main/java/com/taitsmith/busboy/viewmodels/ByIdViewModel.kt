@@ -8,7 +8,7 @@ import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.api.StopPredictionResponse
-import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction
+import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.di.ApiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

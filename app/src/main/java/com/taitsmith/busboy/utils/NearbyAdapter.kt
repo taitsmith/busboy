@@ -1,55 +1,61 @@
 package com.taitsmith.busboy.utils
 
-import android.widget.BaseAdapter
-import android.view.ViewGroup
 import android.view.LayoutInflater
-import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.ListItemNearbyBinding
 
-class NearbyAdapter(var stopList: List<Stop?>) : BaseAdapter() {
-    var binding: ListItemNearbyBinding? = null
-    override fun getCount(): Int {
-        return stopList.size
-    }
+class NearbyAdapter(
+    private val onItemClicked: (Stop) -> Unit,
+    private val onItemLongClick: (Stop) -> Unit
+): ListAdapter<Stop, NearbyAdapter.NearbyViewHolder>(DiffCallback) {
 
-    override fun getItem(i: Int): Any? {
-        return null
-    }
+    companion object {
+        private val DiffCallback = object: DiffUtil.ItemCallback<Stop>() {
+            override fun areItemsTheSame(oldItem: Stop, newItem: Stop): Boolean {
+                return oldItem.id == newItem.id
+            }
 
-    override fun getItemId(i: Int): Long {
-        return i.toLong()
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
-
-    override fun getViewTypeCount(): Int {
-        return if (stopList.isEmpty()) {
-            1
-        } else stopList.size
-    }
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val holder: ViewHolder
-        val stop = stopList[p0]
-        if (p1 == null) {
-            binding = ListItemNearbyBinding.inflate(
-                LayoutInflater.from(p2!!.context),
-                p2, false
-            )
-            holder = ViewHolder(binding!!)
-            holder.view = binding!!.root
-            holder.view.tag = holder
-        } else {
-            holder = p1.tag as ViewHolder
+            override fun areContentsTheSame(oldItem: Stop, newItem: Stop): Boolean {
+                return oldItem == newItem
+            }
         }
-        binding!!.stop = stop
-        return holder.view
     }
 
-    private class ViewHolder(binding: ListItemNearbyBinding) {
-        var view: View = binding.root
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NearbyViewHolder {
+        val viewHolder = NearbyViewHolder(
+            ListItemNearbyBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+
+        viewHolder.itemView.setOnClickListener {
+            val position = viewHolder.bindingAdapterPosition
+            onItemClicked(getItem(position))
+        }
+
+        viewHolder.itemView.setOnLongClickListener {
+            val position = viewHolder.bindingAdapterPosition
+            onItemLongClick(getItem(position))
+            true
+        }
+        return viewHolder
+    }
+
+    override fun onBindViewHolder(holder: NearbyViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    class NearbyViewHolder(
+        private var binding: ListItemNearbyBinding
+    ): RecyclerView.ViewHolder(binding.root) {
+        fun bind(stop: Stop) {
+            binding.stop = stop
+        }
     }
 }

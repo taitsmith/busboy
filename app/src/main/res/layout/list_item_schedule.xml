@@ -9,12 +9,12 @@
             type="com.taitsmith.busboy.utils.PredictionAdapter" />
         <variable
             name="prediction"
-            type="com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse.Prediction" />
+            type="com.taitsmith.busboy.data.Prediction" />
     </data>
 <androidx.cardview.widget.CardView
     android:id="@+id/scheduleListCardView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     app:cardElevation="4dp"
     app:cardCornerRadius="4dp">
 

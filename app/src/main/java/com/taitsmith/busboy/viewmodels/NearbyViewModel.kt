@@ -77,13 +77,17 @@ class NearbyViewModel @Inject constructor(application: Application,
                     val response: Response<StopDestinationResponse?> = call!!.execute()
                     if (response.isSuccessful) {
                         val sb = StringBuilder()
-                        val destinations = response.body()?.routeDestinations!!
-                        destinations.forEach {
-                            sb.append(it.routeId)
-                                .append(" ")
-                                .append(it.destination)
-                                .append("\n")
-                            s.linesServed = sb.toString()
+                        if (response.body()!!.status == "No service today at this stop") {
+                            sb.append(response.body()!!.status) //sometimes this call returns a no service,
+                        } else {                                //even if there's service (happened today [memorial day])
+                            val destinations = response.body()?.routeDestinations!!
+                            destinations.forEach {
+                                sb.append(it.routeId)
+                                    .append(" ")
+                                    .append(it.destination)
+                                    .append("\n")
+                                s.linesServed = sb.toString()
+                            }
                         }
                     } else {
                         mutableErrorMessage.postValue("404")

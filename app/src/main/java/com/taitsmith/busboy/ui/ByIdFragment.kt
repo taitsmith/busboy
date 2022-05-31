@@ -1,26 +1,22 @@
 package com.taitsmith.busboy.ui
 
-import android.content.Context
 import dagger.hilt.android.AndroidEntryPoint
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.api.StopPredictionResponse.BustimeResponse
 import android.widget.EditText
 import com.taitsmith.busboy.utils.PredictionAdapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
-import android.widget.AbsListView
-import android.widget.AdapterView
-import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
-import com.taitsmith.busboy.utils.OnItemClickListener
-import com.taitsmith.busboy.utils.OnItemLongClickListener
+import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
-import java.lang.ClassCastException
 import java.lang.IndexOutOfBoundsException
 
 @AndroidEntryPoint
@@ -30,23 +26,24 @@ class ByIdFragment : Fragment() {
     private val args: ByIdFragmentArgs by navArgs()
 
     private var _binding: ByIdFragmentBinding? = null
+    private var _predictionListView: RecyclerView? = null
+
+    private val predictionListView get() = _predictionListView!!
     private val binding get() = _binding!!
-    private lateinit var listItemListener: OnItemClickListener
-    private lateinit var longClickListener: OnItemLongClickListener
-    private lateinit var predictionListView: ListView
+
     private lateinit var stopIdEditText: EditText
     private lateinit var predictionAdapter: PredictionAdapter
 
-    var predictionList: List<BustimeResponse.Prediction>? = null
+    var predictionList: List<Prediction>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
-        predictionListView = binding.predictionListView
+        _predictionListView = binding.predictionListView
         stopIdEditText = binding.stopEntryEditText
-        if (args.selectedNearbyStop != "none") byIdViewModel.getStopPredictions(args.selectedNearbyStop)
+//        if (args.selectedNearbyStop != "none") byIdViewModel.getStopPredictions(args.selectedNearbyStop)
         setListeners()
         return binding.root
     }
@@ -54,51 +51,32 @@ class ByIdFragment : Fragment() {
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
         binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
-        predictionListView.onItemClickListener =
-            AdapterView.OnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-                listItemListener.onIdItemSelected(i)
-            }
-        predictionListView.onItemLongClickListener =
-            AdapterView.OnItemLongClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-                longClickListener.onIdLongClick(i)
-                true
-            }
-
-        predictionListView.setOnScrollListener(object: AbsListView.OnScrollListener {
-            override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
-            //hide the fab when we get to the bottom of the list, unless the whole list is visible
-            override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {
-                if (p1 == (p3 - p2) && (p2 != p3)) binding.addToFavoritesFab.visibility = View.INVISIBLE
-                else binding.addToFavoritesFab.visibility = View.VISIBLE
-            }
-        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        predictionListView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        predictionAdapter = PredictionAdapter({
+            prediction ->
+            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+            MainActivity.prediction = prediction
+            mainActivityViewModel!!.getBusLocation(prediction.vid!!)
+        },{
+
+        })
+        predictionListView.adapter = predictionAdapter
+
         setObservers()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        try {
-            listItemListener = context as OnItemClickListener
-            longClickListener = context as OnItemLongClickListener
-        } catch (e: ClassCastException) {
-            throw ClassCastException(
-                context.toString() +
-                        "Must Implement OnListItemSelectedListener"
-            )
-        }
-    }
 
     private fun setObservers() {
         byIdViewModel.mutableStopPredictions.observe(
             viewLifecycleOwner
-        ) { predictions: List<BustimeResponse.Prediction> ->
+        ) { predictions: List<Prediction> ->
             predictionList = predictions
-            predictionAdapter = PredictionAdapter(predictionList!!)
-            predictionListView.adapter = predictionAdapter
+            predictionAdapter.submitList(predictionList)
             binding.busFlagIV.visibility = View.INVISIBLE
             try {
                 val s = predictions[0].stpnm
@@ -125,7 +103,9 @@ class ByIdFragment : Fragment() {
         super.onDestroyView()
         byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
+        binding.unbind()
         _binding = null
+        _predictionListView = null
     }
 }
 
