@@ -20,7 +20,17 @@
             app:destination="@id/mapsFragment" />
         <argument
             android:name="selectedNearbyStop"
-            app:argType="com.taitsmith.busboy.data.Stop" />
+            app:argType="com.taitsmith.busboy.data.Stop"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <action
+            android:id="@+id/action_byIdFragment_to_busDetailFragment"
+            app:destination="@id/busDetailFragment" />
+        <action
+            android:id="@+id/action_byIdFragment_to_busDetailFragment2"
+            app:destination="@id/busDetailFragment" />
+        <argument android:name="selectedBus"
+            app:argType="com.taitsmith.busboy.data.Bus" />
     </fragment>
     <fragment
         android:id="@+id/favoritesFragment"
@@ -53,5 +63,13 @@
             android:name="polylineType"
             app:argType="string"
             android:defaultValue="route" />
+    </fragment>
+    <fragment
+        android:id="@+id/busDetailFragment"
+        android:name="com.taitsmith.busboy.ui.BusDetailFragment"
+        android:label="BusDetailFragment" >
+        <action
+            android:id="@+id/action_busDetailFragment_to_byIdFragment"
+            app:destination="@id/byIdFragment" />
     </fragment>
 </navigation>
