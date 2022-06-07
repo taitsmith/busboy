@@ -10,7 +10,9 @@ import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.api.ApiInterface
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.di.ApiRepository
+import com.taitsmith.busboy.ui.MainActivity.Companion.mutableBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,6 +71,21 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                 override fun onFailure(call: Call<StopPredictionResponse>, t: Throwable) {
                     Log.d("BUS LIST FAILURE", t.message!!)
                     MainActivityViewModel.mutableErrorMessage.value = "CALL_FAILURE"
+                }
+            })
+        }
+    }
+
+    fun getBusDetails(vid: String) {
+        viewModelScope.launch {
+            val call = acTransitApiInterface.getDetailedVehicleInfo(vid)
+            call.enqueue(object: Callback<List<Bus>> {
+                override fun onResponse(call: Call<List<Bus>>, response: Response<List<Bus>>) {
+                    mutableBus.value = response.body()!![0]
+                }
+
+                override fun onFailure(call: Call<List<Bus>>, t: Throwable) {
+                    Log.d("BUS DETAIL FAILURE: ", t.message!!)
                 }
             })
         }

@@ -24,6 +24,8 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
+import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
@@ -83,14 +85,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setObservers() {
-        MainActivityViewModel.mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
-        MainActivityViewModel.mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
-        mutableBus.observe(this) {
-            mainActivityViewModel!!.getWaypoints(
-                prediction.rt!!
-            )
-        }
+        mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
+        mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
         mutableNearbyStatusUpdater.observe(this) { s -> updateNearbyStatusText(s) }
+
+        /*  we want to determine if we're going to take this bus and display its location
+            on a map, or if we're going to take it and display detailed information about
+            it to the user. the bus object for map display has minimal information so we can
+            check if certain things are null/empty and determine where to go from there
+         */
+        mutableBus.observe(this) { bus ->
+            if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(prediction.rt!!)
+            else {
+                val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
+                navController.navigate(action)
+            }
+        }
     }
 
 

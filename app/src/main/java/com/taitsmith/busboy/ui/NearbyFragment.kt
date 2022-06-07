@@ -83,6 +83,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     override fun onDestroyView() {
         super.onDestroyView()
         nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
+        buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
         _binding = null
     }

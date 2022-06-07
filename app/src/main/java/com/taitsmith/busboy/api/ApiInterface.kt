@@ -8,6 +8,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiInterface {
+
     //returns predictions for given route at stop, otherwise all routes if rt == null
     @GET("actrealtime/prediction/")
     fun getStopPredictionList(
@@ -47,6 +48,13 @@ interface ApiInterface {
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
     ): Call<Bus?>?
+
+    //get detailed info about a bus because you're a nerd and you like that stuff
+     @GET("vehicle/{vehicleId}/characteristics")
+     fun getDetailedVehicleInfo(
+        @Path("vehicleId") vehicleId: String,
+        @Query("token") token: String = MainActivity.acTransitApiKey
+     )
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
