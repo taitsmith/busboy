@@ -10,11 +10,9 @@ import java.io.Serializable
      @SerializedName("CurrentTripId")
      var currentTripId: Int? = null
 
-     @JvmField
      @SerializedName("Latitude")
      var latitude: Double? = null
 
-     @JvmField
      @SerializedName("Longitude")
      var longitude: Double? = null
 
@@ -65,4 +63,7 @@ import java.io.Serializable
 
      @SerializedName("LimitCapacity")
      var limitCapacity: String? = null
+
+     //so we can save this to a db and keep track of all the buses we've ridden
+     var hasRidden: Boolean? = false
  }

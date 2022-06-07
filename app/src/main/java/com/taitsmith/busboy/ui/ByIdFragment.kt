@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,8 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
 import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.IndexOutOfBoundsException
 
 @AndroidEntryPoint
@@ -32,7 +35,7 @@ class ByIdFragment : Fragment() {
 
     private lateinit var predictionAdapter: PredictionAdapter
 
-    var predictionList: List<Prediction>? = null
+    private var predictionList: List<Prediction>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,8 +44,10 @@ class ByIdFragment : Fragment() {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
         if (args.selectedNearbyStop != null) {
-            byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!)
             byIdViewModel.stop = args.selectedNearbyStop
+            lifecycleScope.launch(Dispatchers.IO) {
+                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!)
+            }
         }
         setListeners()
         return binding.root
@@ -63,7 +68,7 @@ class ByIdFragment : Fragment() {
             MainActivity.prediction = prediction
             mainActivityViewModel!!.getBusLocation(prediction.vid!!)
         },{
-
+            byIdViewModel.getBusDetails(it.vid!!)
         })
         predictionListView.adapter = predictionAdapter
 

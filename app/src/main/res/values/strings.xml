@@ -3,7 +3,7 @@
 
     <!-- buttons, edit/text views etc -->
     <string name="search_button_text">Search</string>
-    <string name="stop_id_edit_text_hint">Enter your stop ID</string>
+    <string name="stop_id_edit_text_hint">Enter your stop ID (ex 56669)</string>
     <string name="nearby_edit_text_hint">Search distance (in feet, default 1000)</string>
     <string name="neaby_edit_text_hint_updated">Displaying stops within %1$s feet</string>
     <string name="nearby_status_update">Getting lines for nearby stop %1$s</string>
@@ -36,6 +36,19 @@
     <string name="dialog_delete_stop">Do you want to delete this stop from your favorites list? You
         can always re-add it later.</string>
     <string name="dialog_delete_stop_yes">Delete stop</string>
+
+    <!-- strings for bus detail fragment -->
+    <string name="bus_detail_header">Details for bus %1$s</string>
+    <string name="bus_description">Description: %1$s</string>
+    <string name="bus_vehicle_type_description">Type description: %1$s</string>
+    <string name="bus_make">Make: %1$s</string>
+    <string name="bus_serial">Serial number: %1$s</string>
+    <string name="bus_license">Plate number: %1$s</string>
+    <string name="bus_length">Length: %1$s</string>
+    <string name="bus_propulsion">Powered by: %1$s</string>
+    <string name="bus_wifi_ac">Has WiFi / AC: %1$s / %2$s</string>
+    <string name="bus_limit_capacity">Capacity limit: %1$s</string>
+    <string name="bus_has_ridden">Ridden before?: %1$s</string>
 
 
     <!-- snackbars -->

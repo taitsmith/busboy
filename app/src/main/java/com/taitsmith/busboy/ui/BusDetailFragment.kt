@@ -6,16 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.databinding.FragmentBusDetailBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class BusDetailFragment: Fragment() {
-    private var bus: Bus
-
-    private val args: ByIdFragmentArgs by navArgs()
-
+    private val args: BusDetailFragmentArgs by navArgs()
+    private val bus by lazy {
+        args.selectedBus
+    }
     private var _binding: FragmentBusDetailBinding? = null
     private val binding get() = _binding!!
 
@@ -35,9 +34,5 @@ class BusDetailFragment: Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-    }
-
-    init {
-        bus = args.selectedBus
     }
 }
