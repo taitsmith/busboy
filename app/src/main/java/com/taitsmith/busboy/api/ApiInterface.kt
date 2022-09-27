@@ -54,7 +54,7 @@ interface ApiInterface {
      fun getDetailedVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-     )
+     ): Call<List<Bus>>
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")

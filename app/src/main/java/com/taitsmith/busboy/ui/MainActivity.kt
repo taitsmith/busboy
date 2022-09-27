@@ -18,11 +18,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
-import com.taitsmith.busboy.api.StopPredictionResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
-import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
@@ -102,7 +100,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun getErrorMessage(s: String) {
         hideUi(false)

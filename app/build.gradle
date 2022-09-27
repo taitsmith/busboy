@@ -13,7 +13,7 @@ android {
         storeFile file('/home/tait/bbks.jks')
         }
     }
-    compileSdkVersion 32
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.taitsmith.busboy"
         minSdkVersion 26
