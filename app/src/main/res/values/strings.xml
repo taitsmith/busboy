@@ -21,7 +21,7 @@
         pressing the search button.
         \n\nNearby:
         \nLong pressing a \'nearby\' stop will display a map of walking directions from your location
-        to the stop, and short-pressing will display a list of upcoming buses for that stop. By default,
+        to the stop, and short pressing will display a list of upcoming buses for that stop. By default,
         Busboy shows you all stops within 1000 feet of your location. You can specify any distance
         up to 5000 feet, or select a line from the drop-down menu to see only stops that serve that line.
         \n\nPredictions:
@@ -31,6 +31,7 @@
         favorites.
         \n\nFavorites:
         \nShort pressing an item on your favorites list will show you upcoming buses for that stop.
+        \nLong pressing a favorite will allow you to delete a stop from your favorites.
         \n\nFor bug reports, feature requests or contributions, please visit github.com/taitsmith/busboy
         or send an email to busboy@taitsmith.com</string>
     <string name="dialog_delete_stop">Do you want to delete this stop from your favorites list? You
@@ -44,12 +45,11 @@
     <string name="bus_make">Make: %1$s</string>
     <string name="bus_serial">Serial number: %1$s</string>
     <string name="bus_license">Plate number: %1$s</string>
-    <string name="bus_length">Length: %1$s</string>
+    <string name="bus_length">Length: %1$s feet</string>
     <string name="bus_propulsion">Powered by: %1$s</string>
     <string name="bus_wifi_ac">Has WiFi / AC: %1$s / %2$s</string>
     <string name="bus_limit_capacity">Capacity limit: %1$s</string>
     <string name="bus_has_ridden">Ridden before?: %1$s</string>
-
 
     <!-- snackbars -->
     <string name="snackbar_404">Nothing found (Your search returned a 404 error)</string>
