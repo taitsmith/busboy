@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -15,15 +17,17 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 
 class MapsFragment : Fragment() {
     private val args: MapsFragmentArgs by navArgs()
     private lateinit var cameraFocus: LatLng
+    private val byIdViewModel: ByIdViewModel by activityViewModels()
 
     private val callback = OnMapReadyCallback { googleMap ->
         googleMap.clear()
-        val bus = MainActivity.mutableBus.value
+        val bus = byIdViewModel.bus.value
 
         cameraFocus = if (args.polylineType == "route") LatLng(bus?.latitude!!, bus.longitude!!)
         else MainActivityViewModel.polylineCoords[0]

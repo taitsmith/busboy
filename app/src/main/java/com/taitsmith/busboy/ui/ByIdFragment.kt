@@ -7,10 +7,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +25,7 @@ import java.lang.IndexOutOfBoundsException
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
 
-    private val byIdViewModel: ByIdViewModel by viewModels()
+    private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val args: ByIdFragmentArgs by navArgs()
 
     private var _binding: ByIdFragmentBinding? = null
@@ -45,9 +45,8 @@ class ByIdFragment : Fragment() {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
         if (args.selectedNearbyStop != null) {
-            byIdViewModel.stop = args.selectedNearbyStop
             lifecycleScope.launch(Dispatchers.IO) {
-                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!)
+                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!, null)
             }
         }
         setListeners()
@@ -67,7 +66,7 @@ class ByIdFragment : Fragment() {
             prediction ->
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
-            mainActivityViewModel!!.getBusLocation(prediction.vid!!)
+            byIdViewModel.getBusLocation(prediction.vid!!)
         },{
             byIdViewModel.getBusDetails(it.vid!!)
         })
@@ -78,28 +77,49 @@ class ByIdFragment : Fragment() {
 
 
     private fun setObservers() {
-        byIdViewModel.mutableStopPredictions.observe(
+        byIdViewModel.stopPredictions.observe(
             viewLifecycleOwner
         ) { predictions: List<Prediction> ->
             predictionList = predictions
             predictionAdapter.submitList(predictionList)
             binding.busFlagIV.visibility = View.INVISIBLE
             try {
-                val s = predictions[0].stpnm
-                binding.stopEntryEditText.text = null
-                binding.stopEntryEditText.hint = s
-                byIdViewModel.stop!!.name = s
+                updateTextHint(predictions[0].stpnm!!)
             } catch (e: IndexOutOfBoundsException) {
                 e.printStackTrace()
             }
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
         }
+
+        /*  we want to determine if we're going to take this bus and display its location
+            on a map, or if we're going to take it and display detailed information about
+            it to the user. the bus object for map display has minimal information so we can
+            check if certain things are null/empty and determine where to go from there
+         */
+        byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
+            if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(MainActivity.prediction.rt!!)
+            else {
+                val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
+                findNavController().navigate(action)
+            }
+        }
+    }
+
+    private fun updateTextHint(s: String) {
+        binding.stopEntryEditText.text = null
+        binding.stopEntryEditText.hint = s
+        byIdViewModel.stop.value?.name = s
     }
 
     private fun search() {
-        if (binding.stopEntryEditText.text.length == 5) {
-            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString())
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+
+        //allow users to re-click the search button to update currently displayed stop
+        //if they haven't entered a new valid number, otherwise display newly entered stop
+        if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
+            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
+        } else if (binding.stopEntryEditText.text.length == 5) {
+            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         }
@@ -107,7 +127,7 @@ class ByIdFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
+        byIdViewModel.stopPredictions.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
         binding.unbind()
         _binding = null

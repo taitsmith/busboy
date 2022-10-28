@@ -8,12 +8,11 @@ import javax.inject.Inject
 import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.api.WaypointResponse
-import com.taitsmith.busboy.ui.MainActivity
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.data.Bus
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +25,8 @@ import java.util.ArrayList
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(application: Application,
                                                 @AcTransitApiInterface private val acTransitApiInterface: ApiInterface,
-                                                @MapsApiInterface private val mapsApiInterface: ApiInterface
-                                                ) : AndroidViewModel(application) {
+                                                @MapsApiInterface private val mapsApiInterface: ApiInterface,
+                                                private val apiRepository: ApiRepository) : AndroidViewModel(application) {
 
     private val directionsApiKey: String
 
@@ -81,27 +80,6 @@ class MainActivityViewModel @Inject constructor(application: Application,
                     mutableErrorMessage.value = "CALL_FAILURE"
                 }
             })
-        }
-    }
-
-    fun getBusLocation(vehicleId: String) {
-        viewModelScope.launch(Dispatchers.IO){
-        val call = acTransitApiInterface.getVehicleInfo(vehicleId)
-        call!!.enqueue(object : Callback<Bus?> {
-            override fun onResponse(call: Call<Bus?>, response: Response<Bus?>) {
-                if (response.code() == 404) mutableErrorMessage.value = "404"
-                if (response.body() != null) {
-                    val bus = response.body()
-                    if (bus?.latitude != null && bus.longitude != null) {
-                        MainActivity.mutableBus.value = response.body()
-                    } else mutableErrorMessage.value = "NULL_BUS_COORDS"
-                }
-            }
-
-            override fun onFailure(call: Call<Bus?>, t: Throwable) {
-                mutableErrorMessage.value = "CALL_FAILURE"
-            }
-        })
         }
     }
 

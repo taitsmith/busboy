@@ -4,6 +4,7 @@ import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
 import retrofit2.http.GET
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -11,11 +12,11 @@ interface ApiInterface {
 
     //returns predictions for given route at stop, otherwise all routes if rt == null
     @GET("actrealtime/prediction/")
-    fun getStopPredictionList(
+    suspend fun getStopPredictionList(
         @Query("stpid") stopId: String,
         @Query("rt") routeId: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<StopPredictionResponse>?
+    ): StopPredictionResponse
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
@@ -44,17 +45,17 @@ interface ApiInterface {
 
     //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")
-     fun getVehicleInfo(
+     suspend fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<Bus?>?
+    ): Bus
 
     //get detailed info about a bus because you're a nerd and you like that stuff
      @GET("vehicle/{vehicleId}/characteristics")
-     fun getDetailedVehicleInfo(
+     suspend fun getDetailedVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-     ): Call<List<Bus>>
+     ): List<Bus>
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
