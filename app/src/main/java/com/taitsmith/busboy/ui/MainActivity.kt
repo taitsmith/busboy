@@ -87,18 +87,7 @@ class MainActivity : AppCompatActivity() {
         mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
         mutableNearbyStatusUpdater.observe(this) { s -> updateNearbyStatusText(s) }
 
-        /*  we want to determine if we're going to take this bus and display its location
-            on a map, or if we're going to take it and display detailed information about
-            it to the user. the bus object for map display has minimal information so we can
-            check if certain things are null/empty and determine where to go from there
-         */
-        mutableBus.observe(this) { bus ->
-            if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(prediction.rt!!)
-            else {
-                val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
-                navController.navigate(action)
-            }
-        }
+
     }
 
     private fun getErrorMessage(s: String) {
@@ -154,8 +143,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        MainActivityViewModel.mutableStatusMessage.removeObservers(this)
-        MainActivityViewModel.mutableErrorMessage.removeObservers(this)
+        mutableStatusMessage.removeObservers(this)
+        mutableErrorMessage.removeObservers(this)
         mainActivityViewModel = null
         _binding = null
     }
@@ -210,7 +199,6 @@ class MainActivity : AppCompatActivity() {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
         var mainActivityViewModel: MainActivityViewModel? = null
         var enableNearbySearch = false
-        var mutableBus: MutableLiveData<Bus> = MutableLiveData()
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
         lateinit var acTransitApiKey: String
         lateinit var prediction: Prediction

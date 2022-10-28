@@ -8,12 +8,17 @@ import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
 import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
@@ -25,7 +30,7 @@ import java.lang.IndexOutOfBoundsException
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
 
-    private val byIdViewModel by viewModels<ByIdViewModel>()
+    private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val args: ByIdFragmentArgs by navArgs()
 
     private var _binding: ByIdFragmentBinding? = null
@@ -46,7 +51,7 @@ class ByIdFragment : Fragment() {
         _predictionListView = binding.predictionListView
         if (args.selectedNearbyStop != null) {
             lifecycleScope.launch(Dispatchers.IO) {
-                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId, null)
+                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!, null)
             }
         }
         setListeners()
@@ -66,7 +71,7 @@ class ByIdFragment : Fragment() {
             prediction ->
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
-            mainActivityViewModel!!.getBusLocation(prediction.vid!!)
+            byIdViewModel.getBusLocation(prediction.vid!!)
         },{
             byIdViewModel.getBusDetails(it.vid!!)
         })
@@ -74,7 +79,6 @@ class ByIdFragment : Fragment() {
 
         setObservers()
     }
-
 
     private fun setObservers() {
         byIdViewModel.stopPredictions.observe(
@@ -84,20 +88,36 @@ class ByIdFragment : Fragment() {
             predictionAdapter.submitList(predictionList)
             binding.busFlagIV.visibility = View.INVISIBLE
             try {
-                val s = predictions[0].stpnm
-                binding.stopEntryEditText.text = null
-                binding.stopEntryEditText.hint = s
-                byIdViewModel.stop.value?.name = s
+                updateTextHint(predictions[0].stpnm!!)
             } catch (e: IndexOutOfBoundsException) {
                 e.printStackTrace()
             }
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
         }
+
+        /*  we want to determine if we're going to take this bus and display its location
+            on a map, or if we're going to take it and display detailed information about
+            it to the user. the bus object for map display has minimal information so we can
+            check if certain things are null/empty and determine where to go from there
+         */
+        byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
+            if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(MainActivity.prediction.rt!!)
+            else {
+                val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
+                findNavController().navigate(action)
+            }
+        }
+    }
+
+    private fun updateTextHint(s: String) {
+        binding.stopEntryEditText.text = null
+        binding.stopEntryEditText.hint = s
+        byIdViewModel.stop.value?.name = s
     }
 
     private fun search() {
         if (byIdViewModel.stop.value != null) {
-            byIdViewModel.getBusDetails(byIdViewModel.stop.value?.stopId!!)
+            byIdViewModel.getStopPredictions(byIdViewModel.stop.value?.stopId!!, null)
         }
          else if (binding.stopEntryEditText.text.length == 5) {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"

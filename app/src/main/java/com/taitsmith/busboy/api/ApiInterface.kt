@@ -45,17 +45,17 @@ interface ApiInterface {
 
     //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")
-     fun getVehicleInfo(
+     suspend fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<Bus?>?
+    ): Bus
 
     //get detailed info about a bus because you're a nerd and you like that stuff
      @GET("vehicle/{vehicleId}/characteristics")
-     fun getDetailedVehicleInfo(
+     suspend fun getDetailedVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-     ): Call<List<Bus>>
+     ): List<Bus>
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")

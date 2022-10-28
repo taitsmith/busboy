@@ -1,20 +1,15 @@
 package com.taitsmith.busboy.api
 
-import android.util.Log
-import androidx.lifecycle.viewModelScope
+
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
-import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import javax.inject.Inject
 
 @Module
@@ -62,5 +57,9 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
             }
         }
         return predictionList
+    }
+
+    suspend fun getBusLocation(vehicleId: String): Bus {
+        return acTransitApiInterface.getVehicleInfo(vehicleId)
     }
 }
