@@ -9,16 +9,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
 import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
@@ -77,15 +72,9 @@ class ByIdFragment : Fragment() {
         })
         predictionListView.adapter = predictionAdapter
 
-//        checkForCurrentStop()
         setObservers()
     }
 
-//    private fun checkForCurrentStop() {
-//        if (byIdViewModel.stopId.value != null) {
-//            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
-//        }
-//    }
 
     private fun setObservers() {
         byIdViewModel.stopPredictions.observe(

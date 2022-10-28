@@ -8,7 +8,6 @@ import javax.inject.Inject
 import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.api.WaypointResponse
-import com.taitsmith.busboy.ui.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
