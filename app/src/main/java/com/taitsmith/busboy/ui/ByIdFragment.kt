@@ -77,8 +77,15 @@ class ByIdFragment : Fragment() {
         })
         predictionListView.adapter = predictionAdapter
 
+//        checkForCurrentStop()
         setObservers()
     }
+
+//    private fun checkForCurrentStop() {
+//        if (byIdViewModel.stopId.value != null) {
+//            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
+//        }
+//    }
 
     private fun setObservers() {
         byIdViewModel.stopPredictions.observe(
@@ -116,11 +123,13 @@ class ByIdFragment : Fragment() {
     }
 
     private fun search() {
-        if (byIdViewModel.stop.value != null) {
-            byIdViewModel.getStopPredictions(byIdViewModel.stop.value?.stopId!!, null)
-        }
-         else if (binding.stopEntryEditText.text.length == 5) {
-            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+
+        //allow users to re-click the search button to update currently displayed stop
+        //if they haven't entered a new valid number, otherwise display newly entered stop
+        if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
+            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
+        } else if (binding.stopEntryEditText.text.length == 5) {
             byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"

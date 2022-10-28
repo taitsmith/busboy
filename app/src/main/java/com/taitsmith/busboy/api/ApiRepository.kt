@@ -62,4 +62,8 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
     suspend fun getBusLocation(vehicleId: String): Bus {
         return acTransitApiInterface.getVehicleInfo(vehicleId)
     }
+
+    suspend fun getDetailedBusInfo(vid: String): Bus {
+        return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
+    }
 }

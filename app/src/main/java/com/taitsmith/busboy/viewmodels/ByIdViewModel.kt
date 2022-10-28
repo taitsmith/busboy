@@ -11,7 +11,6 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.api.ApiRepository
-import com.taitsmith.busboy.ui.MainActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,6 +22,8 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
                                         private val databaseRepository: DatabaseRepository,
                                         private val apiRepository: ApiRepository
 ) : ViewModel() {
+    private val _stopId = MutableLiveData<String>()
+    val stopId: LiveData<String> = _stopId
 
     private val _stop = MutableLiveData<Stop>()
     val stop: LiveData<Stop> = _stop
@@ -34,15 +35,17 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
     val bus: LiveData<Bus> = _bus
 
     fun getStopPredictions(stopId: String, rt: String?) {
+        _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
+
         viewModelScope.launch(Dispatchers.IO) {
+            _stopId.postValue(stopId)
             _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
         }
     }
 
     fun getBusDetails(vid: String) {
         viewModelScope.launch {
-            val call = acTransitApiInterface.getDetailedVehicleInfo(vid)
-            _bus.value = call[0]
+            _bus.value = apiRepository.getDetailedBusInfo(vid)
         }
     }
 
