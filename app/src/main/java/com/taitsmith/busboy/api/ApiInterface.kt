@@ -4,6 +4,7 @@ import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
 import retrofit2.http.GET
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -11,11 +12,11 @@ interface ApiInterface {
 
     //returns predictions for given route at stop, otherwise all routes if rt == null
     @GET("actrealtime/prediction/")
-    fun getStopPredictionList(
+    suspend fun getStopPredictionList(
         @Query("stpid") stopId: String,
         @Query("rt") routeId: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<StopPredictionResponse>?
+    ): StopPredictionResponse
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")

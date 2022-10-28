@@ -7,9 +7,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +25,7 @@ import java.lang.IndexOutOfBoundsException
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
 
-    private val byIdViewModel: ByIdViewModel by viewModels()
+    private val byIdViewModel by viewModels<ByIdViewModel>()
     private val args: ByIdFragmentArgs by navArgs()
 
     private var _binding: ByIdFragmentBinding? = null
@@ -45,9 +45,8 @@ class ByIdFragment : Fragment() {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
         if (args.selectedNearbyStop != null) {
-            byIdViewModel.stop = args.selectedNearbyStop
             lifecycleScope.launch(Dispatchers.IO) {
-                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!)
+                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId, null)
             }
         }
         setListeners()
@@ -78,7 +77,7 @@ class ByIdFragment : Fragment() {
 
 
     private fun setObservers() {
-        byIdViewModel.mutableStopPredictions.observe(
+        byIdViewModel.stopPredictions.observe(
             viewLifecycleOwner
         ) { predictions: List<Prediction> ->
             predictionList = predictions
@@ -88,7 +87,7 @@ class ByIdFragment : Fragment() {
                 val s = predictions[0].stpnm
                 binding.stopEntryEditText.text = null
                 binding.stopEntryEditText.hint = s
-                byIdViewModel.stop!!.name = s
+                byIdViewModel.stop.value?.name = s
             } catch (e: IndexOutOfBoundsException) {
                 e.printStackTrace()
             }
@@ -97,9 +96,12 @@ class ByIdFragment : Fragment() {
     }
 
     private fun search() {
-        if (binding.stopEntryEditText.text.length == 5) {
+        if (byIdViewModel.stop.value != null) {
+            byIdViewModel.getBusDetails(byIdViewModel.stop.value?.stopId!!)
+        }
+         else if (binding.stopEntryEditText.text.length == 5) {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString())
+            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         }
@@ -107,7 +109,7 @@ class ByIdFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        byIdViewModel.mutableStopPredictions.removeObservers(viewLifecycleOwner)
+        byIdViewModel.stopPredictions.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
         binding.unbind()
         _binding = null

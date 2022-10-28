@@ -1,10 +1,20 @@
-package com.taitsmith.busboy.di
+package com.taitsmith.busboy.api
 
-import com.taitsmith.busboy.api.ApiInterface
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.di.AcTransitApiInterface
+import com.taitsmith.busboy.di.MapsApiInterface
+import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import kotlinx.coroutines.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 
 @Module
@@ -19,7 +29,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
         Then we can smoosh everything into one string with a \n between each to display it.
         https://api.actransit.org/transit/Help/Api/GET-stop-stopId-destinations
      */
-    fun getLinesServed(stopId: String): String {
+     fun getLinesServed(stopId: String): String {
         val sb = StringBuilder()
         val call = acTransitApiInterface.getStopDestinations(stopId)
         try {
@@ -35,5 +45,22 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
             MainActivityViewModel.mutableErrorMessage.postValue("404")
         }
         return sb.toString()
+    }
+
+    suspend fun getStopPredictions(stopId: String, rt: String?): List<Prediction> {
+        val predictionList = mutableListOf<Prediction>()
+
+        runBlocking {
+            val predictionResponseList = acTransitApiInterface.getStopPredictionList(stopId, rt)
+
+            predictionResponseList.bustimeResponse?.prd?.forEach {
+                if (it.dyn == 0) { //non-zero dyn means cancelled or not stopping
+                    if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                    else it.prdctdn = "in " + it.prdctdn + " minutes"
+                    predictionList.add(it)
+                }
+            }
+        }
+        return predictionList
     }
 }
