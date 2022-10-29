@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -50,8 +52,11 @@ class ByIdFragment : Fragment() {
             }
         }
         setListeners()
+        setObservers()
+
         return binding.root
     }
+
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
@@ -67,12 +72,12 @@ class ByIdFragment : Fragment() {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
             byIdViewModel.getBusLocation(prediction.vid!!)
+            byIdViewModel.setIsUpdated(true)
         },{
             byIdViewModel.getBusDetails(it.vid!!)
+            byIdViewModel.setIsUpdated(true)
         })
         predictionListView.adapter = predictionAdapter
-
-        setObservers()
     }
 
 
@@ -97,10 +102,12 @@ class ByIdFragment : Fragment() {
             check if certain things are null/empty and determine where to go from there
          */
         byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
-            if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(MainActivity.prediction.rt!!)
-            else {
-                val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
-                findNavController().navigate(action)
+            if (byIdViewModel.isUpdated.value != false) {
+                if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(MainActivity.prediction.rt!!)
+                else {
+                    val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
+                    findNavController().navigate(action)
+                }
             }
         }
     }
@@ -116,6 +123,7 @@ class ByIdFragment : Fragment() {
 
         //allow users to re-click the search button to update currently displayed stop
         //if they haven't entered a new valid number, otherwise display newly entered stop
+        //TODO replace this with swipe to refresh
         if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
             byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
         } else if (binding.stopEntryEditText.text.length == 5) {
@@ -128,8 +136,8 @@ class ByIdFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         byIdViewModel.stopPredictions.removeObservers(viewLifecycleOwner)
+        byIdViewModel.bus.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
-        binding.unbind()
         _binding = null
         _predictionListView = null
     }

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.data.Prediction
@@ -16,10 +15,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ByIdViewModel @Inject constructor(@AcTransitApiInterface
+class ByIdViewModel @Inject constructor(
                                         private val databaseRepository: DatabaseRepository,
                                         private val apiRepository: ApiRepository
 ) : ViewModel() {
+    private val _isUpdated = MutableLiveData<Boolean>()
+    var isUpdated: LiveData<Boolean> = _isUpdated
+
     private val _stopId = MutableLiveData<String>()
     val stopId: LiveData<String> = _stopId
 
@@ -44,12 +46,14 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
     fun getBusDetails(vid: String) {
         viewModelScope.launch {
             _bus.value = apiRepository.getDetailedBusInfo(vid)
+            _isUpdated.postValue(false)
         }
     }
 
     fun getBusLocation(vehicleId: String) {
         viewModelScope.launch(Dispatchers.IO){
             _bus.postValue(apiRepository.getBusLocation(vehicleId))
+            _isUpdated.postValue(false)
         }
     }
 
@@ -57,10 +61,13 @@ class ByIdViewModel @Inject constructor(@AcTransitApiInterface
         if (_stop.value == null) MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         else {
             viewModelScope.launch(Dispatchers.IO) {
-                _stop.value?.linesServed = apiRepository.getLinesServed(_stop.value!!.stopId!!)
                 databaseRepository.addStops(stop.value!!)
                 MainActivityViewModel.mutableStatusMessage.postValue("FAVORITE_ADDED")
             }
         }
+    }
+
+    fun setIsUpdated(update: Boolean) {
+        _isUpdated.value = update
     }
 }
