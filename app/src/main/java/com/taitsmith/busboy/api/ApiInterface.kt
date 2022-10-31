@@ -20,21 +20,21 @@ interface ApiInterface {
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
-    fun getNearbyStops(
+    suspend fun getNearbyStops(
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
         @Query("distance") distance: Int,
         @Query("active") active: Boolean,
         @Query("routeName") routeName: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<List<Stop?>?>?
+    ): List<Stop>
 
     //get destinations for given stop so we can display NB/SB/EB/WB
     @GET("stop/{stopID}/destinations")
-    fun getStopDestinations(
+    suspend fun getStopDestinations(
         @Path("stopID") stopId: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<StopDestinationResponse?>?
+    ): StopDestinationResponse
 
     //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")

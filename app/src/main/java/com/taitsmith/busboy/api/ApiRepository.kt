@@ -1,11 +1,11 @@
 package com.taitsmith.busboy.api
 
 
+import android.util.Log
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.di.MapsApiInterface
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
@@ -15,38 +15,22 @@ import javax.inject.Inject
 @Module
 @InstallIn(ViewModelComponent::class)
 class ApiRepository @Inject constructor(@AcTransitApiInterface
-                                        val acTransitApiInterface: ApiInterface,
-                                        @MapsApiInterface
-                                        val mapsApiInterface: ApiInterface){
-    /*
-        The way AC Transit's API works, we have to make two calls to display everything on the
-        'nearby' screen. One to find all nearby stops, and this one to get the list of lines served.
-        Then we can smoosh everything into one string with a \n between each to display it.
-        https://api.actransit.org/transit/Help/Api/GET-stop-stopId-destinations
-     */
-     fun getLinesServed(stopId: String): String {
-        val sb = StringBuilder()
-        val call = acTransitApiInterface.getStopDestinations(stopId)
-        try {
-            val response = call!!.execute()
-            for (s in response.body()?.routeDestinations!!) {
-                sb.append(s.routeId)
-                        .append(" ")
-                        .append(s.destination)
-                        .append("\n")
-            }
-            return sb.toString()
-        } catch (e: Exception) {
-            MainActivityViewModel.mutableErrorMessage.postValue("404")
-        }
-        return sb.toString()
-    }
+                                        val acTransitApiInterface: ApiInterface) {
 
     suspend fun getStopPredictions(stopId: String, rt: String?): List<Prediction> {
         val predictionList = mutableListOf<Prediction>()
 
         runBlocking {
             val predictionResponseList = acTransitApiInterface.getStopPredictionList(stopId, rt)
+
+            //AC Transit changed their API responses again, so even an invalid stop will
+            //return a 200/OK, so we have to check for an error message now.
+            if (predictionResponseList.bustimeResponse?.error != null) {
+                when (predictionResponseList.bustimeResponse.error[0].msg) {
+                    "No service scheduled" -> throw Exception("no_service")
+                    "No data found for parameter" -> throw Exception("no_data")
+                }
+            }
 
             predictionResponseList.bustimeResponse?.prd?.forEach {
                 if (it.dyn == 0) { //non-zero dyn means cancelled or not stopping
@@ -56,14 +40,50 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
                 }
             }
         }
-        return predictionList
+        if (predictionList.size == 0) throw Exception("empty_list")
+        else return predictionList
     }
 
     suspend fun getBusLocation(vehicleId: String): Bus {
-        return acTransitApiInterface.getVehicleInfo(vehicleId)
+        val returnBus = acTransitApiInterface.getVehicleInfo(vehicleId)
+        if (returnBus.latitude == null || returnBus.longitude == null) {
+            throw Exception("null_coords")
+        } else return acTransitApiInterface.getVehicleInfo(vehicleId)
     }
 
     suspend fun getDetailedBusInfo(vid: String): Bus {
         return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
+    }
+
+    /*
+        The way AC Transit's API works, we have to make two calls to display everything on the
+        'nearby' screen. One to find all nearby stops, and this one to get the list of lines served.
+        Then we can smoosh everything into one string with a \n between each to display it. So
+        that's whats going on here
+        https://api.actransit.org/transit/Help/Api/GET-stop-stopId-destinations
+     */
+    suspend fun getNearbyStops(lat: Double, lon: Double, distance: Int, isActive: Boolean, rt: String?)
+        : List<Stop> {
+
+        return acTransitApiInterface.getNearbyStops(lat, lon, distance, isActive, rt)
+    }
+
+    suspend fun getLinesServedByStop(stopList: List<Stop>): List<Stop> {
+        for (stop in stopList) {
+            val destinations = acTransitApiInterface.getStopDestinations(stop.stopId)
+            val sb = StringBuilder()
+            if (destinations.status == "No service today at this stop") { //ac transit's api is weird
+                sb.append(destinations.status)                            //and will often show no service
+            } else {                                                      //even when there's service
+                destinations.routeDestinations?.forEach {
+                    sb.append(it.routeId)
+                        .append(" ")
+                        .append(it.destination)
+                        .append("\n")
+                    stop.linesServed = sb.toString()
+                }
+            }
+        }
+        return stopList
     }
 }
