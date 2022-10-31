@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.ui.MainActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,8 +40,18 @@ class ByIdViewModel @Inject constructor(
         _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
 
         viewModelScope.launch(Dispatchers.IO) {
-            _stopId.postValue(stopId)
-            _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
+            kotlin.runCatching {
+                _stopId.postValue(stopId)
+                _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
+            }.onFailure {
+                it.printStackTrace()
+                when(it.message) {
+                    "invalid" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
+                    "Unable to resolve host \"api.actransit.org\": No address associated with hostname"
+                        -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+                    "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
+                }
+            }
         }
     }
 
@@ -52,8 +64,15 @@ class ByIdViewModel @Inject constructor(
 
     fun getBusLocation(vehicleId: String) {
         viewModelScope.launch(Dispatchers.IO){
-            _bus.postValue(apiRepository.getBusLocation(vehicleId))
-            _isUpdated.postValue(false)
+            kotlin.runCatching {
+                _bus.postValue(apiRepository.getBusLocation(vehicleId))
+                _isUpdated.postValue(false)
+            }.onFailure {
+                when (it.message) {
+                    "null_coords" -> MainActivityViewModel.mutableErrorMessage
+                        .postValue("NULL_BUS_COORDS")
+                }
+            }
         }
     }
 
@@ -61,6 +80,8 @@ class ByIdViewModel @Inject constructor(
         if (_stop.value == null) MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         else {
             viewModelScope.launch(Dispatchers.IO) {
+                stop.value?.linesServed = //oh lawd, we'll simplify this
+                    apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
                 databaseRepository.addStops(stop.value!!)
                 MainActivityViewModel.mutableStatusMessage.postValue("FAVORITE_ADDED")
             }

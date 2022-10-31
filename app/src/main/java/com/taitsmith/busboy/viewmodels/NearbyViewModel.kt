@@ -4,34 +4,30 @@ import android.Manifest
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.taitsmith.busboy.api.ApiInterface
-import com.taitsmith.busboy.ui.MainActivity
-import com.taitsmith.busboy.api.StopDestinationResponse
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
-import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.taitsmith.busboy.di.AcTransitApiInterface
+import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.lang.Exception
-import java.lang.StringBuilder
-import java.util.ArrayList
 import javax.inject.Inject
 
 @HiltViewModel
 class NearbyViewModel @Inject constructor(application: Application,
-                                          @AcTransitApiInterface private val acTransitApiInterface: ApiInterface
+                                          private val apiRepository: ApiRepository
                                           ) : AndroidViewModel(application) {
 
-    lateinit var mutableNearbyStops: MutableLiveData<List<Stop?>>
+    private val _nearbyStops = MutableLiveData<List<Stop>>()
+    val nearbyStops: LiveData<List<Stop>> = _nearbyStops
+
+    private val _locationPermGranted = MutableLiveData<Boolean>()
+    var locationPermGranted: LiveData<Boolean> = _locationPermGranted
+
     var rt: String? = null
     var distance: Int
 
@@ -39,65 +35,19 @@ class NearbyViewModel @Inject constructor(application: Application,
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         if (rt == null) rt = ""
         viewModelScope.launch(Dispatchers.IO) {
-            val call = acTransitApiInterface.getNearbyStops(
-                loc.latitude,
-                loc.longitude,
-                distance,
-                true,
-                rt
-            )
-            call!!.enqueue(object : Callback<List<Stop?>?> {
-                override fun onResponse(
-                    call: Call<List<Stop?>?>,
-                    response: Response<List<Stop?>?>
-                ) {
-                    if (response.body() == null || response.code() == 404)
-                        mutableErrorMessage.setValue("404")
-                    else {
-                        stopList.clear()
-                        stopList.addAll(response.body()!!)
-                        getLinesServed(stopList)
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Stop?>?>, t: Throwable) {
-                    Log.d("NEARBY ERROR", t.message!!)
-                    mutableErrorMessage.value = "CALL_FAILURE"
-                }
-            })
-        }
-    }
-
-    fun getLinesServed(stopList: List<Stop?>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            for (s in stopList) {
-                MainActivity.mutableNearbyStatusUpdater.postValue(s!!.name)
-                val call = acTransitApiInterface.getStopDestinations(s.stopId)
-                try {
-                    val response: Response<StopDestinationResponse?> = call!!.execute()
-                    if (response.isSuccessful) {
-                        val sb = StringBuilder()
-                        if (response.body()!!.status == "No service today at this stop") {
-                            sb.append(response.body()!!.status) //sometimes this call returns a no service,
-                        } else {                                //even if there's service (happened today [memorial day])
-                            val destinations = response.body()?.routeDestinations!!
-                            destinations.forEach {
-                                sb.append(it.routeId)
-                                    .append(" ")
-                                    .append(it.destination)
-                                    .append("\n")
-                                s.linesServed = sb.toString()
-                            }
-                        }
-                    } else {
-                        mutableErrorMessage.postValue("404")
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    mutableErrorMessage.postValue("CALL_FAILURE")
-                }
+            kotlin.runCatching {
+                val nearbyList = apiRepository.getNearbyStops(
+                    37.8096,    //emulator never gets proper coords recently, so for debug
+                    -122.2685, //we'll pretend we're near 19th st bart on broadway
+                    distance,
+                    true,
+                    rt
+                )
+                _nearbyStops.postValue(apiRepository.getLinesServedByStop(nearbyList))
+            }.onFailure {
+                it.printStackTrace()
+                mutableErrorMessage.postValue("404")
             }
-            mutableNearbyStops.postValue(stopList)
         }
     }
 
@@ -109,10 +59,10 @@ class NearbyViewModel @Inject constructor(application: Application,
         ) {
             if (!loc.hasLocationEnabled()) {
                 mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
-                MainActivity.enableNearbySearch = false
+                _locationPermGranted.value = false
             } else {
                 loc.beginUpdates()
-                MainActivity.enableNearbySearch = true
+                _locationPermGranted.value = true
             }
         } else {
             mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
@@ -120,14 +70,11 @@ class NearbyViewModel @Inject constructor(application: Application,
     }
 
     companion object {
-        lateinit var stopList: MutableList<Stop?>
         lateinit var loc: SimpleLocation
     }
 
     init {
         loc = SimpleLocation(application.applicationContext)
-        mutableNearbyStops = MutableLiveData()
-        stopList = ArrayList()
         distance = 1000
     }
 }
