@@ -48,6 +48,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         buslineSpinner.adapter = adapter
         buslineSpinner.onItemSelectedListener = this
+
         setListeners()
 
         return binding.root
@@ -55,8 +56,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         nearbyViewModel.checkLocationPerm()
-        if (!MainActivity.enableNearbySearch) nearbySearchButton.isEnabled = false
 
         nearbyStopListView = binding.nearbyListView
         nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
@@ -82,16 +83,28 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
         _binding = null
     }
 
     private fun setObservers() {
-        nearbyViewModel.mutableNearbyStops.observe(viewLifecycleOwner) {
+        nearbyViewModel.nearbyStops.observe(viewLifecycleOwner) {
             adapter.submitList(it)
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+        }
+
+        MainActivity.permissionEnabledAndGranted.observe(viewLifecycleOwner) {
+            if (nearbyViewModel.locationPermGranted.value == true &&
+                    it == true) {
+                binding.nearbySearchButton.isEnabled = true
+            }
+        }
+
+        nearbyViewModel.locationPermGranted.observe(viewLifecycleOwner) {
+            if (it == true && MainActivity.permissionEnabledAndGranted.value == true) {
+                binding.nearbySearchButton.isEnabled = true
+            }
         }
     }
 

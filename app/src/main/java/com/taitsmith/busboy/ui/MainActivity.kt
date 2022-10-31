@@ -8,7 +8,9 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -18,7 +20,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
-import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
@@ -40,10 +41,6 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    var nearbyFragment: NearbyFragment? = null
-    var byIdFragment: ByIdFragment? = null
-    var favoritesFragment: FavoritesFragment? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,10 +52,10 @@ class MainActivity : AppCompatActivity() {
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
-        nearbyFragment = NearbyFragment()
         bottomNavigationView.setupWithNavController(navController)
-        byIdFragment = ByIdFragment()
-        favoritesFragment = FavoritesFragment()
+
+        permissionEnabledAndGranted.value = (ContextCompat.checkSelfPermission(this,
+            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
 
         setObservers()
         setTabListeners()
@@ -67,16 +64,10 @@ class MainActivity : AppCompatActivity() {
     private fun setTabListeners() {
         bottomNavigationView.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.byId -> {
-                    navController.popBackStack()
-                    navController.navigate(R.id.byIdFragment)
-                }
-                R.id.nearby -> {
-                    navController.popBackStack()
-                    navController.navigate(R.id.nearbyFragment)
-                }
-                R.id.favorites -> navController.navigate(R.id.favoritesFragment)
-                R.id.help -> showHelp()
+                R.id.byId       -> navController.navigate(R.id.byIdFragment)
+                R.id.nearby     -> navController.navigate(R.id.nearbyFragment)
+                R.id.favorites  -> navController.navigate(R.id.favoritesFragment)
+                R.id.help       -> showHelp()
             }
             true
         }
@@ -86,8 +77,6 @@ class MainActivity : AppCompatActivity() {
         mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
         mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
         mutableNearbyStatusUpdater.observe(this) { s -> updateNearbyStatusText(s) }
-
-
     }
 
     private fun getErrorMessage(s: String) {
@@ -190,16 +179,18 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 NearbyViewModel.loc.beginUpdates()
-                enableNearbySearch = true
+                permissionEnabledAndGranted.value = true
             }
         }
     }
 
     companion object {
         private const val PERMISSION_REQUEST_FINE_LOCATION = 6
+
         var mainActivityViewModel: MainActivityViewModel? = null
-        var enableNearbySearch = false
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
+
+        var permissionEnabledAndGranted = MutableLiveData<Boolean>()
         lateinit var acTransitApiKey: String
         lateinit var prediction: Prediction
     }

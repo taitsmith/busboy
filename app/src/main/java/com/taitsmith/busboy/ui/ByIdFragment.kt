@@ -9,8 +9,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -19,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
 import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
+import com.taitsmith.busboy.utils.RecyclerDivider
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,6 +45,7 @@ class ByIdFragment : Fragment() {
     ): View {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
+        _predictionListView!!.addItemDecoration(RecyclerDivider(requireContext()))
         if (args.selectedNearbyStop != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!, null)

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -22,8 +23,9 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 
 class MapsFragment : Fragment() {
     private val args: MapsFragmentArgs by navArgs()
-    private lateinit var cameraFocus: LatLng
     private val byIdViewModel: ByIdViewModel by activityViewModels()
+
+    private lateinit var cameraFocus: LatLng
 
     private val callback = OnMapReadyCallback { googleMap ->
         googleMap.clear()
