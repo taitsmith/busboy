@@ -59,10 +59,10 @@ interface ApiInterface {
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
-     fun getNavigationToStop(
+     suspend fun getNavigationToStop(
         @Query(value = "origin", encoded = true) origin: String,
         @Query(value = "destination", encoded = true) destination: String,
         @Query("mode") mode: String,
         @Query("key") apiKey: String
-    ): Call<DirectionResponse?>?
+    ): DirectionResponse
 }

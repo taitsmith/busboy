@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.R
@@ -29,7 +31,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private var _binding: NearbyFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val nearbyViewModel: NearbyViewModel by viewModels()
+    private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,7 +75,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             val start =
                 NearbyViewModel.loc.latitude.toString() + "," + NearbyViewModel.loc.longitude.toString()
             val end = (latitude!!).toString() + "," + (longitude!!).toString()
-            mainActivityViewModel!!.getDirectionsToStop(start, end)
+            nearbyViewModel.getDirectionsToStop(start, end)
         })
 
         nearbyStopListView.adapter = adapter
@@ -105,6 +107,11 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             if (it == true && MainActivity.permissionEnabledAndGranted.value == true) {
                 binding.nearbySearchButton.isEnabled = true
             }
+        }
+
+        nearbyViewModel.directionPolylineCoords.observe(viewLifecycleOwner) {
+            val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
+            findNavController().navigate(action)
         }
     }
 

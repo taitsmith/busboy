@@ -6,15 +6,22 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,11 +29,17 @@ class NearbyViewModel @Inject constructor(application: Application,
                                           private val apiRepository: ApiRepository
                                           ) : AndroidViewModel(application) {
 
+    private val mapsKey: String = application.getString(R.string.google_directions_key)
+
     private val _nearbyStops = MutableLiveData<List<Stop>>()
     val nearbyStops: LiveData<List<Stop>> = _nearbyStops
 
     private val _locationPermGranted = MutableLiveData<Boolean>()
     var locationPermGranted: LiveData<Boolean> = _locationPermGranted
+
+    //for getting lat/lon coordinates to draw walking directions on a map
+    private val _directionPolylineCoords = MutableLiveData<List<LatLng>>()
+    val directionPolylineCoords: LiveData<List<LatLng>> = _directionPolylineCoords
 
     var rt: String? = null
     var distance: Int
@@ -66,6 +79,13 @@ class NearbyViewModel @Inject constructor(application: Application,
             }
         } else {
             mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
+        }
+    }
+
+    //hey siri how do i walk from where i am to the bus stop
+    fun getDirectionsToStop(start: String, stop: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, mapsKey))
         }
     }
 

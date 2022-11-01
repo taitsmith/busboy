@@ -7,8 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -20,27 +18,34 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.NearbyViewModel
 
 class MapsFragment : Fragment() {
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
+    private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
+    private lateinit var polylineCoords: List<LatLng>
     private lateinit var cameraFocus: LatLng
 
     private val callback = OnMapReadyCallback { googleMap ->
         googleMap.clear()
         val bus = byIdViewModel.bus.value
 
+        when (args.polylineType) {
+            "directions" -> polylineCoords = nearbyViewModel.directionPolylineCoords.value!!
+        }
+
         cameraFocus = if (args.polylineType == "route") LatLng(bus?.latitude!!, bus.longitude!!)
-        else MainActivityViewModel.polylineCoords[0]
+        else polylineCoords[0]
 
         MainActivityViewModel.mutableStatusMessage.value = "LOADED"
 
-        if (MainActivityViewModel.polylineCoords.size == 0) {
+        if (polylineCoords.isEmpty()) {
             MainActivityViewModel.mutableErrorMessage.value = "404"
         } else {
             val directionRoute = googleMap.addPolyline(PolylineOptions())
-            directionRoute.points = MainActivityViewModel.polylineCoords
+            directionRoute.points = polylineCoords
             directionRoute.color = Color.RED
             try {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraFocus, 15F))
@@ -52,13 +57,13 @@ class MapsFragment : Fragment() {
 
         googleMap.addMarker(
             MarkerOptions()
-                .position(MainActivityViewModel.polylineCoords[0])
+                .position(polylineCoords[0])
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
         )
 
         googleMap.addMarker(
             MarkerOptions()
-                .position(MainActivityViewModel.polylineCoords[MainActivityViewModel.polylineCoords.size - 1])
+                .position(polylineCoords[polylineCoords.size - 1])
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
         )
 
