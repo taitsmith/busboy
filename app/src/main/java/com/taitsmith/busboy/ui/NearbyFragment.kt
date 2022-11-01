@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.R
@@ -29,7 +31,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private var _binding: NearbyFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val nearbyViewModel: NearbyViewModel by viewModels()
+    private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,6 +50,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         buslineSpinner.adapter = adapter
         buslineSpinner.onItemSelectedListener = this
+
         setListeners()
 
         return binding.root
@@ -55,8 +58,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         nearbyViewModel.checkLocationPerm()
-        if (!MainActivity.enableNearbySearch) nearbySearchButton.isEnabled = false
 
         nearbyStopListView = binding.nearbyListView
         nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
@@ -72,7 +75,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             val start =
                 NearbyViewModel.loc.latitude.toString() + "," + NearbyViewModel.loc.longitude.toString()
             val end = (latitude!!).toString() + "," + (longitude!!).toString()
-            mainActivityViewModel!!.getDirectionsToStop(start, end)
+            nearbyViewModel.getDirectionsToStop(start, end)
         })
 
         nearbyStopListView.adapter = adapter
@@ -82,16 +85,33 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        nearbyViewModel.mutableNearbyStops.removeObservers(viewLifecycleOwner)
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
         _binding = null
     }
 
     private fun setObservers() {
-        nearbyViewModel.mutableNearbyStops.observe(viewLifecycleOwner) {
+        nearbyViewModel.nearbyStops.observe(viewLifecycleOwner) {
             adapter.submitList(it)
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+        }
+
+        MainActivity.permissionEnabledAndGranted.observe(viewLifecycleOwner) {
+            if (nearbyViewModel.locationPermGranted.value == true &&
+                    it == true) {
+                binding.nearbySearchButton.isEnabled = true
+            }
+        }
+
+        nearbyViewModel.locationPermGranted.observe(viewLifecycleOwner) {
+            if (it == true && MainActivity.permissionEnabledAndGranted.value == true) {
+                binding.nearbySearchButton.isEnabled = true
+            }
+        }
+
+        nearbyViewModel.directionPolylineCoords.observe(viewLifecycleOwner) {
+            val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
+            findNavController().navigate(action)
         }
     }
 

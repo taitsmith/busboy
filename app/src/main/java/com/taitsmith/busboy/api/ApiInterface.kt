@@ -20,28 +20,28 @@ interface ApiInterface {
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
-    fun getNearbyStops(
+    suspend fun getNearbyStops(
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
         @Query("distance") distance: Int,
         @Query("active") active: Boolean,
         @Query("routeName") routeName: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<List<Stop?>?>?
+    ): List<Stop>
 
     //get destinations for given stop so we can display NB/SB/EB/WB
     @GET("stop/{stopID}/destinations")
-    fun getStopDestinations(
+    suspend fun getStopDestinations(
         @Path("stopID") stopId: String?,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<StopDestinationResponse?>?
+    ): StopDestinationResponse
 
     //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")
-     fun getRouteWaypoints(
+    suspend fun getBusRouteWaypoints(
         @Path("route") route: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<List<WaypointResponse?>?>?
+    ): List<WaypointResponse>
 
     //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")
@@ -59,10 +59,10 @@ interface ApiInterface {
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
-     fun getNavigationToStop(
+     suspend fun getNavigationToStop(
         @Query(value = "origin", encoded = true) origin: String,
         @Query(value = "destination", encoded = true) destination: String,
         @Query("mode") mode: String,
         @Query("key") apiKey: String
-    ): Call<DirectionResponse?>?
+    ): DirectionResponse
 }
