@@ -103,12 +103,17 @@ class ByIdFragment : Fragment() {
          */
         byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
             if (byIdViewModel.isUpdated.value != false) {
-                if (bus.length.isNullOrEmpty()) mainActivityViewModel!!.getWaypoints(MainActivity.prediction.rt!!)
+                if (bus.length.isNullOrEmpty()) byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
                 else {
                     val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
                     findNavController().navigate(action)
                 }
             }
+        }
+
+        byIdViewModel.busRouteWaypoints.observe(viewLifecycleOwner) {
+            val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
+            findNavController().navigate(action)
         }
     }
 

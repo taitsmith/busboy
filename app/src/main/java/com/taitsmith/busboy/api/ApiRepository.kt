@@ -106,4 +106,21 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
 
         return polylineCoords
     }
+
+    //get a list of lat/lon points so we can create a polyline of the selected bus route
+    //and then display it on a map along with the current location of the bus
+    suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
+        val polylineCoords: MutableList<LatLng> = ArrayList()
+
+        val waypointResponse = acTransitApiInterface.getBusRouteWaypoints(routeName)
+
+        if (waypointResponse.isEmpty()) throw Exception("empty_response")
+
+        //need to go through several layers to get the good stuff
+        waypointResponse[0].patterns?.get(0)?.waypoints?.forEach {
+            polylineCoords.add(it.latLng)
+        }
+
+        return  polylineCoords
+    }
 }

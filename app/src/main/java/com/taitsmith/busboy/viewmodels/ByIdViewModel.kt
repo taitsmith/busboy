@@ -5,15 +5,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.WaypointResponse
 import com.taitsmith.busboy.ui.MainActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,6 +38,9 @@ class ByIdViewModel @Inject constructor(
     private val _stopPredictions = MutableLiveData<List<Prediction>>()
     val stopPredictions: LiveData<List<Prediction>> = _stopPredictions
 
+    private val _busRouteWaypoints = MutableLiveData<List<LatLng>>()
+    val busRouteWaypoints: LiveData<List<LatLng>> = _busRouteWaypoints
+
     private val _bus = MutableLiveData<Bus>()
     val bus: LiveData<Bus> = _bus
 
@@ -45,9 +53,10 @@ class ByIdViewModel @Inject constructor(
                 _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
             }.onFailure {
                 it.printStackTrace()
+                Log.d("PREDICTIONS FAILURES: ", it.message.toString())
                 when(it.message) {
                     "invalid" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
-                    "Unable to resolve host \"api.actransit.org\": No address associated with hostname"
+                    "no_service"
                         -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                     "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
                 }
@@ -84,6 +93,21 @@ class ByIdViewModel @Inject constructor(
                     apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
                 databaseRepository.addStops(stop.value!!)
                 MainActivityViewModel.mutableStatusMessage.postValue("FAVORITE_ADDED")
+            }
+        }
+    }
+
+    fun getWaypoints(routeName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            kotlin.runCatching {
+                _busRouteWaypoints.postValue(apiRepository.getBusRouteWaypoints(routeName))
+                _isUpdated.postValue(false)
+
+            }.onFailure {
+                it.printStackTrace()
+                when (it.message) {
+                    "empty_response" -> Log.d("GET WAYPOINTS", it.cause.toString())
+                }
             }
         }
     }

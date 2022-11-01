@@ -34,6 +34,7 @@ class MapsFragment : Fragment() {
 
         when (args.polylineType) {
             "directions" -> polylineCoords = nearbyViewModel.directionPolylineCoords.value!!
+            "route" -> polylineCoords = byIdViewModel.busRouteWaypoints.value!!
         }
 
         cameraFocus = if (args.polylineType == "route") LatLng(bus?.latitude!!, bus.longitude!!)

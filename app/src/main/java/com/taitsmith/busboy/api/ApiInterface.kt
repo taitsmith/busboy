@@ -38,10 +38,10 @@ interface ApiInterface {
 
     //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")
-     fun getRouteWaypoints(
+    suspend fun getBusRouteWaypoints(
         @Path("route") route: String,
         @Query("token") token: String = MainActivity.acTransitApiKey
-    ): Call<List<WaypointResponse?>?>?
+    ): List<WaypointResponse>
 
     //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")

@@ -22,6 +22,7 @@ class WaypointResponse {
             @SerializedName("Longitude")
             @Expose
             private val longitude: Double? = null
+
             val latLng: LatLng
                 get() = LatLng(latitude!!, longitude!!)
         }
