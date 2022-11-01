@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
-import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import com.taitsmith.busboy.utils.RecyclerDivider
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import kotlinx.coroutines.Dispatchers

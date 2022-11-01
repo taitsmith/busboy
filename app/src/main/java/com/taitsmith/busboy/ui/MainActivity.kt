@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -103,19 +102,10 @@ class MainActivity : AppCompatActivity() {
     private fun getStatusMessage(s: String) {
         when (s) {
             "HELP_REQUESTED" -> showHelp()
-            "DIRECTION_POLYLINE_READY" -> {
-                val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
-                navController.navigate(action)
-            }
-            "ROUTE_POLYLINE_READY" -> {
-                val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
-                navController.navigate(action)
-            }
             "FAVORITE_ADDED" -> showSnackbar(R.string.snackbar_favorite_added)
             "STOP_DELETED" -> showSnackbar(R.string.snackbar_favorite_deleted)
             "LOADING" -> hideUi(true)
             "LOADED" -> hideUi(false)
-
         }
     }
 
@@ -189,8 +179,8 @@ class MainActivity : AppCompatActivity() {
 
         var mainActivityViewModel: MainActivityViewModel? = null
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
-
         var permissionEnabledAndGranted = MutableLiveData<Boolean>()
+
         lateinit var acTransitApiKey: String
         lateinit var prediction: Prediction
     }

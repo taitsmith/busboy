@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.databinding.FavoritesFragmentBinding
@@ -63,11 +62,5 @@ class FavoritesFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         favoritesListView.adapter = null
-    }
-
-    companion object {
-        fun newInstance(): FavoritesFragment {
-            return FavoritesFragment()
-        }
     }
 }

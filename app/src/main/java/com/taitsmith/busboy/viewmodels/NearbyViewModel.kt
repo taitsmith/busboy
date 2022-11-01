@@ -6,22 +6,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.ApiRepository
-import com.taitsmith.busboy.api.DirectionResponse
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,8 +45,8 @@ class NearbyViewModel @Inject constructor(application: Application,
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
                 val nearbyList = apiRepository.getNearbyStops(
-                    37.8096,    //emulator never gets proper coords recently, so for debug
-                    -122.2685, //we'll pretend we're near 19th st bart on broadway
+                    loc.latitude,
+                    loc.latitude,
                     distance,
                     true,
                     rt

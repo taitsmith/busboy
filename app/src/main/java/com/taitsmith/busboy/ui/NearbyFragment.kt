@@ -9,14 +9,12 @@ import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding
-import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 
