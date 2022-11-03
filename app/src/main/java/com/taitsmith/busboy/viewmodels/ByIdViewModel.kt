@@ -70,7 +70,6 @@ class ByIdViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO){
             kotlin.runCatching {
                 _bus.postValue(apiRepository.getBusLocation(vehicleId))
-                _isUpdated.postValue(false)
             }.onFailure {
                 when (it.message) {
                     "null_coords" -> MainActivityViewModel.mutableErrorMessage
@@ -97,7 +96,6 @@ class ByIdViewModel @Inject constructor(
             kotlin.runCatching {
                 _busRouteWaypoints.postValue(apiRepository.getBusRouteWaypoints(routeName))
                 _isUpdated.postValue(false)
-
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {

@@ -56,6 +56,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setListeners()
+        setObservers()
 
         return binding.root
     }
@@ -72,6 +73,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 .actionNearbyFragmentToByIdFragment(stop)
             view.findNavController().navigate(action)
         }, {
+            nearbyViewModel.setIsUpdated(true)
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val (_, _, _, latitude, longitude) = it
             val start =
@@ -81,8 +83,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         })
 
         nearbyStopListView.adapter = adapter
-
-        setObservers()
     }
 
     override fun onDestroyView() {
@@ -99,8 +99,12 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         nearbyViewModel.directionPolylineCoords.observe(viewLifecycleOwner) {
-            val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
-            findNavController().navigate(action)
+            if (nearbyViewModel.isUpdated.value == true) {
+                val action =
+                    NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
+                findNavController().navigate(action)
+                nearbyViewModel.setIsUpdated(false)
+            }
         }
     }
 
@@ -119,8 +123,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     }
                 }
                 nearbyViewModel.getNearbyStops()
-            } else {
-                MainActivityViewModel.mutableErrorMessage.value = "NO_LOC_ENABLED"
             }
         }
     }
