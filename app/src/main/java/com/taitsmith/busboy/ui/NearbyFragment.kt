@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.ui
 
+import android.annotation.SuppressLint
 import dagger.hilt.android.AndroidEntryPoint
 import com.taitsmith.busboy.utils.NearbyAdapter
 import android.view.LayoutInflater
@@ -13,6 +14,8 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.databinding.NearbyFragmentBinding
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
@@ -25,6 +28,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
     private lateinit var adapter: NearbyAdapter
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var _binding: NearbyFragmentBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +53,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         buslineSpinner.adapter = adapter
         buslineSpinner.onItemSelectedListener = this
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
         setListeners()
 
         return binding.root
@@ -56,8 +62,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        nearbyViewModel.checkLocationPerm()
 
         nearbyStopListView = binding.nearbyListView
         nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
@@ -94,19 +98,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
         }
 
-        MainActivity.permissionEnabledAndGranted.observe(viewLifecycleOwner) {
-            if (nearbyViewModel.locationPermGranted.value == true &&
-                    it == true) {
-                binding.nearbySearchButton.isEnabled = true
-            }
-        }
-
-        nearbyViewModel.locationPermGranted.observe(viewLifecycleOwner) {
-            if (it == true && MainActivity.permissionEnabledAndGranted.value == true) {
-                binding.nearbySearchButton.isEnabled = true
-            }
-        }
-
         nearbyViewModel.directionPolylineCoords.observe(viewLifecycleOwner) {
             val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
             findNavController().navigate(action)
@@ -115,18 +106,22 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun setListeners() {
         nearbySearchButton.setOnClickListener {
-            val s = nearbyEditText.text.toString()
-            if (s.isNotEmpty()) {
-                val distance = s.toInt()
-                if (distance < 500 || distance > 5000) {
-                    MainActivityViewModel.mutableErrorMessage.setValue("BAD_DISTANCE")
-                } else {
-                    nearbyViewModel.distance = distance
-                    nearbyEditText.text = null
-                    nearbyEditText.hint = getString(R.string.neaby_edit_text_hint_updated, s)
+            if (nearbyViewModel.checkLocationPerm()) {
+                val s = nearbyEditText.text.toString()
+                if (s.isNotEmpty()) {
+                    val distance = s.toInt()
+                    if (distance < 500 || distance > 5000) {
+                        MainActivityViewModel.mutableErrorMessage.setValue("BAD_DISTANCE")
+                    } else {
+                        nearbyViewModel.distance = distance
+                        nearbyEditText.text = null
+                        nearbyEditText.hint = getString(R.string.neaby_edit_text_hint_updated, s)
+                    }
                 }
+                nearbyViewModel.getNearbyStops()
+            } else {
+                MainActivityViewModel.mutableErrorMessage.value = "NO_LOC_ENABLED"
             }
-            nearbyViewModel.getNearbyStops()
         }
     }
 

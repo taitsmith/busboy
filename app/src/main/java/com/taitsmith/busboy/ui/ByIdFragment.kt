@@ -101,7 +101,7 @@ class ByIdFragment : Fragment() {
             check if certain things are null/empty and determine where to go from there
          */
         byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
-            if (byIdViewModel.isUpdated.value != false) {
+            if (byIdViewModel.isUpdated.value == true) {
                 if (bus.length.isNullOrEmpty()) byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
                 else {
                     val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)

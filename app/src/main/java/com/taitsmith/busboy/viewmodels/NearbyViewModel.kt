@@ -29,8 +29,8 @@ class NearbyViewModel @Inject constructor(application: Application,
     private val _nearbyStops = MutableLiveData<List<Stop>>()
     val nearbyStops: LiveData<List<Stop>> = _nearbyStops
 
-    private val _locationPermGranted = MutableLiveData<Boolean>()
-    var locationPermGranted: LiveData<Boolean> = _locationPermGranted
+    private val _locationEnabled = MutableLiveData<Boolean>()
+    var locationEnabled: LiveData<Boolean> = _locationEnabled
 
     //for getting lat/lon coordinates to draw walking directions on a map
     private val _directionPolylineCoords = MutableLiveData<List<LatLng>>()
@@ -46,7 +46,7 @@ class NearbyViewModel @Inject constructor(application: Application,
             kotlin.runCatching {
                 val nearbyList = apiRepository.getNearbyStops(
                     loc.latitude,
-                    loc.latitude,
+                    loc.longitude,
                     distance,
                     true,
                     rt
@@ -59,23 +59,31 @@ class NearbyViewModel @Inject constructor(application: Application,
         }
     }
 
-    fun checkLocationPerm() {
-        if (ContextCompat.checkSelfPermission(
-                getApplication<Application>().applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            if (!loc.hasLocationEnabled()) {
-                mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
-                _locationPermGranted.value = false
-            } else {
-                loc.beginUpdates()
-                _locationPermGranted.value = true
-            }
+    //check to see if we've been given permission to access location. if we have, check
+    //to see if location is enabled. if both are true, we can ask for a location, if not
+    //we'll either prompt for location permission or to enable permission, depending on whats missing
+    fun checkLocationPerm(): Boolean {
+        if (!loc.hasLocationEnabled()) {
+            mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
+            _locationEnabled.value = false
+            return false
         } else {
-            mutableErrorMessage.value = "NO_PERMISSION" //permissions not granted, so ask for them
+            if (ContextCompat.checkSelfPermission(
+                    getApplication<Application>().applicationContext,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                locationPermGranted.value = true
+                loc.beginUpdates()
+                _locationEnabled.value = true
+            } else {
+                mutableErrorMessage.value = "NO_PERMISSION"
+                return false
+            }
         }
+        return true
     }
+
 
     //hey siri how do i walk from where i am to the bus stop
     fun getDirectionsToStop(start: String, stop: String) {
@@ -86,6 +94,8 @@ class NearbyViewModel @Inject constructor(application: Application,
 
     companion object {
         lateinit var loc: SimpleLocation
+
+        val locationPermGranted = MutableLiveData<Boolean>()
     }
 
     init {

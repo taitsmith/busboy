@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navHostFragment: NavHostFragment
 
     private var nearbyStatusUpdateTv: TextView? = null
-
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
@@ -52,9 +51,6 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
         bottomNavigationView.setupWithNavController(navController)
-
-        permissionEnabledAndGranted.value = (ContextCompat.checkSelfPermission(this,
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
 
         setObservers()
         setTabListeners()
@@ -168,8 +164,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                NearbyViewModel.loc.beginUpdates()
-                permissionEnabledAndGranted.value = true
+                NearbyViewModel.locationPermGranted.value = true
             }
         }
     }
@@ -179,7 +174,6 @@ class MainActivity : AppCompatActivity() {
 
         var mainActivityViewModel: MainActivityViewModel? = null
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
-        var permissionEnabledAndGranted = MutableLiveData<Boolean>()
 
         lateinit var acTransitApiKey: String
         lateinit var prediction: Prediction

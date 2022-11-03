@@ -50,7 +50,7 @@ class ByIdViewModel @Inject constructor(
                 it.printStackTrace()
                 Log.d("PREDICTIONS FAILURES: ", it.message.toString())
                 when(it.message) {
-                    "invalid" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
+                    "no_data" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
                     "no_service"
                         -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                     "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
