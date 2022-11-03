@@ -68,13 +68,13 @@ class ByIdFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         predictionAdapter = PredictionAdapter({
             prediction ->
+            byIdViewModel.setIsUpdated(true)
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
             byIdViewModel.getBusLocation(prediction.vid!!)
-            byIdViewModel.setIsUpdated(true)
         },{
-            byIdViewModel.getBusDetails(it.vid!!)
             byIdViewModel.setIsUpdated(true)
+            byIdViewModel.getBusDetails(it.vid!!)
         })
         predictionListView.adapter = predictionAdapter
     }
@@ -111,8 +111,11 @@ class ByIdFragment : Fragment() {
         }
 
         byIdViewModel.busRouteWaypoints.observe(viewLifecycleOwner) {
-            val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
-            findNavController().navigate(action)
+            if (byIdViewModel.isUpdated.value == true) {
+                val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
+                findNavController().navigate(action)
+                byIdViewModel.setIsUpdated(false)
+            }
         }
     }
 

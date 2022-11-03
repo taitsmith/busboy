@@ -26,11 +26,11 @@ class NearbyViewModel @Inject constructor(application: Application,
 
     private val mapsKey: String = application.getString(R.string.google_directions_key)
 
+    private val _isUpdated = MutableLiveData<Boolean>()
+    val isUpdated: LiveData<Boolean> = _isUpdated
+
     private val _nearbyStops = MutableLiveData<List<Stop>>()
     val nearbyStops: LiveData<List<Stop>> = _nearbyStops
-
-    private val _locationEnabled = MutableLiveData<Boolean>()
-    var locationEnabled: LiveData<Boolean> = _locationEnabled
 
     //for getting lat/lon coordinates to draw walking directions on a map
     private val _directionPolylineCoords = MutableLiveData<List<LatLng>>()
@@ -65,7 +65,6 @@ class NearbyViewModel @Inject constructor(application: Application,
     fun checkLocationPerm(): Boolean {
         if (!loc.hasLocationEnabled()) {
             mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
-            _locationEnabled.value = false
             return false
         } else {
             if (ContextCompat.checkSelfPermission(
@@ -73,9 +72,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                locationPermGranted.value = true
                 loc.beginUpdates()
-                _locationEnabled.value = true
             } else {
                 mutableErrorMessage.value = "NO_PERMISSION"
                 return false
@@ -89,7 +86,12 @@ class NearbyViewModel @Inject constructor(application: Application,
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, mapsKey))
+            _isUpdated.postValue(false)
         }
+    }
+
+    fun setIsUpdated(isUpdated: Boolean) {
+        _isUpdated.value = isUpdated
     }
 
     companion object {
