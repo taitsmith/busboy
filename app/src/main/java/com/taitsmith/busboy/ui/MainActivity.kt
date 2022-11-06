@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity() {
             "CALL_FAILURE" -> showSnackbar(R.string.snackbar_network_error)
             "BAD_DISTANCE" -> showSnackbar(R.string.snackbar_bad_distance)
             "NO_FAVORITE_STOPS" -> showSnackbar(R.string.snackbar_no_favorites)
+            "NULL_LOCATION" -> showSnackbar(R.string.snackbar_loc_null)
         }
     }
 

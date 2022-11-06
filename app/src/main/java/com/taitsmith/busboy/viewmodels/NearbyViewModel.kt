@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
@@ -21,10 +22,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NearbyViewModel @Inject constructor(application: Application,
-                                          private val apiRepository: ApiRepository
+                                          private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
     private val mapsKey: String = application.getString(R.string.google_directions_key)
+
+    private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
+    var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
 
     private val _isUpdated = MutableLiveData<Boolean>()
     val isUpdated: LiveData<Boolean> = _isUpdated
@@ -42,19 +46,23 @@ class NearbyViewModel @Inject constructor(application: Application,
     fun getNearbyStops() {
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         if (rt == null) rt = ""
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                val nearbyList = apiRepository.getNearbyStops(
-                    loc.latitude,
-                    loc.longitude,
-                    distance,
-                    true,
-                    rt
-                )
-                _nearbyStops.postValue(apiRepository.getLinesServedByStop(nearbyList))
-            }.onFailure {
-                it.printStackTrace()
-                mutableErrorMessage.postValue("404")
+        if (currentLocation.latitude == 0.0) {
+            mutableErrorMessage.value = "NULL_LOCATION"
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                kotlin.runCatching {
+                    val nearbyList = apiRepository.getNearbyStops(
+                        currentLocation.latitude,
+                        currentLocation.longitude,
+                        distance,
+                        true,
+                        rt
+                    )
+                    _nearbyStops.postValue(apiRepository.getLinesServedByStop(nearbyList))
+                }.onFailure {
+                    it.printStackTrace()
+                    mutableErrorMessage.postValue("404")
+                }
             }
         }
     }
@@ -63,24 +71,22 @@ class NearbyViewModel @Inject constructor(application: Application,
     //to see if location is enabled. if both are true, we can ask for a location, if not
     //we'll either prompt for location permission or to enable permission, depending on whats missing
     fun checkLocationPerm(): Boolean {
-        if (!loc.hasLocationEnabled()) {
-            mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
-            return false
-        } else {
-            if (ContextCompat.checkSelfPermission(
-                    getApplication<Application>().applicationContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                loc.beginUpdates()
+        if (ContextCompat.checkSelfPermission(
+                getApplication<Application>().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            return if (loc.hasLocationEnabled()) {
+                _permGrantedAndEnabled.value = true
+                true
             } else {
-                mutableErrorMessage.value = "NO_PERMISSION"
-                return false
+                mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
+                false
             }
         }
-        return true
+        mutableErrorMessage.value = "NO_PERMISSION"
+        return false
     }
-
 
     //hey siri how do i walk from where i am to the bus stop
     fun getDirectionsToStop(start: String, stop: String) {
@@ -94,14 +100,20 @@ class NearbyViewModel @Inject constructor(application: Application,
         _isUpdated.value = isUpdated
     }
 
+    fun setLocation(location: Location) {
+        currentLocation = location
+    }
+
     companion object {
         lateinit var loc: SimpleLocation
+        lateinit var currentLocation: Location
 
         val locationPermGranted = MutableLiveData<Boolean>()
     }
 
     init {
         loc = SimpleLocation(application.applicationContext)
+        currentLocation = Location(null)
         distance = 1000
     }
 }

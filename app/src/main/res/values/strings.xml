@@ -63,6 +63,7 @@
     <string name="snackbar_no_favorites">Looks like there\'s nothing here…</string>
     <string name="snackbar_favorite_added">Stop added to favorites</string>
     <string name="snackbar_favorite_deleted">Favorite deleted</string>
+    <string name="snackbar_loc_null">Waiting on location, try again shortly</string>
 
     <!-- tabs, menus etc-->
     <string name="tab_layout_by_stop">By ID</string>

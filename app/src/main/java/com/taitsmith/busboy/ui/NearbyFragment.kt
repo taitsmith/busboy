@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,12 +18,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.taitsmith.busboy.R
-import com.taitsmith.busboy.databinding.NearbyFragmentBinding
+import com.taitsmith.busboy.databinding.FragmentNearbyBinding
+import com.taitsmith.busboy.di.LocationRepository
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
+    @Inject
+    lateinit var locationRepository: LocationRepository
+
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
     private lateinit var buslineSpinner: Spinner
@@ -30,7 +37,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var adapter: NearbyAdapter
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private var _binding: NearbyFragmentBinding? = null
+    private var _binding: FragmentNearbyBinding? = null
     private val binding get() = _binding!!
 
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
@@ -40,7 +47,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = NearbyFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentNearbyBinding.inflate(inflater, container, false)
         buslineSpinner = binding.buslineSpinner
         nearbySearchButton = binding.nearbySearchButton
         nearbyEditText = binding.nearbyEditText
@@ -77,7 +84,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val (_, _, _, latitude, longitude) = it
             val start =
-                NearbyViewModel.loc.latitude.toString() + "," + NearbyViewModel.loc.longitude.toString()
+                NearbyViewModel.currentLocation.latitude.toString() + "," +
+                        NearbyViewModel.currentLocation.longitude.toString()
             val end = (latitude!!).toString() + "," + (longitude!!).toString()
             nearbyViewModel.getDirectionsToStop(start, end)
         })
@@ -90,8 +98,10 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
         _binding = null
+        locationRepository.stopUpdates()
     }
 
+    @SuppressLint("MissingPermission")
     private fun setObservers() {
         nearbyViewModel.nearbyStops.observe(viewLifecycleOwner) {
             adapter.submitList(it)
@@ -104,6 +114,20 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("directions")
                 findNavController().navigate(action)
                 nearbyViewModel.setIsUpdated(false)
+            }
+        }
+
+        nearbyViewModel.permGrantedAndEnabled.observe(viewLifecycleOwner) {
+            if (it) {
+                locationRepository.startUpdates()
+                lifecycleScope.launch {
+                    locationRepository.lastLocation.collect {
+                        location ->
+                        if (location != null) {
+                            nearbyViewModel.setLocation(location)
+                        }
+                    }
+                }
             }
         }
     }
