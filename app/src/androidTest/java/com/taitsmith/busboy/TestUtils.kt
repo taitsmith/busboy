@@ -10,6 +10,14 @@ object TestUtils {
         stopId = "53929"
     )
 
+    fun createStops(): List<Stop> {
+        val stop1 = Stop(id = 1, stopId = "55555")
+        val stop2 = Stop(id = 2, stopId = "58829")
+        val stop3 = Stop(id = 3, stopId =  "56669")
+
+        return listOf(stop1, stop2, stop3)
+    }
+
     fun createLines() : List<RouteDestination> {
         val line1 = RouteDestination(
             1,
