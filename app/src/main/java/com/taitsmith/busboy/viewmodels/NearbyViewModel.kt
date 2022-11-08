@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.location.Location
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
@@ -61,7 +62,8 @@ class NearbyViewModel @Inject constructor(application: Application,
                     _nearbyStops.postValue(apiRepository.getLinesServedByStop(nearbyList))
                 }.onFailure {
                     it.printStackTrace()
-                    mutableErrorMessage.postValue("404")
+                    if (it.message == "timeout") mutableErrorMessage.postValue("CALL_FAILURE")
+                    else mutableErrorMessage.postValue("404")
                 }
             }
         }

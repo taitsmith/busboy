@@ -54,6 +54,7 @@ class ByIdViewModel @Inject constructor(
                     "no_service"
                         -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                     "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
+                    "timeout" -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                 }
             }
         }
