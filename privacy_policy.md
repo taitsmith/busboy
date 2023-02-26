@@ -1,8 +1,8 @@
 # busboy privacy
-the only personal information busboy will ever access is your location, if you've given it permission. this information is included in api calls to ac transit (for determining nearby stops) and google (for determining walking directions to nearby stops), and only accessed when the app is running in the foreground a search for nearby stops or walking directions is requested. it is never stored by busboy and is forgotten when the app is closed.
+the only personal information busboy will ever access is your location, if you've given it permission. this information is included in api calls to ac transit (for determining nearby stops) and google (for determining walking directions to nearby stops). your location is accessed when you search for a nearby stop [here](https://github.com/taitsmith/busboy/blob/38be64cf5dcce2ddd4e2e7591d942e6787b9d7af/app/src/main/java/com/taitsmith/busboy/di/LocationRepository.kt#L30), and is updated every ten minutes if the app is running in the foreground, or when you request a new search. this information is not stored by busboy and is forgotten [here](https://github.com/taitsmith/busboy/blob/38be64cf5dcce2ddd4e2e7591d942e6787b9d7af/app/src/main/java/com/taitsmith/busboy/di/LocationRepository.kt#L45) when the 'nearby' screen is closed.
   
 No other user data is accessible by busboy, and the app will function normally (without the use of 'nearby' search) if the permission is denied or location access is turned off.  
 
-[Location request](https://github.com/taitsmith/busboy/blob/19a4fd8ead9b5376fbb89c1ca670c3f92b464aa5/app/src/main/java/com/taitsmith/busboy/ui/MainActivity.java#L227)  
-[Location use with google api call](https://github.com/taitsmith/busboy/blob/19a4fd8ead9b5376fbb89c1ca670c3f92b464aa5/app/src/main/java/com/taitsmith/busboy/utils/ApiInterface.kt#L62)  
-[Location use with ac transit api call](https://github.com/taitsmith/busboy/blob/19a4fd8ead9b5376fbb89c1ca670c3f92b464aa5/app/src/main/java/com/taitsmith/busboy/utils/ApiInterface.kt#L31)  
+[Location use with google api call](https://github.com/taitsmith/busboy/blob/38be64cf5dcce2ddd4e2e7591d942e6787b9d7af/app/src/main/java/com/taitsmith/busboy/api/ApiInterface.kt#L58)  
+[Location use with ac transit api call](https://github.com/taitsmith/busboy/blob/38be64cf5dcce2ddd4e2e7591d942e6787b9d7af/app/src/main/java/com/taitsmith/busboy/api/ApiInterface.kt#L20)  
+
