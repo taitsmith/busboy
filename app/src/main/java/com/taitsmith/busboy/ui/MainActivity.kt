@@ -18,6 +18,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        acTransitApiKey = getString(R.string.ac_transit_key)
+        acTransitApiKey = BuildConfig.ac_transit_key
         mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
         bottomNavigationView = binding.mainTabLayout
         nearbyStatusUpdateTv = binding.nearbyStatusUpdater

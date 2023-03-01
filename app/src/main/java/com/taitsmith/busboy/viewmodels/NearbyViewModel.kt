@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
@@ -26,7 +27,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                                           private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
-    private val mapsKey: String = application.getString(R.string.google_directions_key)
+    private val mapsKey: String = BuildConfig.google_maps_key
 
     private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
     var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
