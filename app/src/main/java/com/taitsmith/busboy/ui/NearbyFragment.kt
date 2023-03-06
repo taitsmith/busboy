@@ -1,12 +1,10 @@
 package com.taitsmith.busboy.ui
 
 import android.annotation.SuppressLint
-import dagger.hilt.android.AndroidEntryPoint
-import com.taitsmith.busboy.utils.NearbyAdapter
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -20,8 +18,10 @@ import com.google.android.gms.location.LocationServices
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
 import com.taitsmith.busboy.di.LocationRepository
-import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,7 +34,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var nearbySearchButton: Button
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
-    private lateinit var adapter: NearbyAdapter
+    private lateinit var nearbyAdapter: NearbyAdapter
+    private lateinit var buslineAdapter: ArrayAdapter<CharSequence>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var _binding: FragmentNearbyBinding? = null
@@ -52,12 +53,12 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         nearbySearchButton = binding.nearbySearchButton
         nearbyEditText = binding.nearbyEditText
 
-        val adapter = ArrayAdapter.createFromResource(
+        buslineAdapter= ArrayAdapter.createFromResource(
             requireContext(),
             R.array.bus_lines, android.R.layout.simple_spinner_item
         )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        buslineSpinner.adapter = adapter
+        buslineAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        buslineSpinner.adapter = buslineAdapter
         buslineSpinner.onItemSelectedListener = this
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -74,7 +75,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         nearbyStopListView = binding.nearbyListView
         nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = NearbyAdapter ({ stop ->
+        nearbyAdapter = NearbyAdapter ({ stop ->
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = NearbyFragmentDirections
                 .actionNearbyFragmentToByIdFragment(stop)
@@ -89,14 +90,14 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
             val end = (latitude!!).toString() + "," + (longitude!!).toString()
             nearbyViewModel.getDirectionsToStop(start, end)
         })
-
-        nearbyStopListView.adapter = adapter
+        nearbyStopListView.adapter = nearbyAdapter
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
+        nearbyAdapter.submitList(null)
         _binding = null
         locationRepository.stopUpdates()
     }
@@ -104,7 +105,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     @SuppressLint("MissingPermission")
     private fun setObservers() {
         nearbyViewModel.nearbyStops.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
+            nearbyAdapter.submitList(it)
             MainActivityViewModel.mutableStatusMessage.value = "LOADED"
         }
 
