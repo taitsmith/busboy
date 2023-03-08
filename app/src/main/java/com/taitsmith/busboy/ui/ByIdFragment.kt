@@ -1,12 +1,9 @@
 package com.taitsmith.busboy.ui
 
-import dagger.hilt.android.AndroidEntryPoint
-import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.utils.PredictionAdapter
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,11 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ByIdFragmentBinding
-import com.taitsmith.busboy.utils.RecyclerDivider
+import com.taitsmith.busboy.utils.PredictionAdapter
+import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.IndexOutOfBoundsException
 
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
@@ -44,12 +42,17 @@ class ByIdFragment : Fragment() {
     ): View {
         _binding = ByIdFragmentBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
-        _predictionListView!!.addItemDecoration(RecyclerDivider(requireContext()))
+
+        //if we're coming to the predictions fragment from nearby / favorites,
+        //we want to display predictions for the selected stop
         if (args.selectedNearbyStop != null) {
             lifecycleScope.launch(Dispatchers.IO) {
-                byIdViewModel.getStopPredictions(args.selectedNearbyStop!!.stopId!!, null)
+                args.selectedNearbyStop?.stopId?.let {
+                    byIdViewModel.getStopPredictions(it , null)
+                }
             }
         }
+
         setListeners()
         setObservers()
 
@@ -74,7 +77,8 @@ class ByIdFragment : Fragment() {
             byIdViewModel.getBusLocation(prediction.vid!!)
         },{
             byIdViewModel.setIsUpdated(true)
-            byIdViewModel.getBusDetails(it.vid!!)
+            it.vid?.let { it1 -> byIdViewModel.getBusDetails(it1)
+            }
         })
         predictionListView.adapter = predictionAdapter
     }

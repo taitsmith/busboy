@@ -6,11 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.di.DatabaseRepository
-import com.taitsmith.busboy.data.Stop
-import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.data.Bus
+import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

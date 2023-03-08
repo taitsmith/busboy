@@ -101,7 +101,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
         val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList
 
         stepList?.forEach {
-            polylineCoords.add(it.endCoords!!.returnCoords())
+            it.endCoords?.returnCoords()?.let { it1 -> polylineCoords.add(it1) }
         }
 
         return polylineCoords

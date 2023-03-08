@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.databinding.FavoritesFragmentBinding
 import com.taitsmith.busboy.utils.NearbyAdapter
-import com.taitsmith.busboy.utils.RecyclerDivider
 import com.taitsmith.busboy.viewmodels.FavoritesViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,7 +48,6 @@ class FavoritesFragment : Fragment() {
         }, {
             favoritesViewModel.deleteStop(it)
         })
-        favoritesListView.addItemDecoration(RecyclerDivider(requireContext()))
         favoritesListView.adapter = nearbyAdapter
 
         lifecycle.coroutineScope.launch {
