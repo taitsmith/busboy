@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
@@ -114,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.navHostFragment.visibility = View.VISIBLE
             binding.progressBar.visibility = View.INVISIBLE
-            nearbyStatusUpdateTv!!.visibility = View.INVISIBLE
+            nearbyStatusUpdateTv?.visibility = View.INVISIBLE
         }
     }
 
@@ -154,8 +153,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateNearbyStatusText(s: String) {
-        nearbyStatusUpdateTv!!.visibility = View.VISIBLE
-        nearbyStatusUpdateTv!!.text = getString(R.string.nearby_status_update, s)
+        nearbyStatusUpdateTv?.visibility = View.VISIBLE
+        nearbyStatusUpdateTv?.text = getString(R.string.nearby_status_update, s)
     }
 
     override fun onRequestPermissionsResult(
