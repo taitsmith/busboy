@@ -33,7 +33,7 @@
         \nShort pressing an item on your favorites list will show you upcoming buses for that stop.
         \nLong pressing a favorite will allow you to delete a stop from your favorites.
         \n\nFor bug reports, feature requests or contributions, please visit github.com/taitsmith/busboy
-        or send an email to busboy@taitsmith.com</string>
+        or send an email to thebus@busboy.dev</string>
     <string name="dialog_delete_stop">Do you want to delete this stop from your favorites list? You
         can always re-add it later.</string>
     <string name="dialog_delete_stop_yes">Delete stop</string>
