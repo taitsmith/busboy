@@ -61,7 +61,7 @@ class ByIdViewModel @Inject constructor(
     }
 
     fun getBusDetails(vid: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _bus.value = apiRepository.getDetailedBusInfo(vid)
             _isUpdated.postValue(false)
         }
