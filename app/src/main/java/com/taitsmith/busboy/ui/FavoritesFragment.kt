@@ -58,6 +58,7 @@ class FavoritesFragment : Fragment() {
     }
     override fun onDestroyView() {
         super.onDestroyView()
+        favoritesListView.removeAllViews()
         _binding = null
         favoritesListView.adapter = null
         nearbyAdapter.submitList(null)
