@@ -1,10 +1,9 @@
 package com.taitsmith.busboy.ui
 
-import com.taitsmith.busboy.viewmodels.FavoritesViewModel
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
@@ -13,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.databinding.FavoritesFragmentBinding
 import com.taitsmith.busboy.utils.NearbyAdapter
-import com.taitsmith.busboy.utils.RecyclerDivider
+import com.taitsmith.busboy.viewmodels.FavoritesViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -23,9 +22,9 @@ class FavoritesFragment : Fragment() {
 
     private val favoritesViewModel: FavoritesViewModel by viewModels()
     lateinit var favoritesListView: RecyclerView
+    private lateinit var nearbyAdapter: NearbyAdapter
 
     private var _binding: FavoritesFragmentBinding? = null
-
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -41,7 +40,7 @@ class FavoritesFragment : Fragment() {
         favoritesListView = binding.favoritesListView
         favoritesListView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        val adapter = NearbyAdapter ({
+        nearbyAdapter = NearbyAdapter ({
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = FavoritesFragmentDirections
                 .actionFavoritesFragmentToByIdFragment(it)
@@ -49,12 +48,11 @@ class FavoritesFragment : Fragment() {
         }, {
             favoritesViewModel.deleteStop(it)
         })
-        favoritesListView.addItemDecoration(RecyclerDivider(requireContext()))
-        favoritesListView.adapter = adapter
+        favoritesListView.adapter = nearbyAdapter
 
         lifecycle.coroutineScope.launch {
             favoritesViewModel.getFavoriteStops().collect {
-                adapter.submitList(it)
+                nearbyAdapter.submitList(it)
             }
         }
     }
@@ -62,5 +60,6 @@ class FavoritesFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         favoritesListView.adapter = null
+        nearbyAdapter.submitList(null)
     }
 }

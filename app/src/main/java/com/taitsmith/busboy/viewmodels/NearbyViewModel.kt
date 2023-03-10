@@ -2,17 +2,15 @@ package com.taitsmith.busboy.viewmodels
 
 import android.Manifest
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.BuildConfig
-import com.taitsmith.busboy.R
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
@@ -27,7 +25,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                                           private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
-    private val mapsKey: String = BuildConfig.google_maps_key
+    private val directionsKey: String = BuildConfig.google_directions_key
 
     private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
     var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
@@ -94,7 +92,7 @@ class NearbyViewModel @Inject constructor(application: Application,
     //hey siri how do i walk from where i am to the bus stop
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, mapsKey))
+            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, directionsKey))
             _isUpdated.postValue(false)
         }
     }
