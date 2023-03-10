@@ -25,7 +25,7 @@ class NearbyViewModel @Inject constructor(application: Application,
                                           private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
-    private val mapsKey: String = BuildConfig.google_directions_key
+    private val directionsKey: String = BuildConfig.google_directions_key
 
     private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
     var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
@@ -92,7 +92,7 @@ class NearbyViewModel @Inject constructor(application: Application,
     //hey siri how do i walk from where i am to the bus stop
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, mapsKey))
+            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, directionsKey))
             _isUpdated.postValue(false)
         }
     }
