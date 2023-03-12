@@ -14,15 +14,14 @@ android {
         }
     }
 
-
     compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.taitsmith.busboy"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 13
-        versionName "1.0.0_rc_2"
+        versionCode 17
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
         javaCompileOptions {
@@ -34,8 +33,6 @@ android {
         buildConfigField("String", "google_maps_key", google_maps_key)
         buildConfigField("String", "google_directions_key", google_directions_key)
         buildConfigField("String", "ac_transit_key", ac_transit_key)
-
-        manifestPlaceholders = [maps_key:google_maps_key]
     }
 
     compileOptions {

@@ -1,5 +1,0 @@
-<resources>
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">secret</string>
-    <string name="google_directions_key" translatable="false">secret</string>
-    <string name="ac_transit_key">secret</string>
-</resources>
