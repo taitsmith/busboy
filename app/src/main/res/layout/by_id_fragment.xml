@@ -79,6 +79,7 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:contentDescription="@string/accessibility_favorites_fab"
+            android:layout_margin="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/add_favorite_fab_icon"/>

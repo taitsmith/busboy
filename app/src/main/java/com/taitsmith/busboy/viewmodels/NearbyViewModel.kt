@@ -21,8 +21,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NearbyViewModel @Inject constructor(private val application: Application,
-                                          private val apiRepository: ApiRepository,
+class NearbyViewModel @Inject constructor(
+    application: Application,
+    private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
     private val directionsKey: String = BuildConfig.google_directions_key
@@ -72,7 +73,6 @@ class NearbyViewModel @Inject constructor(private val application: Application,
     //to see if location is enabled. if both are true, we can ask for a location, if not
     //we'll either prompt for location permission or to enable permission, depending on whats missing
     fun checkLocationPerm(): Boolean {
-        loc = SimpleLocation(application.applicationContext)
         if (ContextCompat.checkSelfPermission(
                 getApplication<Application>().applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -114,6 +114,10 @@ class NearbyViewModel @Inject constructor(private val application: Application,
     }
 
     init {
+        loc = SimpleLocation(application.applicationContext)
+
+        if (checkLocationPerm()) _permGrantedAndEnabled.value = true
+
         currentLocation = Location(null)
         distance = 1000
     }
