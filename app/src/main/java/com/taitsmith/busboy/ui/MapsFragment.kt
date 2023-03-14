@@ -1,81 +1,117 @@
 package com.taitsmith.busboy.ui
 
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 
-class MapsFragment : Fragment() {
+class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
     private lateinit var polylineCoords: List<LatLng>
-    private lateinit var cameraFocus: LatLng
+    private lateinit var locationChoice: LatLng
+    private lateinit var bus: Bus
+    private lateinit var googleMap: GoogleMap
 
     private val callback = OnMapReadyCallback { googleMap ->
-        googleMap.clear()
-        val bus = byIdViewModel.bus.value
+        this.googleMap = googleMap
 
-        when (args.polylineType) {
-            "directions" -> polylineCoords = nearbyViewModel.directionPolylineCoords.value!!
-            "route" -> polylineCoords = byIdViewModel.busRouteWaypoints.value!!
+        googleMap.clear()
+
+        /* we'll show the map fragment in three cases:
+            - a bus route with the location of the bus
+            - walking directions from user's location to a bus stop
+            - allowing a user to pick a location to display nearby stops
+            we'll take polyline coordinate from the viewmodels in the first two cases,
+            otherwise we'll focus on downtown oakland and let users move the map to pick a spot
+         */
+        polylineCoords = when (args.polylineType) {
+            "directions" -> nearbyViewModel.directionPolylineCoords.value!!
+            "route" -> byIdViewModel.busRouteWaypoints.value!!
+            "choice" -> mutableListOf(LatLng(37.811, -122.268))
+            else -> mutableListOf()
         }
 
-        cameraFocus = if (args.polylineType == "route") LatLng(bus?.latitude!!, bus.longitude!!)
-        else polylineCoords[0]
+        if (polylineCoords.size == 1) {
+            setupForLocationChoice()
+        } else {
+            setupForRouteDisplay()
+        }
+    }
+
+    //if we're letting user pick a location we want it empty
+    private fun setupForLocationChoice() {
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
+        locationChoice = polylineCoords[0]
+
+        googleMap.addMarker(
+            MarkerOptions()
+                .position(polylineCoords[0])
+                .draggable(true)
+                .title(getString(R.string.map_you_are_here))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
+        )
+
+        googleMap.setOnMarkerClickListener(this)
+        googleMap.setOnMarkerDragListener(this)
 
         MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+    }
 
-        if (polylineCoords.isEmpty()) {
-            MainActivityViewModel.mutableErrorMessage.value = "404"
-        } else {
-            val directionRoute = googleMap.addPolyline(PolylineOptions())
-            directionRoute.points = polylineCoords
-            directionRoute.color = Color.RED
-            try {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraFocus, 15F))
-            } catch (e: NullPointerException) {
-                e.printStackTrace()
-                MainActivityViewModel.mutableErrorMessage.setValue("NULL_BUS_COORDS")
-            }
-        }
+    //if we're displying a route
+    private fun setupForRouteDisplay() {
+        val directionRoute = googleMap.addPolyline(PolylineOptions())
+        directionRoute.points = polylineCoords
+        directionRoute.color = Color.RED
 
+        //start location
         googleMap.addMarker(
             MarkerOptions()
                 .position(polylineCoords[0])
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
         )
 
+        //end location
         googleMap.addMarker(
             MarkerOptions()
                 .position(polylineCoords[polylineCoords.size - 1])
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
         )
 
-        if (bus != null) { //only want to do this if we're showing a bus route
+        //only want to do this if we're showing a bus route
+        if (args.polylineType == "route") {
+            bus = byIdViewModel.bus.value!!
             googleMap.addMarker(
                 MarkerOptions()
                     .position(LatLng(bus.latitude!!, bus.longitude!!))
                     .title("THE BUS")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
             )
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                LatLng(bus.latitude!!, bus.longitude!!), 15F))
         }
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
+        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
     }
 
     override fun onCreateView(
@@ -94,6 +130,31 @@ class MapsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        googleMap.clear()
+    }
 
+    override fun onMarkerDrag(p0: Marker) {
+        //do nothing
+    }
+
+    override fun onMarkerDragEnd(p0: Marker) {
+        locationChoice = p0.position
+        val loc = Location(null)
+        loc.latitude = p0.position.latitude
+        loc.longitude = p0.position.longitude
+        nearbyViewModel.setLocation(loc)
+    }
+
+    override fun onMarkerDragStart(p0: Marker) {
+        view?.let {
+            Snackbar.make(it, "Drop the pin where you'd like to search", Snackbar.LENGTH_LONG)
+                .show()
+        }
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {
+        findNavController().navigate(R.id.nearbyFragment)
+        nearbyViewModel.getNearbyStops()
+        return false
     }
 }
