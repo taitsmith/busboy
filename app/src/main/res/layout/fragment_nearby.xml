@@ -8,6 +8,7 @@
             name="nearbyFragment"
             type="com.taitsmith.busboy.ui.NearbyFragment" />
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,15 +28,26 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/nearbyChooseOnMapButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/nearby_choose_on_map"
+            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/nearbyVertGuideline75"
+            app:layout_constraintTop_toBottomOf="@id/nearbyEditText" />
+
         <Button
             android:id="@+id/nearbySearchButton"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/search_button_text"
-            app:layout_constraintStart_toEndOf="@id/nearbyVertGuideline"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/nearbyEditText"
-            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"/>
+            app:layout_constraintBottom_toTopOf="@+id/nearbyHorizGuideline"
+            app:layout_constraintEnd_toStartOf="@+id/nearbyVertGuideline75"
+            app:layout_constraintStart_toStartOf="@+id/nearbyVertGuideline50"
+            app:layout_constraintTop_toBottomOf="@+id/nearbyEditText" />
 
         <Spinner
             android:id="@+id/buslineSpinner"
@@ -43,7 +55,8 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
-            app:layout_constraintEnd_toStartOf="@id/nearbyVertGuideline"
+            app:layout_constraintEnd_toStartOf="@id/nearbyVertGuideline50"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nearbyEditText" />
 
@@ -68,11 +81,20 @@
 
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/nearbyVertGuideline"
+            android:id="@+id/nearbyVertGuideline75"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent=".75"/>
+            app:layout_constraintGuide_percent="0.6" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/nearbyVertGuideline50"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.35" />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

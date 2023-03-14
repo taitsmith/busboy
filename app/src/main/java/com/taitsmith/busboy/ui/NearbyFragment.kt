@@ -32,6 +32,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
+    private lateinit var chooseOnMapButton: Button
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
     private lateinit var nearbyAdapter: NearbyAdapter
@@ -51,6 +52,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         _binding = FragmentNearbyBinding.inflate(inflater, container, false)
         buslineSpinner = binding.buslineSpinner
         nearbySearchButton = binding.nearbySearchButton
+        chooseOnMapButton = binding.nearbyChooseOnMapButton
         nearbyEditText = binding.nearbyEditText
 
         buslineAdapter= ArrayAdapter.createFromResource(
@@ -144,11 +146,16 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     } else {
                         nearbyViewModel.distance = distance
                         nearbyEditText.text = null
-                        nearbyEditText.hint = getString(R.string.neaby_edit_text_hint_updated, s)
+                        nearbyEditText.hint = getString(R.string.nearby_edit_text_hint_updated, s)
                     }
                 }
                 nearbyViewModel.getNearbyStops()
             }
+        }
+
+        chooseOnMapButton.setOnClickListener {
+            val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("choice")
+            view?.findNavController()?.navigate(action)
         }
     }
 
