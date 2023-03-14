@@ -12,7 +12,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.databinding.ByIdFragmentBinding
+import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
@@ -26,7 +26,7 @@ class ByIdFragment : Fragment() {
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val args: ByIdFragmentArgs by navArgs()
 
-    private var _binding: ByIdFragmentBinding? = null
+    private var _binding: FragmentByIdBinding? = null
     private var _predictionListView: RecyclerView? = null
 
     private val predictionListView get() = _predictionListView!!
@@ -40,7 +40,7 @@ class ByIdFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ByIdFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentByIdBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
 
         //if we're coming to the predictions fragment from nearby / favorites,
