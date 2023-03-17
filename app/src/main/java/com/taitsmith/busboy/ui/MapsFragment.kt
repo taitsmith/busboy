@@ -82,6 +82,7 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         val directionRoute = googleMap.addPolyline(PolylineOptions())
         directionRoute.points = polylineCoords
         directionRoute.color = Color.RED
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
 
         //start location
         googleMap.addMarker(
@@ -110,7 +111,6 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
                 LatLng(bus.latitude!!, bus.longitude!!), 15F))
         }
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
         MainActivityViewModel.mutableStatusMessage.value = "LOADED"
     }
 
@@ -131,6 +131,8 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
     override fun onDestroy() {
         super.onDestroy()
         googleMap.clear()
+        googleMap.setOnMarkerDragListener(null)
+        googleMap.setOnMarkerClickListener(null)
     }
 
     override fun onMarkerDrag(p0: Marker) {
@@ -154,7 +156,6 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
 
     override fun onMarkerClick(p0: Marker): Boolean {
         findNavController().navigate(R.id.nearbyFragment)
-        nearbyViewModel.getNearbyStops()
         return false
     }
 }

@@ -30,24 +30,15 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/nearbyChooseOnMapButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/nearby_choose_on_map"
-            app:layout_constraintBottom_toTopOf="@id/nearbyHorizGuideline"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/nearbyVertGuideline75"
-            app:layout_constraintTop_toBottomOf="@id/nearbyEditText" />
-
-        <Button
             android:id="@+id/nearbySearchButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/search_button_text"
             app:layout_constraintBottom_toTopOf="@+id/nearbyHorizGuideline"
-            app:layout_constraintEnd_toStartOf="@+id/nearbyVertGuideline75"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/nearbyVertGuideline50"
-            app:layout_constraintTop_toBottomOf="@+id/nearbyEditText" />
+            app:layout_constraintTop_toBottomOf="@+id/nearbyEditText"
+            app:layout_constraintVertical_bias="0.362" />
 
         <Spinner
             android:id="@+id/buslineSpinner"
@@ -81,18 +72,11 @@
 
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/nearbyVertGuideline75"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.6" />
-
-        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nearbyVertGuideline50"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.35" />
+            app:layout_constraintGuide_percent="0.66" />
 
 
 

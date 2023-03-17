@@ -1,6 +1,7 @@
 package com.taitsmith.busboy.ui
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
 import com.taitsmith.busboy.di.LocationRepository
@@ -26,13 +28,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
+class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener {
     @Inject
     lateinit var locationRepository: LocationRepository
 
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
-    private lateinit var chooseOnMapButton: Button
     private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
     private lateinit var nearbyAdapter: NearbyAdapter
@@ -52,7 +53,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
         _binding = FragmentNearbyBinding.inflate(inflater, container, false)
         buslineSpinner = binding.buslineSpinner
         nearbySearchButton = binding.nearbySearchButton
-        chooseOnMapButton = binding.nearbyChooseOnMapButton
         nearbyEditText = binding.nearbyEditText
 
         buslineAdapter= ArrayAdapter.createFromResource(
@@ -67,8 +67,19 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
         setListeners()
         setObservers()
-
+        showDialog()
         return binding.root
+    }
+
+    //allow users to choose whether to use their device location or pick a location from the map
+    private fun showDialog() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setMessage(R.string.dialog_location_method)
+            .setPositiveButton(R.string.dialog_choose_on_map, this)
+            .setNegativeButton(R.string.dialog_use_location, null) //cancel dialog, use device location
+            .setCancelable(false)
+            .create()
+            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -152,11 +163,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 nearbyViewModel.getNearbyStops()
             }
         }
-
-        chooseOnMapButton.setOnClickListener {
-            val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("choice")
-            view?.findNavController()?.navigate(action)
-        }
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -166,4 +172,13 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+    override fun onClick(p0: DialogInterface?, p1: Int) {
+        when (p1) {
+            //user picked 'choose on map'
+            DialogInterface.BUTTON_POSITIVE -> {
+                val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("choice")
+                findNavController().navigate(action)
+            }
+        }
+    }
 }
