@@ -1,7 +1,15 @@
-# busboy
-Don't you hate it when you wait twenty minutes for the 51A, and then three show up at the same time? Busboy doesn't prevent that unfortunately, but it does allow you see that all three will be arriving simultaneously. 
+# busboy  
 
-Busboy uses Retrofit and Kotlin Coroutines to make its network calls, Hilt for DI and Room for offline storage. It's built on MVVM design patterns and uses LiveData and all the standard fancy tools.
+
+<a href='https://play.google.com/store/apps/details?id=com.taitsmith.busboy'><img alt='busboy on google play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200 height=auto/></a>
+
+Or get APKs of the latest builds:  
+<a href='https://busboy.dev/apks/main/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=main'></a>
+<a href='https://busboy.dev/apks/dev/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=dev'></a>
+<a href='https://busboy.dev/apks/feature/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=feature'></a>
+
+
+Don't you hate it when you wait twenty minutes for the 51A, and then three show up at the same time? Busboy doesn't prevent that unfortunately, but it does allow you see that all three will be arriving simultaneously. 
   
 Already at a bus stop? Busboy can use your stop's ID to tell you what buses are coming.  
 ![ss_main_busflag](https://user-images.githubusercontent.com/18432394/224452432-4e0dc5fe-926e-4466-99dd-9307277e1aea.png)
@@ -20,4 +28,5 @@ Not at a bus stop? If you give Busboy permission to see your location, it can sh
 Don't care about stops that don't serve the 51A? Tell Busboy what lines you're looking for:  
 ![image](https://user-images.githubusercontent.com/18432394/224452590-a796598b-d14a-449f-b92d-02306923cb19.png)
 
-Install from an [.apk](https://www.taitsmith.com/apks/busboy_debug_2023_02_13.apk) and verify with a [.sig](https://www.taitsmith.com/apks/busboy_debug_2023_02_13.apk.sig) and [this key](https://www.taitsmith.com/apks/ts_public.key), or from the [play store](https://play.google.com/store/apps/details?id=com.taitsmith.busboy). You can also build it yourself from the source, but you'll need to supply [AC Transit](https://api.actransit.org/transit/Account/Register) and [Google](https://developers.google.com/maps/documentation/directions/get-api-key) API keys, and there's a chance you'll run into some bugs.
+
+Busboy uses Retrofit and Kotlin Coroutines to make its network calls, Hilt for DI and Room for offline storage. It's built on MVVM design patterns and uses LiveData and all the standard fancy tools.
