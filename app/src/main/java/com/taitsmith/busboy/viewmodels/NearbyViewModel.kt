@@ -44,6 +44,15 @@ class NearbyViewModel @Inject constructor(
     var rt: String? = null
     var distance: Int
 
+    /* some app functionality is different if we're using the device location or letting users
+    pick a location on the map- we don't want to show location access dialogs if we aren't
+    accessing the user's location, etc.
+     */
+    var isUsingLocation: Boolean = false
+
+    //we only want to show the location choice method dialog once per session
+    var shouldShowDialog = true
+
     fun getNearbyStops() {
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         if (rt == null) rt = ""
@@ -106,6 +115,18 @@ class NearbyViewModel @Inject constructor(
         currentLocation = location
     }
 
+    fun setIsUsingLocation(usingLocation: Boolean) {
+        //if user has selected the option to use the device location, make sure we have
+        //permission and location setting is enabled
+        if (usingLocation) checkLocationPerm()
+
+        //disable the 'choose location method' dialog for now
+        shouldShowDialog = false
+
+        isUsingLocation = usingLocation
+    }
+
+
     companion object {
         lateinit var loc: SimpleLocation
         lateinit var currentLocation: Location
@@ -115,8 +136,6 @@ class NearbyViewModel @Inject constructor(
 
     init {
         loc = SimpleLocation(application.applicationContext)
-
-        if (checkLocationPerm()) _permGrantedAndEnabled.value = true
 
         currentLocation = Location(null)
         distance = 1000

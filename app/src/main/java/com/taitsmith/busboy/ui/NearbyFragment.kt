@@ -67,7 +67,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
 
         setListeners()
         setObservers()
-        showDialog()
+        if (nearbyViewModel.shouldShowDialog) showDialog()
         return binding.root
     }
 
@@ -148,7 +148,10 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
 
     private fun setListeners() {
         nearbySearchButton.setOnClickListener {
-            if (nearbyViewModel.checkLocationPerm()) {
+            //only perform search in two cases- user picked a location from the map,
+            //or we're using device location and have necessary permissions
+            if ((nearbyViewModel.isUsingLocation && nearbyViewModel.checkLocationPerm())
+                || !nearbyViewModel.isUsingLocation) {
                 val s = nearbyEditText.text.toString()
                 if (s.isNotEmpty()) {
                     val distance = s.toInt()
@@ -172,12 +175,18 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
     }
 
     override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+
     override fun onClick(p0: DialogInterface?, p1: Int) {
         when (p1) {
             //user picked 'choose on map'
             DialogInterface.BUTTON_POSITIVE -> {
+                nearbyViewModel.setIsUsingLocation(false)
                 val action = NearbyFragmentDirections.actionNearbyFragmentToMapsFragment("choice")
                 findNavController().navigate(action)
+            }
+            //user picked device location
+            DialogInterface.BUTTON_NEGATIVE -> {
+                nearbyViewModel.setIsUsingLocation(true)
             }
         }
     }
