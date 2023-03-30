@@ -118,7 +118,7 @@ class NearbyViewModel @Inject constructor(
     fun setIsUsingLocation(usingLocation: Boolean) {
         //if user has selected the option to use the device location, make sure we have
         //permission and location setting is enabled
-        if (usingLocation) checkLocationPerm()
+        if (usingLocation && checkLocationPerm()) _permGrantedAndEnabled.value = true
 
         //disable the 'choose location method' dialog for now
         shouldShowDialog = false

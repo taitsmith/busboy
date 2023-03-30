@@ -76,7 +76,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setMessage(R.string.dialog_location_method)
             .setPositiveButton(R.string.dialog_choose_on_map, this)
-            .setNegativeButton(R.string.dialog_use_location, null) //cancel dialog, use device location
+            .setNegativeButton(R.string.dialog_use_location, this) //cancel dialog, use device location
             .setCancelable(false)
             .create()
             .show()
