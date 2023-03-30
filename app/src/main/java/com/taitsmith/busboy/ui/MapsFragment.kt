@@ -75,9 +75,15 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         googleMap.setOnMarkerDragListener(this)
 
         MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+
+        view?.rootView?.let {
+            Snackbar.make(it, R.string.snackbar_map_long_press_drag, Snackbar.LENGTH_LONG)
+                .show()
+        }
+
     }
 
-    //if we're displying a route
+    //if we're displaying a route
     private fun setupForRouteDisplay() {
         val directionRoute = googleMap.addPolyline(PolylineOptions())
         directionRoute.points = polylineCoords
@@ -145,11 +151,15 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         loc.latitude = p0.position.latitude
         loc.longitude = p0.position.longitude
         nearbyViewModel.setLocation(loc)
+        view?.let {
+            Snackbar.make(it, R.string.snackbar_map_click_to_select, Snackbar.LENGTH_LONG)
+                .show()
+        }
     }
 
     override fun onMarkerDragStart(p0: Marker) {
         view?.let {
-            Snackbar.make(it, "Drop the pin where you'd like to search", Snackbar.LENGTH_LONG)
+            Snackbar.make(it, R.string.snackbar_map_drop, Snackbar.LENGTH_LONG)
                 .show()
         }
     }
