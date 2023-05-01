@@ -3,6 +3,7 @@ package com.taitsmith.busboy.ui
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +13,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapsInitializer
+import com.google.android.gms.maps.MapsInitializer.Renderer
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Bus
@@ -22,7 +30,8 @@ import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 
-class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
+class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
+    OnMapsSdkInitializedCallback {
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
@@ -125,6 +134,7 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        context?.let { MapsInitializer.initialize(it, Renderer.LATEST, this) }
         return inflater.inflate(R.layout.fragment_maps, container, false)
     }
 
@@ -167,5 +177,14 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
     override fun onMarkerClick(p0: Marker): Boolean {
         findNavController().navigate(R.id.nearbyFragment)
         return false
+    }
+
+    override fun onMapsSdkInitialized(p0: Renderer) {
+        when (p0) {
+            //we should always get the latest but sometimes there's a weird
+            //issue with legacy renderer being loaded which causes issues.
+            Renderer.LATEST -> Log.d("MAPS", "latest renderer")
+            Renderer.LEGACY -> Log.d("MAPS", "legacy renderer")
+        }
     }
 }

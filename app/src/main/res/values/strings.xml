@@ -58,7 +58,7 @@
     <string name="bus_has_ridden">Ridden before?: %1$s</string>
 
     <!-- snackbars -->
-    <string name="snackbar_404">Nothing found (Your search returned a 404 error)</string>
+    <string name="snackbar_404">Looks like nothing was found, try expanding your range</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
         this stop.</string>
@@ -73,6 +73,7 @@
     <string name="snackbar_map_long_press_drag">Long press the marker to drag to your location</string>
     <string name="snackbar_map_drop">Drop where you\'d like to search</string>
     <string name="snackbar_map_click_to_select">Click the marker to select this location</string>
+    <string name="snackbar_direction_failure">Looks like there was an issue getting directions</string>
     
     <!-- tabs, menus etc-->
     <string name="tab_layout_by_stop">By ID</string>

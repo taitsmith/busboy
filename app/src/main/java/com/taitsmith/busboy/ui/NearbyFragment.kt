@@ -14,8 +14,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
@@ -38,7 +36,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
     private lateinit var nearbyEditText: EditText
     private lateinit var nearbyAdapter: NearbyAdapter
     private lateinit var buslineAdapter: ArrayAdapter<CharSequence>
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var _binding: FragmentNearbyBinding? = null
     private val binding get() = _binding!!
@@ -62,8 +59,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         buslineAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         buslineSpinner.adapter = buslineAdapter
         buslineSpinner.onItemSelectedListener = this
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setListeners()
         setObservers()
