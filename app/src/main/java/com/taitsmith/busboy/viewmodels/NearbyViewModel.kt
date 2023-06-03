@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -22,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NearbyViewModel @Inject constructor(
-    application: Application,
+    private val application: Application,
     private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
 
@@ -43,6 +44,15 @@ class NearbyViewModel @Inject constructor(
 
     var rt: String? = null
     var distance: Int
+
+    /* some app functionality is different if we're using the device location or letting users
+    pick a location on the map- we don't want to show location access dialogs if we aren't
+    accessing the user's location, etc.
+     */
+    var isUsingLocation: Boolean = false
+
+    //we only want to show the location choice method dialog once per session
+    var shouldShowDialog = true
 
     fun getNearbyStops() {
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
@@ -73,6 +83,8 @@ class NearbyViewModel @Inject constructor(
     //to see if location is enabled. if both are true, we can ask for a location, if not
     //we'll either prompt for location permission or to enable permission, depending on whats missing
     fun checkLocationPerm(): Boolean {
+        loc = SimpleLocation(application.applicationContext)
+
         if (ContextCompat.checkSelfPermission(
                 getApplication<Application>().applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -93,8 +105,13 @@ class NearbyViewModel @Inject constructor(
     //hey siri how do i walk from where i am to the bus stop
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, directionsKey))
-            _isUpdated.postValue(false)
+            kotlin.runCatching {
+                _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, directionsKey))
+                _isUpdated.postValue(false)
+            }.onFailure {
+                Log.d("FAILURE: ", it.message.toString())
+                mutableErrorMessage.postValue("DIRECTION_FAILURE")
+            }
         }
     }
 
@@ -106,6 +123,18 @@ class NearbyViewModel @Inject constructor(
         currentLocation = location
     }
 
+    fun setIsUsingLocation(usingLocation: Boolean) {
+        //if user has selected the option to use the device location, make sure we have
+        //permission and location setting is enabled
+        if (usingLocation && checkLocationPerm()) _permGrantedAndEnabled.value = true
+
+        //disable the 'choose location method' dialog for now
+        shouldShowDialog = false
+
+        isUsingLocation = usingLocation
+    }
+
+
     companion object {
         lateinit var loc: SimpleLocation
         lateinit var currentLocation: Location
@@ -114,10 +143,6 @@ class NearbyViewModel @Inject constructor(
     }
 
     init {
-        loc = SimpleLocation(application.applicationContext)
-
-        if (checkLocationPerm()) _permGrantedAndEnabled.value = true
-
         currentLocation = Location(null)
         distance = 1000
     }
