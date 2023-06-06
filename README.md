@@ -6,8 +6,8 @@
 Or get APKs of the latest builds:  
 <a href='https://busboy.dev/apks/main/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=main'></a>
 <a href='https://busboy.dev/apks/dev/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=dev'></a>
-<a href='https://busboy.dev/apks/feature/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=feature'></a>
-
+<a href='https://busboy.dev/apks/feature/'><img src='https://jenkins.busboy.dev/buildStatus/icon?job=busboy_master&subject=feature'></a>  
+(last successful build will still be available if it's currently failing)
 
 Don't you hate it when you wait twenty minutes for the 51A, and then three show up at the same time? Busboy doesn't prevent that unfortunately, but it does allow you see that all three will be arriving simultaneously. 
   
