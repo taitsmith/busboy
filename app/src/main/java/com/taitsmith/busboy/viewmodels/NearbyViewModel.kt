@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -26,8 +27,6 @@ class NearbyViewModel @Inject constructor(
     private val application: Application,
     private val apiRepository: ApiRepository,
                                           ) : AndroidViewModel(application) {
-
-    private val directionsKey: String = BuildConfig.google_directions_key
 
     private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
     var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
@@ -106,7 +105,7 @@ class NearbyViewModel @Inject constructor(
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop, directionsKey))
+                _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop))
                 _isUpdated.postValue(false)
             }.onFailure {
                 Log.d("FAILURE: ", it.message.toString())
