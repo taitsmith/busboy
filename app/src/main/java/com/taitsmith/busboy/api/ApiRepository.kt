@@ -1,6 +1,7 @@
 package com.taitsmith.busboy.api
 
 import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
@@ -91,11 +92,11 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
     //get walking directions from current location to a bus stop. google returns a ton of information
     //and you have to dig through the list to get what we want: a collection of lat/lon points
     //to draw a polyline on our map to represent walking directions
-    suspend fun getDirectionsToStop(start: String, stop: String, key: String): List<LatLng> {
+    suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng> {
         val polylineCoords: MutableList<LatLng> = ArrayList()
 
         val directionResponse = mapsApiInterface.getNavigationToStop(
-            start, stop, "walking", key)
+            start, stop, "walking")
 
         //too many damn lists
         val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList

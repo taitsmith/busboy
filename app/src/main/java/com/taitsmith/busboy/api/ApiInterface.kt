@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.api
 
+import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
 import retrofit2.http.GET
@@ -13,7 +14,7 @@ interface ApiInterface {
     suspend fun getStopPredictionList(
         @Query("stpid") stopId: String,
         @Query("rt") routeId: String?,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
     ): StopPredictionResponse
 
     //find all active stops within {distance} feet of point
@@ -24,35 +25,35 @@ interface ApiInterface {
         @Query("distance") distance: Int,
         @Query("active") active: Boolean,
         @Query("routeName") routeName: String?,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
     ): List<Stop>
 
     //get destinations for given stop so we can display NB/SB/EB/WB
     @GET("stop/{stopID}/destinations")
     suspend fun getStopDestinations(
         @Path("stopID") stopId: String?,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
     ): StopDestinationResponse
 
     //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")
     suspend fun getBusRouteWaypoints(
         @Path("route") route: String,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
     ): List<WaypointResponse>
 
     //get info about a bus so we can put it on the map
     @GET("vehicle/{vehicleId}")
      suspend fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
     ): Bus
 
     //get detailed info about a bus because you're a nerd and you like that stuff
      @GET("vehicle/{vehicleId}/characteristics")
      suspend fun getDetailedVehicleInfo(
         @Path("vehicleId") vehicleId: String,
-        @Query("token") token: String = MainActivity.acTransitApiKey
+        @Query("token") token: String = BuildConfig.ac_transit_key
      ): List<Bus>
 
     //talk to google and get walking directions from our location to the selected stop
@@ -61,6 +62,6 @@ interface ApiInterface {
         @Query(value = "origin", encoded = true) origin: String,
         @Query(value = "destination", encoded = true) destination: String,
         @Query("mode") mode: String,
-        @Query("key") apiKey: String
+        @Query("key") apiKey: String = BuildConfig.google_directions_key
     ): DirectionResponse
 }

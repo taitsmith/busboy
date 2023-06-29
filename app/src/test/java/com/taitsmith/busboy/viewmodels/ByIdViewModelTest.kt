@@ -1,12 +1,15 @@
 package com.taitsmith.busboy.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.taitsmith.busboy.MainDispatchRule
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -19,12 +22,16 @@ import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.MockitoAnnotations.openMocks
 
 @RunWith(JUnit4::class)
 class ByIdViewModelTest {
 
     @get:Rule
     var rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatchRule()
 
     @Mock
     private lateinit var apiRepository: ApiRepository
@@ -39,7 +46,7 @@ class ByIdViewModelTest {
 
     @Before
     fun setup() {
-        initMocks(this)
+        openMocks(this)
 
         createPredictions()
         createMockedBus()
@@ -83,12 +90,12 @@ class ByIdViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun teardown() {
-        testDispatcher.cleanupTestCoroutines()
+        testDispatcher.cancel()
 
     }
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `test predictions added to livedata`() = testDispatcher.runBlockingTest{
+    fun `test predictions added to livedata`() = testDispatcher.runBlockingTest {
         `when`(apiRepository.getStopPredictions("50825", null)).thenReturn(mockedPredictions)
         byIdViewModel.getStopPredictions("50825", null)
         val returnedPredictions = apiRepository.getStopPredictions("50825", null)

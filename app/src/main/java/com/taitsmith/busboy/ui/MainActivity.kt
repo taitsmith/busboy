@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        acTransitApiKey = BuildConfig.ac_transit_key
         mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
         bottomNavigationView = binding.mainTabLayout
         nearbyStatusUpdateTv = binding.nearbyStatusUpdater
@@ -177,7 +176,6 @@ class MainActivity : AppCompatActivity() {
         var mainActivityViewModel: MainActivityViewModel? = null
         var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
 
-        lateinit var acTransitApiKey: String
         lateinit var prediction: Prediction
     }
 }

@@ -1,8 +1,12 @@
 package com.taitsmith.busboy.viewmodels
 
 import android.app.Application
+import android.location.Location
+import android.location.LocationProvider
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.BuildConfig
+import com.taitsmith.busboy.MainDispatchRule
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.getOrAwaitValue
@@ -17,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -26,10 +31,15 @@ class NearbyViewModelTest {
     @get:Rule
     var rule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatchRule()
+
     @Mock
     private lateinit var apiRepository: ApiRepository
     @Mock
     private lateinit var application: Application
+    @Mock
+    private lateinit var location: Location
 
     private lateinit var nearbyViewModel: NearbyViewModel
     private lateinit var mainActivityViewModel: MainActivityViewModel
@@ -43,6 +53,7 @@ class NearbyViewModelTest {
         MockitoAnnotations.initMocks(this)
 
         createMockedStops()
+        createMockedWaypoints()
 
         mainActivityViewModel = MainActivityViewModel(application)
         nearbyViewModel = NearbyViewModel(application, apiRepository)
@@ -74,23 +85,33 @@ class NearbyViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `test nearby stops added to livedata`() = testDispatcher.runBlockingTest {
-        `when`(apiRepository.getNearbyStops(1.1, 1.1, 1000, true, null))
+        `when`(apiRepository.getNearbyStops(location.latitude, location.longitude, 1000, true, null))
             .thenReturn(mockedNearbyStops)
+        `when`(apiRepository.getLinesServedByStop(mockedNearbyStops)).thenReturn(mockedNearbyStops)
+
+        `when`(location.longitude).thenReturn(1.1)
+        `when`(location.latitude).thenReturn(1.1)
+
+        nearbyViewModel.setLocation(location)
+
         nearbyViewModel.getNearbyStops()
         val returnedStops = apiRepository.getNearbyStops(1.1, 1.1, 1000, true, null)
-//        assertEquals(returnedStops, nearbyViewModel.nearbyStops.getOrAwaitValue())
+        assertEquals(returnedStops, nearbyViewModel.nearbyStops.getOrAwaitValue())
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `test get directions added to live data`() = testDispatcher.runBlockingTest {
-        `when`(apiRepository.getDirectionsToStop("1", "1", "1"))
+        `when`(apiRepository.getDirectionsToStop("1", "1"))
             .thenReturn(mockedWaypoints)
+
         nearbyViewModel.getDirectionsToStop("1", "1")
-        val returnedWaypoints = apiRepository.getDirectionsToStop("1", "1", "1")
+
+        val returnedWaypoints = apiRepository.getDirectionsToStop("1", "1")
+
         assertEquals(mockedWaypoints, returnedWaypoints)
         assertEquals(false, nearbyViewModel.isUpdated.getOrAwaitValue())
-//        assertEquals(returnedWaypoints, nearbyViewModel.directionPolylineCoords.getOrAwaitValue())
+        assertEquals(returnedWaypoints, nearbyViewModel.directionPolylineCoords.getOrAwaitValue())
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
