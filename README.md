@@ -17,7 +17,7 @@ Already at a bus stop? Busboy can use your stop's ID to tell you what buses are 
 
 
 
-Use the same stops frequently? Add them to your favorites instead of trying to remember the stop ID:
+Use the same stops frequently? Add them to your favorites instead of trying to remember the stop ID:  
 ![ss_favorites](https://user-images.githubusercontent.com/18432394/224452517-bc353196-aa76-46c1-b2b3-5615cbf66c95.png)
 
 Bad experience with bus predictions in the past? Pick an upcoming bus from the list, and Busboy will show you exactly where on its route that bus is. This information comes right from the bus itself:  
