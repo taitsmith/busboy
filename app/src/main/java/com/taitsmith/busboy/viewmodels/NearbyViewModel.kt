@@ -5,14 +5,12 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage

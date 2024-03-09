@@ -17,7 +17,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
