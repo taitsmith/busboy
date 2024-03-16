@@ -47,20 +47,20 @@ class ServiceAlert {
     var mod: String? = null
 
     //lines impacted by alert
-    class Srvc {
+    data class Srvc(
 
         @SerializedName("rt")
-        var rt    : String? = null
+        var rt: String? = null,
 
         @SerializedName("rtdir")
-        var rtdir : String? = null
+        var rtdir: String? = null,
 
         @SerializedName("stpid")
-        var stpid : String? = null
+        var stpid: String? = null,
 
         @SerializedName("stpnm")
-        var stpnm : String? = null
-    }
+        var stpnm: String? = null
+    )
 }
 
 
