@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
@@ -87,6 +88,13 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
             }
         }
         return stopList
+    }
+
+    //get service alerts for a given stop so we can inform users of delays, detours, stop closures etc
+    suspend fun getServiceAlertsForStop(stopId: String) : List<ServiceAlert>? {
+        val serviceAlertResponseList = acTransitApiInterface.getServiceAlertsForStop(stopId)
+
+        return serviceAlertResponseList.bustimeResponse?.sb
     }
 
     //get walking directions from current location to a bus stop. google returns a ton of information

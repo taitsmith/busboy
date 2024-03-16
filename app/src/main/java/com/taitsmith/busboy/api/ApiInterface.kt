@@ -59,9 +59,9 @@ interface ApiInterface {
      //get alerts for lines served by selected stop
      @GET("actrealtime/servicebulletin")
      suspend fun getServiceAlertsForStop(
-         @Query("rt") route: String,
+         @Query("stpid") stopId: String,
          @Query("token") token: String = BuildConfig.ac_transit_key
-     ): List<ServiceAlert>
+     ): ServiceAlertResponse
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")
