@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.ServiceAlert
@@ -40,8 +41,8 @@ class ByIdViewModel @Inject constructor(
     private val _bus = MutableLiveData<Bus>()
     val bus: LiveData<Bus> = _bus
 
-    private val _alerts = MutableLiveData<List<ServiceAlert>>()
-    val alerts: LiveData<List<ServiceAlert>> = _alerts
+    private val _alerts = MutableLiveData<ServiceAlertResponse>()
+    val alerts: LiveData<ServiceAlertResponse> = _alerts
 
     fun getStopPredictions(stopId: String, rt: String?) {
         _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))

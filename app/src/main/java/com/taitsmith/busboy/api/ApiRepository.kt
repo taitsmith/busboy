@@ -8,6 +8,7 @@ import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
+import com.taitsmith.busboy.ui.MainActivity
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
@@ -73,6 +74,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
 
     suspend fun getLinesServedByStop(stopList: List<Stop>): List<Stop> {
         for (stop in stopList) {
+            MainActivity.mutableNearbyStatusUpdater.postValue(stop.name)
             val destinations = acTransitApiInterface.getStopDestinations(stop.stopId)
             val sb = StringBuilder()
             if (destinations.status == "No service today at this stop") { //ac transit's api is weird
@@ -91,10 +93,8 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
     }
 
     //get service alerts for a given stop so we can inform users of delays, detours, stop closures etc
-    suspend fun getServiceAlertsForStop(stopId: String) : List<ServiceAlert>? {
-        val serviceAlertResponseList = acTransitApiInterface.getServiceAlertsForStop(stopId)
-
-        return serviceAlertResponseList.bustimeResponse?.sb
+    suspend fun getServiceAlertsForStop(stopId: String) : ServiceAlertResponse {
+       return acTransitApiInterface.getServiceAlertsForStop(stopId)
     }
 
     //get walking directions from current location to a bus stop. google returns a ton of information
