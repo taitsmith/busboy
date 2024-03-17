@@ -40,14 +40,14 @@ class ServiceAlert {
     var rtpidatafeed: String? = null
 
     @SerializedName("srvc")
-    var srvc: ArrayList<Srvc> = arrayListOf()
+    var srvc: ArrayList<ImpactedServices> = arrayListOf()
 
     //timestamp of last modification YYYMMDD HH:MM:SS
     @SerializedName("mod")
     var mod: String? = null
 
     //lines impacted by alert
-    data class Srvc(
+    data class ImpactedServices(
 
         @SerializedName("rt")
         var rt: String? = null,
