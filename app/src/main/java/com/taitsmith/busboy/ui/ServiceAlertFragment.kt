@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -84,8 +83,7 @@ class ServiceAlertFragment : Fragment() {
             onClick = { isExpanded = !isExpanded },
             shadowElevation = 4.dp,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(all = 4.dp),
+                .fillMaxWidth(),
             color = Color(0xFFDCE5DC)
         ) {
             Column(
@@ -109,7 +107,8 @@ class ServiceAlertFragment : Fragment() {
                             )
                         }
                         Row(
-                            Modifier.align(Alignment.CenterHorizontally)
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Text(
                                 "Cause: " + alert.cse
@@ -118,10 +117,15 @@ class ServiceAlertFragment : Fragment() {
                                 "Effect: " + alert.efct
                             )
                         }
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        ) {
                             Text("Lines impacted: ")
-                            alert.srvc.forEach{
-                                Text(it.rt.toString() + ", ")
+                            alert.srvc.forEachIndexed { i, v ->
+                                if (i < alert.srvc.size - 1) Text(v.rt.toString() + ", ")
+                                else Text(v.rt.toString())
                             }
                         }
                     }
@@ -151,7 +155,6 @@ class ServiceAlertFragment : Fragment() {
                 rtdir   = "NB"
             )
         )
-
         AlertCard(alert)
     }
 }
