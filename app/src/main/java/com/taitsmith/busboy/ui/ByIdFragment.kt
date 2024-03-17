@@ -1,19 +1,26 @@
 package com.taitsmith.busboy.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
+import com.taitsmith.busboy.utils.ServiceAlertDialogFragment
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,17 +67,11 @@ class ByIdFragment : Fragment() {
     }
 
 
-    private fun setListeners() {
-        binding.searchByIdButton.setOnClickListener { search() }
-        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         predictionListView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        predictionAdapter = PredictionAdapter({
-            prediction ->
+        predictionAdapter = PredictionAdapter({ prediction ->
             byIdViewModel.setIsUpdated(true)
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
@@ -83,6 +84,11 @@ class ByIdFragment : Fragment() {
         predictionListView.adapter = predictionAdapter
     }
 
+
+    private fun setListeners() {
+        binding.searchByIdButton.setOnClickListener { search() }
+        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
+    }
 
     private fun setObservers() {
         byIdViewModel.stopPredictions.observe(
@@ -119,6 +125,21 @@ class ByIdFragment : Fragment() {
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
                 findNavController().navigate(action)
                 byIdViewModel.setIsUpdated(false)
+            }
+        }
+
+        byIdViewModel.alerts.observe(viewLifecycleOwner) { alerts ->
+            val alertList = alerts.bustimeResponse?.sb
+            if (!alertList.isNullOrEmpty()) {
+                val snackbar = Snackbar.make(binding.root,
+                    resources.getQuantityString(R.plurals.snackbar_service_alerts, alertList.size, alertList.size),
+                    Snackbar.LENGTH_LONG)
+
+                snackbar.setAction("view") {
+                    val action = ByIdFragmentDirections.actionByIdFragmentToServiceAlertFragment(alerts)
+                    findNavController().navigate(action)
+                }
+                snackbar.show()
             }
         }
     }

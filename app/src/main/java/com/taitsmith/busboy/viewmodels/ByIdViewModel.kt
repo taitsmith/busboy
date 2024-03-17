@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
+import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +41,9 @@ class ByIdViewModel @Inject constructor(
     private val _bus = MutableLiveData<Bus>()
     val bus: LiveData<Bus> = _bus
 
+    private val _alerts = MutableLiveData<ServiceAlertResponse>()
+    val alerts: LiveData<ServiceAlertResponse> = _alerts
+
     fun getStopPredictions(stopId: String, rt: String?) {
         _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
 
@@ -46,6 +51,7 @@ class ByIdViewModel @Inject constructor(
             kotlin.runCatching {
                 _stopId.postValue(stopId)
                 _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
+                _alerts.postValue(apiRepository.getServiceAlertsForStop(stopId))
             }.onFailure {
                 it.printStackTrace()
                 Log.d("PREDICTIONS FAILURES: ", it.message.toString())
