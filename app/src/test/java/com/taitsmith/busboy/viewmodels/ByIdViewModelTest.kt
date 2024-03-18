@@ -1,13 +1,18 @@
 package com.taitsmith.busboy.viewmodels
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.MainDispatchRule
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.BustimeResponse
+import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.getOrAwaitValue
+import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,15 +41,19 @@ class ByIdViewModelTest {
     private lateinit var apiRepository: ApiRepository
     @Mock
     private lateinit var databaseRepository: DatabaseRepository
+    @Mock
+    val app = Application()
 
     private lateinit var byIdViewModel: ByIdViewModel
-    private lateinit var mainViewModel: MainActivityViewModel
+
     private lateinit var mockedBus: Bus
+    private lateinit var mockedServiceAlertResponse: ServiceAlertResponse
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
     private val mockedPredictions = mutableListOf<Prediction>()
     private val mockedAlerts = mutableListOf<ServiceAlert>()
+    private val mockedWaypoints = mutableListOf<LatLng>()
 
     @Before
     fun setup() {
@@ -53,8 +62,14 @@ class ByIdViewModelTest {
         createPredictions()
         createMockedBus()
         createServiceAlerts()
+        createMockedWaypoints()
 
         byIdViewModel = ByIdViewModel(databaseRepository, apiRepository)
+    }
+
+    private fun createMockedWaypoints() {
+        mockedWaypoints.add(0, LatLng(23.2, 42.1))
+        mockedWaypoints.add(1, LatLng(123.5, 23.2))
     }
 
     private fun createMockedBus() {
@@ -93,6 +108,9 @@ class ByIdViewModelTest {
     private fun createServiceAlerts() {
         val alert1 = ServiceAlert()
 
+        val btr = BustimeResponse()
+        val sar = ServiceAlertResponse()
+
         alert1.nm = "Test Alert Please Ignore"
         alert1.sbj = "This is just a test no reason to panic"
         alert1.sbj = "Test"
@@ -103,14 +121,18 @@ class ByIdViewModelTest {
         alert1.efct = "Discount calamari"
 
         alert1.srvc = arrayListOf(
-            ServiceAlert.Srvc(
+            ServiceAlert.ImpactedServices(
                 rt = "51A",
                 rtdir = "NB",
                 stpid = "55555",
                 stpnm = "Downtown Berkeley"
             )
         )
+
         mockedAlerts.add(alert1)
+        sar.bustimeResponse = btr
+        btr.sb = mockedAlerts
+        mockedServiceAlertResponse = sar
     }
 
     @After
@@ -150,12 +172,55 @@ class ByIdViewModelTest {
 
     @Test
     fun `test service alerts added to livedata`() = runTest(testDispatcher) {
-        `when`(apiRepository.getServiceAlertsForStop("55555")).thenReturn(mockedAlerts)
+        `when`(apiRepository.getServiceAlertsForStop("55555")).thenReturn(mockedServiceAlertResponse)
         byIdViewModel.getStopPredictions("55555", null)
 
         val returnedAlerts = apiRepository.getServiceAlertsForStop("55555")
-        assertEquals(mockedAlerts, returnedAlerts)
-        assertEquals(returnedAlerts, byIdViewModel.alerts.getOrAwaitValue())
+        assertEquals(mockedServiceAlertResponse, returnedAlerts)
+        assertEquals(mockedServiceAlertResponse, byIdViewModel.alerts.getOrAwaitValue())
+    }
+
+    @Test
+    fun `test get waypoints updates live data`() = runTest(testDispatcher) {
+        `when`(apiRepository.getBusRouteWaypoints("51A")).thenReturn(mockedWaypoints)
+        `when`(apiRepository.getBusRouteWaypoints("51B")).thenThrow(RuntimeException("empty_response"))
+        byIdViewModel.getWaypoints("51B")
+        byIdViewModel.getWaypoints("51A")
+
+        val returnedWaypoints = apiRepository.getBusRouteWaypoints("51A")
+        assertEquals(mockedWaypoints, returnedWaypoints)
+        assertEquals(mockedWaypoints, byIdViewModel.busRouteWaypoints.getOrAwaitValue())
+        assertEquals("NO_WAYPOINTS", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
+    }
+
+    @Test
+    fun `test api 404 error updates status message`() = runTest(testDispatcher) {
+       `when`(apiRepository.getStopPredictions("55555", null)).thenThrow(RuntimeException("no_data"))
+        byIdViewModel.getStopPredictions("55555", null)
+
+        assertEquals("404", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
+    }
+
+    @Test
+    fun `test no service error updates status message`() = runTest(testDispatcher) {
+        `when`(apiRepository.getStopPredictions("55555", null)).thenThrow(RuntimeException("no_service"))
+        byIdViewModel.getStopPredictions("55555", null)
+
+        assertEquals("CALL_FAILURE", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
+    }
+
+    @Test
+    fun `test null bus coordinates updates error message`() = runTest(testDispatcher) {
+        `when`(apiRepository.getBusLocation("234")).thenThrow(RuntimeException("null_coords"))
+        byIdViewModel.getBusLocation("234")
+        assertEquals("NULL_BUS_COORDS", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
+    }
+
+    @Test
+    fun `test is updated is updated`() = runTest(testDispatcher) {
+        byIdViewModel.setIsUpdated(true)
+        byIdViewModel.getBusDetails("54")
+        assertEquals(false, byIdViewModel.isUpdated.getOrAwaitValue())
     }
 
 }
