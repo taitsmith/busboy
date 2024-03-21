@@ -46,16 +46,16 @@
 
     <!-- strings for bus detail fragment -->
     <string name="bus_detail_header">Details for bus %1$s</string>
-    <string name="bus_description">Description: %1$s</string>
-    <string name="bus_vehicle_type_description">Type description: %1$s</string>
-    <string name="bus_make">Make: %1$s</string>
-    <string name="bus_serial">Serial number: %1$s</string>
-    <string name="bus_license">Plate number: %1$s</string>
-    <string name="bus_length">Length: %1$s feet</string>
-    <string name="bus_propulsion">Powered by: %1$s</string>
+    <string name="bus_description">Description:\n%1$s</string>
+    <string name="bus_vehicle_type_description">Type description:\n%1$s</string>
+    <string name="bus_make">Make:\n%1$s</string>
+    <string name="bus_serial">Serial number:\n%1$s</string>
+    <string name="bus_license">Plate number:\n%1$s</string>
+    <string name="bus_length">Length:\n%1$s feet</string>
+    <string name="bus_propulsion">Powered by:\n%1$s</string>
     <string name="bus_wifi_ac">Has WiFi / AC: %1$s / %2$s</string>
-    <string name="bus_limit_capacity">Capacity limit: %1$s</string>
-    <string name="bus_has_ridden">Ridden before?: %1$s</string>
+    <string name="bus_limit_capacity">Capacity limit:\n%1$s</string>
+    <string name="bus_has_ridden">Ridden before?:\n%1$s</string>
 
     <!-- snackbars (error related) -->
     <string name="snackbar_404">Looks like nothing was found, try expanding your range</string>
