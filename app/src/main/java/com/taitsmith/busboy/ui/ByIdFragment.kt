@@ -109,8 +109,7 @@ class ByIdFragment : Fragment() {
             if (byIdViewModel.isUpdated.value == true) {
                 if (bus.length.isNullOrEmpty()) byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
                 else {
-                    val action = ByIdFragmentDirections.actionByIdFragmentToBusDetailFragment(bus)
-                    findNavController().navigate(action)
+                    BusDetailFragment(bus).show(childFragmentManager, "detail")
                 }
             }
         }
