@@ -10,7 +10,6 @@ import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -106,7 +105,7 @@ class ByIdViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {
-                    "empty_response" -> Log.d("GET WAYPOINTS", it.cause.toString())
+                    "empty_response" -> MainActivityViewModel.mutableErrorMessage.postValue("NO_WAYPOINTS")
                 }
             }
         }

@@ -12,7 +12,6 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.getOrAwaitValue
-import com.taitsmith.busboy.ui.MainActivity.Companion.mainActivityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -45,6 +44,7 @@ class ByIdViewModelTest {
     val app = Application()
 
     private lateinit var byIdViewModel: ByIdViewModel
+    private lateinit var mainActivityViewModel: MainActivityViewModel
 
     private lateinit var mockedBus: Bus
     private lateinit var mockedServiceAlertResponse: ServiceAlertResponse
@@ -65,6 +65,7 @@ class ByIdViewModelTest {
         createMockedWaypoints()
 
         byIdViewModel = ByIdViewModel(databaseRepository, apiRepository)
+        mainActivityViewModel = MainActivityViewModel(app)
     }
 
     private fun createMockedWaypoints() {

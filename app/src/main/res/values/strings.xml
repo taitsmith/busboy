@@ -68,6 +68,7 @@
     <string name="snackbar_bad_distance">Please enter a distance between 500 and 5000 feet</string>
     <string name="snackbar_no_favorites">Looks like there\'s nothing here…</string>
     <string name="snackbar_direction_failure">Looks like there was an issue getting directions</string>
+    <string name="snackbar_no_waypoints">Looks like an error fetching route data</string>
 
     <!-- snackbars (informational) -->
     <string name="snackbar_favorite_added">Stop added to favorites</string>

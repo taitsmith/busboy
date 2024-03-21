@@ -1,13 +1,10 @@
 package com.taitsmith.busboy.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,10 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
-import com.taitsmith.busboy.utils.ServiceAlertDialogFragment
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
