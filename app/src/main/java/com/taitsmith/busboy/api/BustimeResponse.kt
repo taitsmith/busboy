@@ -18,7 +18,7 @@ class BustimeResponse {
     //body returned for service alert calls
     @SerializedName("sb")
     @Expose
-    val sb: List<ServiceAlert>? = null
+    var sb: List<ServiceAlert>? = null
 
     //almost always empty
     @SerializedName("error")

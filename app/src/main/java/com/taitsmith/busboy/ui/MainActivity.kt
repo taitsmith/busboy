@@ -75,19 +75,20 @@ class MainActivity : AppCompatActivity() {
     private fun getErrorMessage(s: String) {
         hideUi(false)
         when (s) {
-            "NO_LOC_ENABLED" -> askToEnableLoc()
-            "NO_PERMISSION" -> ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSION_REQUEST_FINE_LOCATION)
-            "404" -> showSnackbar(R.string.snackbar_404)
-            "BAD_INPUT" -> showSnackbar(R.string.snackbar_bad_input)
-            "NULL_PRED_RESPONSE" -> showSnackbar(R.string.snackbar_no_predictions)
-            "NULL_BUS_COORDS" -> showSnackbar(R.string.snackbar_null_bus_coords)
-            "CALL_FAILURE" -> showSnackbar(R.string.snackbar_network_error)
-            "BAD_DISTANCE" -> showSnackbar(R.string.snackbar_bad_distance)
-            "NO_FAVORITE_STOPS" -> showSnackbar(R.string.snackbar_no_favorites)
-            "NULL_LOCATION" -> showSnackbar(R.string.snackbar_loc_null)
-            "DIRECTION_FAILURE" -> showSnackbar(R.string.snackbar_direction_failure)
+            "NO_LOC_ENABLED"        -> askToEnableLoc()
+            "NO_PERMISSION"         -> ActivityCompat.requestPermissions(
+                                    this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                            PERMISSION_REQUEST_FINE_LOCATION)
+            "404"                   -> showSnackbar(R.string.snackbar_404)
+            "BAD_INPUT"             -> showSnackbar(R.string.snackbar_bad_input)
+            "NULL_PRED_RESPONSE"    -> showSnackbar(R.string.snackbar_no_predictions)
+            "NULL_BUS_COORDS"       -> showSnackbar(R.string.snackbar_null_bus_coords)
+            "CALL_FAILURE"          -> showSnackbar(R.string.snackbar_network_error)
+            "BAD_DISTANCE"          -> showSnackbar(R.string.snackbar_bad_distance)
+            "NO_FAVORITE_STOPS"     -> showSnackbar(R.string.snackbar_no_favorites)
+            "NULL_LOCATION"         -> showSnackbar(R.string.snackbar_loc_null)
+            "DIRECTION_FAILURE"     -> showSnackbar(R.string.snackbar_direction_failure)
+            "NO_WAYPOINTS"          -> showSnackbar(R.string.snackbar_no_waypoints)
         }
     }
 
@@ -97,22 +98,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun getStatusMessage(s: String) {
         when (s) {
-            "HELP_REQUESTED" -> showHelp()
-            "FAVORITE_ADDED" -> showSnackbar(R.string.snackbar_favorite_added)
-            "STOP_DELETED" -> showSnackbar(R.string.snackbar_favorite_deleted)
-            "LOADING" -> hideUi(true)
-            "LOADED" -> hideUi(false)
+            "HELP_REQUESTED"    -> showHelp()
+            "FAVORITE_ADDED"    -> showSnackbar(R.string.snackbar_favorite_added)
+            "STOP_DELETED"      -> showSnackbar(R.string.snackbar_favorite_deleted)
+            "LOADING"           -> hideUi(true)
+            "LOADED"            -> hideUi(false)
         }
     }
 
     private fun hideUi(shouldHide: Boolean) {
         if (shouldHide) {
-            binding.navHostFragment.visibility = View.INVISIBLE
-            binding.progressBar.visibility = View.VISIBLE
+            binding.navHostFragment.visibility  = View.INVISIBLE
+            binding.progressBar.visibility      = View.VISIBLE
         } else {
-            binding.navHostFragment.visibility = View.VISIBLE
-            binding.progressBar.visibility = View.INVISIBLE
-            nearbyStatusUpdateTv?.visibility = View.INVISIBLE
+            binding.navHostFragment.visibility  = View.VISIBLE
+            binding.progressBar.visibility      = View.INVISIBLE
+            nearbyStatusUpdateTv?.visibility    = View.INVISIBLE
         }
     }
 
@@ -149,6 +150,10 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.dialog_got_it, null)
             .create()
             .show()
+    }
+
+    private fun showAlertDialogs() {
+
     }
 
     private fun updateNearbyStatusText(s: String) {
