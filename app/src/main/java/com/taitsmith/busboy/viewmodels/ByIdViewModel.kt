@@ -14,6 +14,7 @@ import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,8 +44,12 @@ class ByIdViewModel @Inject constructor(
     private val _alerts = MutableLiveData<ServiceAlertResponse>()
     val alerts: LiveData<ServiceAlertResponse> = _alerts
 
+    private val _alertShown = MutableLiveData(false)
+    val alertShown: LiveData<Boolean> = _alertShown
+
     fun getStopPredictions(stopId: String, rt: String?) {
         _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
+        _alertShown.postValue(false)
 
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
@@ -57,7 +62,7 @@ class ByIdViewModel @Inject constructor(
                 when(it.message) {
                     "no_data" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
                     "no_service"
-                        -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+                        -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
                     "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
                     "timeout" -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                 }
@@ -113,5 +118,9 @@ class ByIdViewModel @Inject constructor(
 
     fun setIsUpdated(update: Boolean) {
         _isUpdated.value = update
+    }
+
+    fun setAlertShown(shown: Boolean) {
+        _alertShown.value = shown
     }
 }

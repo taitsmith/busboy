@@ -125,7 +125,7 @@ class ByIdFragment : Fragment() {
 
         byIdViewModel.alerts.observe(viewLifecycleOwner) { alerts ->
             val alertList = alerts.bustimeResponse?.sb
-            if (!alertList.isNullOrEmpty()) {
+            if (!alertList.isNullOrEmpty() && byIdViewModel.alertShown.value == false) {
                 val snackbar = Snackbar.make(binding.root,
                     resources.getQuantityString(R.plurals.snackbar_service_alerts, alertList.size, alertList.size),
                     Snackbar.LENGTH_LONG)
@@ -133,6 +133,7 @@ class ByIdFragment : Fragment() {
                 snackbar.setAction("view") {
                     val action = ByIdFragmentDirections.actionByIdFragmentToServiceAlertFragment(alerts)
                     findNavController().navigate(action)
+                    byIdViewModel.setAlertShown(true)
                 }
                 snackbar.show()
             }
