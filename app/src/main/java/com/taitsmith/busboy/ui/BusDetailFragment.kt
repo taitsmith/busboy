@@ -4,17 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.DialogFragment
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.databinding.FragmentBusDetailBinding
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class BusDetailFragment: Fragment() {
-    private val args: BusDetailFragmentArgs by navArgs()
-    private val bus by lazy {
-        args.selectedBus
-    }
+class BusDetailFragment(private val bus: Bus): DialogFragment() {
     private var _binding: FragmentBusDetailBinding? = null
     private val binding get() = _binding!!
 
@@ -26,13 +20,5 @@ class BusDetailFragment: Fragment() {
         _binding = FragmentBusDetailBinding.inflate(inflater, container, false)
         binding.bus = bus
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
     }
 }

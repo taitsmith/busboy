@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,20 +41,28 @@ class ByIdViewModel @Inject constructor(
     private val _bus = MutableLiveData<Bus>()
     val bus: LiveData<Bus> = _bus
 
+    private val _alerts = MutableLiveData<ServiceAlertResponse>()
+    val alerts: LiveData<ServiceAlertResponse> = _alerts
+
+    private val _alertShown = MutableLiveData(false)
+    val alertShown: LiveData<Boolean> = _alertShown
+
     fun getStopPredictions(stopId: String, rt: String?) {
         _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
+        _alertShown.postValue(false)
 
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
                 _stopId.postValue(stopId)
                 _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
+                _alerts.postValue(apiRepository.getServiceAlertsForStop(stopId))
             }.onFailure {
                 it.printStackTrace()
                 Log.d("PREDICTIONS FAILURES: ", it.message.toString())
                 when(it.message) {
                     "no_data" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
                     "no_service"
-                        -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+                        -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
                     "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
                     "timeout" -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                 }
@@ -100,7 +110,7 @@ class ByIdViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {
-                    "empty_response" -> Log.d("GET WAYPOINTS", it.cause.toString())
+                    "empty_response" -> MainActivityViewModel.mutableErrorMessage.postValue("NO_WAYPOINTS")
                 }
             }
         }
@@ -108,5 +118,9 @@ class ByIdViewModel @Inject constructor(
 
     fun setIsUpdated(update: Boolean) {
         _isUpdated.value = update
+    }
+
+    fun setAlertShown(shown: Boolean) {
+        _alertShown.value = shown
     }
 }

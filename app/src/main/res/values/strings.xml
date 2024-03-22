@@ -46,18 +46,18 @@
 
     <!-- strings for bus detail fragment -->
     <string name="bus_detail_header">Details for bus %1$s</string>
-    <string name="bus_description">Description: %1$s</string>
-    <string name="bus_vehicle_type_description">Type description: %1$s</string>
-    <string name="bus_make">Make: %1$s</string>
-    <string name="bus_serial">Serial number: %1$s</string>
-    <string name="bus_license">Plate number: %1$s</string>
-    <string name="bus_length">Length: %1$s feet</string>
-    <string name="bus_propulsion">Powered by: %1$s</string>
+    <string name="bus_description">Description:\n%1$s</string>
+    <string name="bus_vehicle_type_description">Type description:\n%1$s</string>
+    <string name="bus_make">Make:\n%1$s</string>
+    <string name="bus_serial">Serial number:\n%1$s</string>
+    <string name="bus_license">Plate number:\n%1$s</string>
+    <string name="bus_length">Length:\n%1$s feet</string>
+    <string name="bus_propulsion">Powered by:\n%1$s</string>
     <string name="bus_wifi_ac">Has WiFi / AC: %1$s / %2$s</string>
-    <string name="bus_limit_capacity">Capacity limit: %1$s</string>
-    <string name="bus_has_ridden">Ridden before?: %1$s</string>
+    <string name="bus_limit_capacity">Capacity limit:\n%1$s</string>
+    <string name="bus_has_ridden">Ridden before?:\n%1$s</string>
 
-    <!-- snackbars -->
+    <!-- snackbars (error related) -->
     <string name="snackbar_404">Looks like nothing was found, try expanding your range</string>
     <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
     <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
@@ -67,14 +67,22 @@
     <string name="snackbar_network_error">Looks like a network issue, try again shortly</string>
     <string name="snackbar_bad_distance">Please enter a distance between 500 and 5000 feet</string>
     <string name="snackbar_no_favorites">Looks like there\'s nothing here…</string>
+    <string name="snackbar_direction_failure">Looks like there was an issue getting directions</string>
+    <string name="snackbar_no_waypoints">Looks like an error fetching route data</string>
+    <string name="snackbar_no_service_scheduled">Looks like there\'s no service scheduled for this stop today</string>
+
+    <!-- snackbars (informational) -->
     <string name="snackbar_favorite_added">Stop added to favorites</string>
     <string name="snackbar_favorite_deleted">Favorite deleted</string>
     <string name="snackbar_loc_null">Waiting on location, try again shortly</string>
     <string name="snackbar_map_long_press_drag">Long press the marker to drag to your location</string>
     <string name="snackbar_map_drop">Drop where you\'d like to search</string>
     <string name="snackbar_map_click_to_select">Click the marker to select this location</string>
-    <string name="snackbar_direction_failure">Looks like there was an issue getting directions</string>
-    
+    <plurals name="snackbar_service_alerts">
+        <item quantity="one">There is %1$d service alert at this stop</item>
+        <item quantity="other">There are %1$d service alerts at this stop</item>
+    </plurals>
+
     <!-- tabs, menus etc-->
     <string name="tab_layout_by_stop">By ID</string>
     <string name="tab_layout_nearby">Nearby</string>

@@ -1,10 +1,10 @@
 package com.taitsmith.busboy.viewmodels
 
-import dagger.hilt.android.lifecycle.HiltViewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import javax.inject.Inject
 import androidx.lifecycle.MutableLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(

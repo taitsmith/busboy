@@ -2,10 +2,10 @@ package com.taitsmith.busboy.api
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import com.taitsmith.busboy.data.Prediction
+import java.io.Serializable
 
-class StopPredictionResponse {
+data class ServiceAlertResponse(
     @SerializedName("bustime-response")
     @Expose
-    val bustimeResponse: BustimeResponse? = null
-}
+    var bustimeResponse: BustimeResponse? = null
+) : Serializable

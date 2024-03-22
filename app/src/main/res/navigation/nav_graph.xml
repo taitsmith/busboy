@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_byIdFragment_to_busDetailFragment"
             app:destination="@id/busDetailFragment" />
+        <action
+            android:id="@+id/action_byIdFragment_to_serviceAlertFragment"
+            app:destination="@id/serviceAlertFragment" />
     </fragment>
     <fragment
         android:id="@+id/favoritesFragment"
@@ -68,5 +71,16 @@
             app:destination="@id/byIdFragment" />
         <argument android:name="selectedBus"
             app:argType="com.taitsmith.busboy.data.Bus"/>
+    </fragment>
+    <fragment
+        android:id="@+id/serviceAlertFragment"
+        android:name="com.taitsmith.busboy.ui.ServiceAlertFragment"
+        android:label="ServiceAlertFragment" >
+        <action
+            android:id="@+id/action_serviceAlertFragment_to_byIdFragment"
+            app:destination="@id/byIdFragment" />
+        <argument
+            android:name="serviceAlertResponse"
+            app:argType="com.taitsmith.busboy.api.ServiceAlertResponse" />
     </fragment>
 </navigation>
