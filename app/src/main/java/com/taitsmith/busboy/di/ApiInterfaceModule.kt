@@ -1,5 +1,7 @@
 package com.taitsmith.busboy.di
 
+import com.slack.eithernet.ApiResultCallAdapterFactory
+import com.slack.eithernet.ApiResultConverterFactory
 import com.taitsmith.busboy.api.ApiInterface
 import dagger.Module
 import dagger.Provides
@@ -34,7 +36,9 @@ object ApiInterfaceModule {
 
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.actransit.org/transit/")
+            .addConverterFactory(ApiResultConverterFactory)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(ApiResultCallAdapterFactory)
             .client(client)
             .build()
         return retrofit.create(ApiInterface::class.java)

@@ -1,5 +1,7 @@
 package com.taitsmith.busboy.api
 
+import com.slack.eithernet.ApiResult
+import com.slack.eithernet.DecodeErrorBody
 import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.data.*
 import com.taitsmith.busboy.ui.MainActivity
@@ -10,12 +12,13 @@ import retrofit2.http.Query
 interface ApiInterface {
 
     //returns predictions for given route at stop, otherwise all routes if rt == null
+    @DecodeErrorBody
     @GET("actrealtime/prediction/")
     suspend fun getStopPredictionList(
         @Query("stpid") stopId: String,
         @Query("rt") routeId: String?,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): StopPredictionResponse
+    ): ApiResult<StopPredictionResponse, Unit>
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")

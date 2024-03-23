@@ -1,5 +1,6 @@
 package com.taitsmith.busboy.api
 
+import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
@@ -11,6 +12,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -33,33 +35,6 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
                 else it.prdctdn = "in " + it.prdctdn + " minutes"
             }
         }
-    
-    suspend fun getStopPredictions(stopId: String, rt: String?): List<Prediction> {
-        val predictionList = mutableListOf<Prediction>()
-
-        runBlocking {
-            val predictionResponseList = acTransitApiInterface.getStopPredictionList(stopId, rt)
-
-            //AC Transit changed their API responses again, so even an invalid stop will
-            //return a 200/OK, so we have to check for an error message now.
-            if (predictionResponseList.bustimeResponse?.error != null) {
-                when (predictionResponseList.bustimeResponse.error[0].msg) {
-                    "No service scheduled" -> throw Exception("no_service")
-                    "No data found for parameter" -> throw Exception("no_data")
-                }
-            }
-
-            predictionResponseList.bustimeResponse?.prd?.forEach {
-                if (it.dyn == 0) { //non-zero dyn means cancelled or not stopping
-                    if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
-                    else it.prdctdn = "in " + it.prdctdn + " minutes"
-                    predictionList.add(it)
-                }
-            }
-        }
-        if (predictionList.size == 0) throw Exception("empty_list")
-        else return predictionList
-    }
 
     suspend fun getBusLocation(vehicleId: String): Bus {
         val returnBus = acTransitApiInterface.getVehicleInfo(vehicleId)
