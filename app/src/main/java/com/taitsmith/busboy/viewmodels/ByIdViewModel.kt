@@ -56,13 +56,13 @@ class ByIdViewModel @Inject constructor(
             _stopId.postValue(id)
             apiRepository.stopPredictions
                 .catch { exception ->
-                    _predictionFlow.value = PredictionState.Error(exception)
                     when(exception.message) {
-                    "no_data"       -> MainActivityViewModel.mutableErrorMessage.postValue("404")
-                    "no_service"    -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
-                    "empty_list"    -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
-                    "timeout"       -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+                        "no_data"       -> MainActivityViewModel.mutableErrorMessage.postValue("404")
+                        "no_service"    -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
+                        "empty_list"    -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
+                        "timeout"       -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
                     }
+                    _predictionFlow.value = PredictionState.Error(exception)
                 }
                 .collect { preds ->
                 _predictionFlow.value = PredictionState.Success(preds)

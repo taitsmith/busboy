@@ -1,5 +1,7 @@
 package com.taitsmith.busboy.api
 
+import com.slack.eithernet.ApiResult.Failure
+import com.slack.eithernet.ApiResult.Success
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
@@ -18,13 +20,24 @@ class RemoteDataSource @Inject constructor (@AcTransitApiInterface
                                             @MapsApiInterface
                                             private val mapsApiInterface: ApiInterface
 ) {
+    //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
 
     val predictions: Flow<List<Prediction>> = flow {
         while (true) {
-            val response = acTransitApiInterface.getStopPredictionList(stopId, rt)
-            emit(response.bustimeResponse!!.prd!!)
-            delay(refreshIntervalMillis)
+            when (val response = acTransitApiInterface.getStopPredictionList(stopId, rt)) {
+                is Success -> {
+                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) throw Exception(
+                        response.value.bustimeResponse.error!![0].msg)
+                    else emit(response.value.bustimeResponse.prd!!)
+                    delay(refreshIntervalMillis)
+                }
+                is Failure.ApiFailure -> throw Exception("api_failure")
+                is Failure.HttpFailure -> throw Exception("http_failure")
+                is Failure.NetworkFailure -> throw Exception("no_data")
+                is Failure.UnknownFailure -> throw Exception("unknown")
+            }
+
         }
     }
 
