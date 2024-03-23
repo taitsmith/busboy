@@ -1,10 +1,8 @@
 package com.taitsmith.busboy.api
 
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
-import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import com.taitsmith.busboy.di.MapsApiInterface
@@ -12,7 +10,10 @@ import com.taitsmith.busboy.ui.MainActivity
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @Module
@@ -20,8 +21,19 @@ import javax.inject.Inject
 class ApiRepository @Inject constructor(@AcTransitApiInterface
                                         val acTransitApiInterface: ApiInterface,
                                         @MapsApiInterface
-                                        val mapsApiInterface: ApiInterface) {
+                                        val mapsApiInterface: ApiInterface,
+                                        remoteDataSource: RemoteDataSource
+    ) {
 
+    val stopPredictions: Flow<List<Prediction>> = remoteDataSource.predictions
+        .map { predictions ->
+            predictions.filter { it.dyn == 0 }
+            predictions.onEach {
+                if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                else it.prdctdn = "in " + it.prdctdn + " minutes"
+            }
+        }
+    
     suspend fun getStopPredictions(stopId: String, rt: String?): List<Prediction> {
         val predictionList = mutableListOf<Prediction>()
 

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.ApiRepository
+import com.taitsmith.busboy.api.RemoteDataSource
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
@@ -14,7 +15,9 @@ import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,9 +35,6 @@ class ByIdViewModel @Inject constructor(
     private val _stop = MutableLiveData<Stop>()
     val stop: LiveData<Stop> = _stop
 
-    private val _stopPredictions = MutableLiveData<List<Prediction>>()
-    val stopPredictions: LiveData<List<Prediction>> = _stopPredictions
-
     private val _busRouteWaypoints = MutableLiveData<List<LatLng>>()
     val busRouteWaypoints: LiveData<List<LatLng>> = _busRouteWaypoints
 
@@ -47,25 +47,25 @@ class ByIdViewModel @Inject constructor(
     private val _alertShown = MutableLiveData(false)
     val alertShown: LiveData<Boolean> = _alertShown
 
-    fun getStopPredictions(stopId: String, rt: String?) {
-        _stop.postValue(Stop(id = stopId.toLong(), stopId = stopId))
-        _alertShown.postValue(false)
+    private val _predictionFlow = MutableStateFlow<PredictionState>(PredictionState.Loading(false))
+    val predictionFlow: StateFlow<PredictionState> = _predictionFlow
 
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                _stopId.postValue(stopId)
-                _stopPredictions.postValue(apiRepository.getStopPredictions(stopId, rt))
-                _alerts.postValue(apiRepository.getServiceAlertsForStop(stopId))
-            }.onFailure {
-                it.printStackTrace()
-                Log.d("PREDICTIONS FAILURES: ", it.message.toString())
-                when(it.message) {
-                    "no_data" -> MainActivityViewModel.mutableErrorMessage.postValue("404")
-                    "no_service"
-                        -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
-                    "empty_list" -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
-                    "timeout" -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+    fun getPredictions(id: String, rt: String?) {
+        RemoteDataSource.setStopInfo(id, rt)
+        viewModelScope.launch {
+            _stopId.postValue(id)
+            apiRepository.stopPredictions
+                .catch { exception ->
+                    _predictionFlow.value = PredictionState.Error(exception)
+                    when(exception.message) {
+                    "no_data"       -> MainActivityViewModel.mutableErrorMessage.postValue("404")
+                    "no_service"    -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
+                    "empty_list"    -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
+                    "timeout"       -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
+                    }
                 }
+                .collect { preds ->
+                _predictionFlow.value = PredictionState.Success(preds)
             }
         }
     }
@@ -122,5 +122,11 @@ class ByIdViewModel @Inject constructor(
 
     fun setAlertShown(shown: Boolean) {
         _alertShown.value = shown
+    }
+
+    sealed class PredictionState {
+        data class Success(val predictions: List<Prediction>): PredictionState()
+        data class Error(val exception: Throwable): PredictionState()
+        data class Loading(val loading: Boolean): PredictionState()
     }
 }

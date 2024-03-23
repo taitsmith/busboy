@@ -1,12 +1,16 @@
 package com.taitsmith.busboy.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +25,7 @@ import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
@@ -38,6 +43,7 @@ class ByIdFragment : Fragment() {
 
     private var predictionList: List<Prediction>? = null
 
+    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,7 +56,22 @@ class ByIdFragment : Fragment() {
         if (args.selectedNearbyStop != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 args.selectedNearbyStop?.stopId?.let {
-                    byIdViewModel.getStopPredictions(it , null)
+                    byIdViewModel.getPredictions(it , null)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                byIdViewModel.predictionFlow.collect {
+                    when(it) {
+                        is PredictionState.Success  -> setList(it.predictions)
+                        is PredictionState.Error    -> Log.d("ERROR", it.exception.message.toString())
+                        is PredictionState.Loading  -> {
+                            if (it.loading) MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+                            else MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+                        }
+                    }
                 }
             }
         }
@@ -86,20 +107,6 @@ class ByIdFragment : Fragment() {
     }
 
     private fun setObservers() {
-        byIdViewModel.stopPredictions.observe(
-            viewLifecycleOwner
-        ) { predictions: List<Prediction> ->
-            predictionList = predictions
-            predictionAdapter.submitList(predictionList)
-            binding.busFlagIV.visibility = View.INVISIBLE
-            try {
-                updateTextHint(predictions[0].stpnm!!)
-            } catch (e: IndexOutOfBoundsException) {
-                e.printStackTrace()
-            }
-            MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-        }
-
         /*  we want to determine if we're going to take this bus and display its location
             on a map, or if we're going to take it and display detailed information about
             it to the user. the bus object for map display has minimal information so we can
@@ -139,6 +146,17 @@ class ByIdFragment : Fragment() {
         }
     }
 
+    private fun setList(predictionList: List<Prediction>) {
+        predictionAdapter.submitList(predictionList)
+        binding.busFlagIV.visibility = View.INVISIBLE
+        try {
+            updateTextHint(predictionList[0].stpnm!!)
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+        }
+        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+    }
+
     private fun updateTextHint(s: String) {
         binding.stopEntryEditText.text = null
         binding.stopEntryEditText.hint = s
@@ -152,9 +170,9 @@ class ByIdFragment : Fragment() {
         //if they haven't entered a new valid number, otherwise display newly entered stop
         //TODO replace this with swipe to refresh
         if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
-            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
+            byIdViewModel.getPredictions(byIdViewModel.stopId.value!!, null)
         } else if (binding.stopEntryEditText.text.length == 5) {
-            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString(), null)
+            byIdViewModel.getPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
             MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
         }
@@ -162,7 +180,6 @@ class ByIdFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        byIdViewModel.stopPredictions.removeObservers(viewLifecycleOwner)
         byIdViewModel.bus.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
         _binding = null
