@@ -1,6 +1,5 @@
 package com.taitsmith.busboy.api
 
-import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
@@ -12,10 +11,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @Module
@@ -24,7 +20,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
                                         val acTransitApiInterface: ApiInterface,
                                         @MapsApiInterface
                                         val mapsApiInterface: ApiInterface,
-                                        remoteDataSource: RemoteDataSource
+                                        remoteDataSource: AcTransitRemoteDataSource
     ) {
 
     val stopPredictions: Flow<List<Prediction>> = remoteDataSource.predictions
@@ -35,6 +31,8 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
                 else it.prdctdn = "in " + it.prdctdn + " minutes"
             }
         }
+
+    val serviceAlerts: Flow<ServiceAlertResponse> = remoteDataSource.serviceAlerts
 
     suspend fun getBusLocation(vehicleId: String): Bus {
         val returnBus = acTransitApiInterface.getVehicleInfo(vehicleId)
@@ -79,10 +77,10 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
         return stopList
     }
 
-    //get service alerts for a given stop so we can inform users of delays, detours, stop closures etc
-    suspend fun getServiceAlertsForStop(stopId: String) : ServiceAlertResponse {
-       return acTransitApiInterface.getServiceAlertsForStop(stopId)
-    }
+//    //get service alerts for a given stop so we can inform users of delays, detours, stop closures etc
+//    suspend fun getServiceAlertsForStop(stopId: String) : ServiceAlertResponse {
+//       return acTransitApiInterface.getServiceAlertsForStop(stopId)
+//    }
 
     //get walking directions from current location to a bus stop. google returns a ton of information
     //and you have to dig through the list to get what we want: a collection of lat/lon points

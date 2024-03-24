@@ -4,7 +4,6 @@ import com.slack.eithernet.ApiResult.Failure
 import com.slack.eithernet.ApiResult.Success
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.di.MapsApiInterface
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
@@ -15,10 +14,8 @@ import javax.inject.Inject
 
 @Module
 @InstallIn(ViewModelComponent::class)
-class RemoteDataSource @Inject constructor (@AcTransitApiInterface
-                                            private val acTransitApiInterface: ApiInterface,
-                                            @MapsApiInterface
-                                            private val mapsApiInterface: ApiInterface
+class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
+                                                    private val acTransitApiInterface: ApiInterface
 ) {
     //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
@@ -27,17 +24,26 @@ class RemoteDataSource @Inject constructor (@AcTransitApiInterface
         while (true) {
             when (val response = acTransitApiInterface.getStopPredictionList(stopId, rt)) {
                 is Success -> {
-                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) throw Exception(
-                        response.value.bustimeResponse.error!![0].msg)
+                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) throw Exception("NULL_PRED_RESPONSE")
                     else emit(response.value.bustimeResponse.prd!!)
                     delay(refreshIntervalMillis)
                 }
-                is Failure.ApiFailure -> throw Exception("api_failure")
-                is Failure.HttpFailure -> throw Exception("http_failure")
-                is Failure.NetworkFailure -> throw Exception("no_data")
-                is Failure.UnknownFailure -> throw Exception("unknown")
+                is Failure.ApiFailure -> throw Exception("404")
+                is Failure.HttpFailure -> throw Exception("404")
+                is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
+                is Failure.UnknownFailure -> throw Exception("UNKNOWN")
             }
 
+        }
+    }
+
+    val serviceAlerts: Flow<ServiceAlertResponse> = flow {
+        when (val response = acTransitApiInterface.getServiceAlertsForStop(stopId)) {
+            is Success -> emit(response.value)
+            is Failure.ApiFailure -> throw Exception("404")
+            is Failure.HttpFailure -> throw Exception("404")
+            is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
+            is Failure.UnknownFailure -> throw Exception("UNKNOWN")
         }
     }
 

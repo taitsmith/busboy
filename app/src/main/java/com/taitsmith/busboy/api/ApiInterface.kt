@@ -64,7 +64,7 @@ interface ApiInterface {
      suspend fun getServiceAlertsForStop(
          @Query("stpid") stopId: String,
          @Query("token") token: String = BuildConfig.ac_transit_key
-     ): ServiceAlertResponse
+     ): ApiResult<ServiceAlertResponse, Unit>
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")

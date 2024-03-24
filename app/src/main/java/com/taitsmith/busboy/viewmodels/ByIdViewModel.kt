@@ -1,13 +1,12 @@
 package com.taitsmith.busboy.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.ApiRepository
-import com.taitsmith.busboy.api.RemoteDataSource
+import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
@@ -51,21 +50,24 @@ class ByIdViewModel @Inject constructor(
     val predictionFlow: StateFlow<PredictionState> = _predictionFlow
 
     fun getPredictions(id: String, rt: String?) {
-        RemoteDataSource.setStopInfo(id, rt)
+        AcTransitRemoteDataSource.setStopInfo(id, rt)
         viewModelScope.launch {
             _stopId.postValue(id)
             apiRepository.stopPredictions
                 .catch { exception ->
-                    when(exception.message) {
-                        "no_data"       -> MainActivityViewModel.mutableErrorMessage.postValue("404")
-                        "no_service"    -> MainActivityViewModel.mutableErrorMessage.postValue("NO_SERVICE_SCHEDULED")
-                        "empty_list"    -> MainActivityViewModel.mutableErrorMessage.postValue("NULL_PRED_RESPONSE")
-                        "timeout"       -> MainActivityViewModel.mutableErrorMessage.postValue("CALL_FAILURE")
-                    }
                     _predictionFlow.value = PredictionState.Error(exception)
                 }
-                .collect { preds ->
-                _predictionFlow.value = PredictionState.Success(preds)
+                .collect { predictions ->
+                    _predictionFlow.value = PredictionState.Success(predictions)
+                    getAlerts()
+            }
+        }
+    }
+
+    private fun getAlerts() {
+        viewModelScope.launch {
+            apiRepository.serviceAlerts.collect {
+                _alerts.postValue(it)
             }
         }
     }

@@ -7,5 +7,5 @@ import java.io.Serializable
 data class ServiceAlertResponse(
     @SerializedName("bustime-response")
     @Expose
-    var bustimeResponse: BustimeResponse? = null
+    var bustimeResponse: BustimeResponse
 ) : Serializable
