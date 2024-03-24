@@ -2,7 +2,6 @@ package com.taitsmith.busboy.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,11 +20,11 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
@@ -66,11 +65,8 @@ class ByIdFragment : Fragment() {
                 byIdViewModel.predictionFlow.collect {
                     when(it) {
                         is PredictionState.Success  -> setList(it.predictions)
-                        is PredictionState.Error    -> Log.d("ERROR", it.exception.message.toString())
-                        is PredictionState.Loading  -> {
-                            if (it.loading) MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-                            else MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-                        }
+                        is PredictionState.Error    -> MainActivityViewModel.mutableErrorMessage.value = it.exception.message
+                        is PredictionState.Loading  -> {}
                     }
                 }
             }
@@ -81,7 +77,6 @@ class ByIdFragment : Fragment() {
 
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -99,7 +94,6 @@ class ByIdFragment : Fragment() {
         })
         predictionListView.adapter = predictionAdapter
     }
-
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
@@ -130,7 +124,7 @@ class ByIdFragment : Fragment() {
         }
 
         byIdViewModel.alerts.observe(viewLifecycleOwner) { alerts ->
-            val alertList = alerts.bustimeResponse?.sb
+            val alertList = alerts.bustimeResponse.sb
             if (!alertList.isNullOrEmpty() && byIdViewModel.alertShown.value == false) {
                 val snackbar = Snackbar.make(binding.root,
                     resources.getQuantityString(R.plurals.snackbar_service_alerts, alertList.size, alertList.size),

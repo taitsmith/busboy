@@ -70,6 +70,7 @@
     <string name="snackbar_direction_failure">Looks like there was an issue getting directions</string>
     <string name="snackbar_no_waypoints">Looks like an error fetching route data</string>
     <string name="snackbar_no_service_scheduled">Looks like there\'s no service scheduled for this stop today</string>
+    <string name="snackbar_unknown_error">Looks like something went wrong…</string>
 
     <!-- snackbars (informational) -->
     <string name="snackbar_favorite_added">Stop added to favorites</string>

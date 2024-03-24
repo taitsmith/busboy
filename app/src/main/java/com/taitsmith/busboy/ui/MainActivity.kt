@@ -90,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             "DIRECTION_FAILURE"     -> showSnackbar(R.string.snackbar_direction_failure)
             "NO_WAYPOINTS"          -> showSnackbar(R.string.snackbar_no_waypoints)
             "NO_SERVICE_SCHEDULED"  -> showSnackbar(R.string.snackbar_no_service_scheduled)
+            "UNKNOWN"                -> showSnackbar(R.string.snackbar_unknown_error)
         }
     }
 
