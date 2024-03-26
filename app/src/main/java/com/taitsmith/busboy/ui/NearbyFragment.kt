@@ -13,18 +13,22 @@ import android.widget.EditText
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
 import com.taitsmith.busboy.di.LocationRepository
 import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import com.taitsmith.busboy.viewmodels.NearbyViewModel.ListLoadingState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,8 +46,9 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
     private lateinit var buslineAdapter: ArrayAdapter<CharSequence>
 
     private var _binding: FragmentNearbyBinding? = null
-    private val binding get() = _binding!!
 
+    private val binding get() = _binding!!
+    private val stopList = mutableListOf<Stop>()
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -63,6 +68,32 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         buslineAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         buslineSpinner.adapter = buslineAdapter
         buslineSpinner.onItemSelectedListener = this
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                nearbyViewModel.nearbyStopsState.collect {
+                    when (it) {
+                        is NearbyViewModel.NearbyStopsState.Error -> {
+                            MainActivityViewModel.mutableErrorMessage.postValue(it.exception.message)
+                        }
+                        is NearbyViewModel.NearbyStopsState.Loading -> {
+                            when (it.loadState) {
+                                ListLoadingState.START -> {}
+                                ListLoadingState.PARTIAL -> nearbyViewModel.getNearbyStopsWithLines()
+                                ListLoadingState.COMPLETE -> nearbyAdapter.submitList(it.stopList)
+                            }
+                        }
+                        is NearbyViewModel.NearbyStopsState.Success -> {
+                            val index = stopList.size
+                            stopList.add(stopList.size, it.stops)
+                            nearbyAdapter.notifyItemInserted(index)
+                            nearbyAdapter.submitList(stopList)
+                            MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+                        }
+                    }
+                }
+            }
+        }
 
         setListeners()
         setObservers()
@@ -87,6 +118,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         nearbyStopListView = binding.nearbyListView
         nearbyStopListView.layoutManager = LinearLayoutManager(requireContext())
 
+        //create the adapter and pass in short (view stop predictions) / long (walking directions) press
         nearbyAdapter = NearbyAdapter ({ stop ->
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = NearbyFragmentDirections
@@ -96,10 +128,10 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
             nearbyViewModel.setIsUpdated(true)
             MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val (_, _, _, latitude, longitude) = it
-            val start =
+            val start = //maps api expects encoded lat/lon
                 NearbyViewModel.currentLocation.latitude.toString() + "," +
                         NearbyViewModel.currentLocation.longitude.toString()
-            val end = (latitude!!).toString() + "," + (longitude!!).toString()
+            val end = (latitude).toString() + "," + (longitude).toString()
             nearbyViewModel.getDirectionsToStop(start, end)
         })
         nearbyStopListView.adapter = nearbyAdapter
@@ -109,18 +141,12 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         super.onDestroyView()
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
-        nearbyAdapter.submitList(null)
         _binding = null
         locationRepository.stopUpdates()
     }
 
     @SuppressLint("MissingPermission")
     private fun setObservers() {
-        nearbyViewModel.nearbyStops.observe(viewLifecycleOwner) {
-            nearbyAdapter.submitList(it)
-            MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-        }
-
         nearbyViewModel.directionPolylineCoords.observe(viewLifecycleOwner) {
             if (nearbyViewModel.isUpdated.value == true) {
                 val action =

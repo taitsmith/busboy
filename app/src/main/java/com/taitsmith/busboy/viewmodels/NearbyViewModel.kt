@@ -11,12 +11,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,12 +36,14 @@ class NearbyViewModel @Inject constructor(
     private val _isUpdated = MutableLiveData<Boolean>()
     val isUpdated: LiveData<Boolean> = _isUpdated
 
-    private val _nearbyStops = MutableLiveData<List<Stop>>()
-    val nearbyStops: LiveData<List<Stop>> = _nearbyStops
-
     //for getting lat/lon coordinates to draw walking directions on a map
     private val _directionPolylineCoords = MutableLiveData<List<LatLng>>()
     val directionPolylineCoords: LiveData<List<LatLng>> = _directionPolylineCoords
+
+    private val _nearbyStopsFlow = MutableStateFlow<NearbyStopsState>(NearbyStopsState.Loading(ListLoadingState.START, emptyList()))
+    val nearbyStopsState: StateFlow<NearbyStopsState> = _nearbyStopsFlow
+
+    private lateinit var stopList: MutableList<Stop>
 
     var rt: String? = null
     var distance: Int
@@ -51,27 +57,51 @@ class NearbyViewModel @Inject constructor(
     //we only want to show the location choice method dialog once per session
     var shouldShowDialog = true
 
+    /**
+        The way AC Transit's API works, we have to make two calls to display everything on the
+        'nearby' screen. One to find all nearby stops, and one to get the list of lines served.
+        Then we can smoosh everything into one string with a \n between each to display it. So
+        that's whats going on here and in the following method
+        https://api.actransit.org/transit/Help/Api/GET-stop-stopId-destinations
+     **/
+    //gets a list of all stops within [distance] feet of [lat]/[lon] that serve line [rt]
+    //or all stops if unspecified
     fun getNearbyStops() {
         MainActivityViewModel.mutableStatusMessage.value = "LOADING"
         if (rt == null) rt = ""
         if (currentLocation.latitude == 0.0) {
             mutableErrorMessage.value = "NULL_LOCATION"
         } else {
-            viewModelScope.launch(Dispatchers.IO) {
-                kotlin.runCatching {
-                    val nearbyList = apiRepository.getNearbyStops(
-                        currentLocation.latitude,
-                        currentLocation.longitude,
-                        distance,
-                        true,
-                        rt
-                    )
-                    _nearbyStops.postValue(apiRepository.getLinesServedByStop(nearbyList))
-                }.onFailure {
-                    it.printStackTrace()
-                    if (it.message == "timeout") mutableErrorMessage.postValue("CALL_FAILURE")
-                    else mutableErrorMessage.postValue("404")
-                }
+            AcTransitRemoteDataSource.setNearbyInfo(
+                currentLocation.latitude,
+                currentLocation.longitude,
+                distance,
+                rt)
+            viewModelScope.launch {
+                apiRepository.nearbyStops
+                    .catch {
+                        it.printStackTrace()
+                        if (it.message == "timeout") mutableErrorMessage.postValue("CALL_FAILURE")
+                        else mutableErrorMessage.postValue("404")
+                    }
+                    .collect{
+                        _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
+                        stopList = it.toMutableList()
+                    }
+            }
+        }
+    }
+
+    //collects edited stops (lines added) and updates the stop in list
+    fun getNearbyStopsWithLines() {
+        var i = 0
+        viewModelScope.launch {
+            apiRepository.nearbyStopsWithLines
+            .collect {
+                stopList[i] = it
+                _nearbyStopsFlow.value = NearbyStopsState.Success(it)
+                i++
+                if (i == stopList.size) _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.COMPLETE, stopList)
             }
         }
     }
@@ -142,5 +172,15 @@ class NearbyViewModel @Inject constructor(
     init {
         currentLocation = Location(null)
         distance = 1000
+    }
+
+    sealed class NearbyStopsState {
+        data class Success(val stops: Stop): NearbyStopsState()
+        data class Error(val exception: Throwable): NearbyStopsState()
+        data class Loading(val loadState: ListLoadingState, var stopList: List<Stop>): NearbyStopsState()
+    }
+
+    enum class ListLoadingState {
+        START, PARTIAL, COMPLETE
     }
 }
