@@ -1,6 +1,5 @@
 package com.taitsmith.busboy.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +20,6 @@ import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,9 +38,6 @@ class ByIdFragment : Fragment() {
 
     private lateinit var predictionAdapter: PredictionAdapter
 
-    private var predictionList: List<Prediction>? = null
-
-    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,12 +55,12 @@ class ByIdFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 byIdViewModel.predictionFlow.collect {
                     when(it) {
                         is PredictionState.Success  -> setList(it.predictions)
-                        is PredictionState.Error    -> MainActivityViewModel.mutableErrorMessage.value = it.exception.message
+                        is PredictionState.Error    -> byIdViewModel.updateStatus(null, it.exception.message!!)
                         is PredictionState.Loading  -> {}
                     }
                 }
@@ -84,7 +79,6 @@ class ByIdFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         predictionAdapter = PredictionAdapter({ prediction ->
             byIdViewModel.setIsUpdated(true)
-            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             MainActivity.prediction = prediction
             byIdViewModel.getBusLocation(prediction.vid!!)
         },{
@@ -97,7 +91,7 @@ class ByIdFragment : Fragment() {
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
-        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
+//        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
     }
 
     private fun setObservers() {
@@ -148,7 +142,7 @@ class ByIdFragment : Fragment() {
         } catch (e: IndexOutOfBoundsException) {
             e.printStackTrace()
         }
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
+
     }
 
     private fun updateTextHint(s: String) {
@@ -158,8 +152,6 @@ class ByIdFragment : Fragment() {
     }
 
     private fun search() {
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-
         //allow users to re-click the search button to update currently displayed stop
         //if they haven't entered a new valid number, otherwise display newly entered stop
         //TODO replace this with swipe to refresh
@@ -168,7 +160,7 @@ class ByIdFragment : Fragment() {
         } else if (binding.stopEntryEditText.text.length == 5) {
             byIdViewModel.getPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
-            MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
+            byIdViewModel.updateStatus(null, "BAD_INPUT")
         }
     }
 

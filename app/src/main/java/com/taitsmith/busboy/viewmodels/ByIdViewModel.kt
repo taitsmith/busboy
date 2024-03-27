@@ -5,13 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.AcTransitRemoteDataSource
+import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
+import com.taitsmith.busboy.utils.StatusRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ByIdViewModel @Inject constructor(
                                         private val databaseRepository: DatabaseRepository,
-                                        private val apiRepository: ApiRepository
+                                        private val apiRepository: ApiRepository,
+                                        private val statusRepo: StatusRepo
 ) : ViewModel() {
     private val _isUpdated = MutableLiveData<Boolean>()
     var isUpdated: LiveData<Boolean> = _isUpdated
@@ -50,6 +52,7 @@ class ByIdViewModel @Inject constructor(
     val predictionFlow: StateFlow<PredictionState> = _predictionFlow
 
     fun getPredictions(id: String, rt: String?) {
+        statusRepo.isLoading(true)
         AcTransitRemoteDataSource.setStopInfo(id, rt)
         viewModelScope.launch {
             _stopId.postValue(id)
@@ -60,6 +63,7 @@ class ByIdViewModel @Inject constructor(
                 .collect { predictions ->
                     _predictionFlow.value = PredictionState.Success(predictions)
                     getAlerts()
+                    statusRepo.isLoading(false)
             }
         }
     }
@@ -80,26 +84,26 @@ class ByIdViewModel @Inject constructor(
     }
 
     fun getBusLocation(vehicleId: String) {
+        statusRepo.isLoading(true)
         viewModelScope.launch(Dispatchers.IO){
             kotlin.runCatching {
                 _bus.postValue(apiRepository.getBusLocation(vehicleId))
             }.onFailure {
                 when (it.message) {
-                    "null_coords" -> MainActivityViewModel.mutableErrorMessage
-                        .postValue("NULL_BUS_COORDS")
+                    "null_coords" -> statusRepo.updateStatus("NULL_BUS_COORDS")
                 }
             }
         }
     }
 
     fun addStopToFavorites() {
-        if (_stop.value == null) MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
+        if (_stop.value == null) statusRepo.updateStatus("BAD_INPUT")
         else {
             viewModelScope.launch(Dispatchers.IO) {
                 stop.value?.linesServed = //oh lawd, we'll simplify this
                     apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
                 databaseRepository.addStops(stop.value!!)
-                MainActivityViewModel.mutableStatusMessage.postValue("FAVORITE_ADDED")
+                statusRepo.updateStatus("FAVORITE_ADDED")
             }
         }
     }
@@ -112,10 +116,15 @@ class ByIdViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {
-                    "empty_response" -> MainActivityViewModel.mutableErrorMessage.postValue("NO_WAYPOINTS")
+                    "empty_response" -> statusRepo.updateStatus("NO_WAYPOINTS")
                 }
             }
         }
+    }
+
+    fun updateStatus(loading: Boolean?, message: String?) {
+        if (loading == null) statusRepo.updateStatus(message!!)
+        else statusRepo.isLoading(loading)
     }
 
     fun setIsUpdated(update: Boolean) {
