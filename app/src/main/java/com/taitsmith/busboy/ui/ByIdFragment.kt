@@ -114,6 +114,7 @@ class ByIdFragment : Fragment() {
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
                 findNavController().navigate(action)
                 byIdViewModel.setIsUpdated(false)
+                byIdViewModel.updateStatus(false, null)
             }
         }
 

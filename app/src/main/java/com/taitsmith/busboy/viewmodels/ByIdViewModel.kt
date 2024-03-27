@@ -96,17 +96,17 @@ class ByIdViewModel @Inject constructor(
         }
     }
 
-    fun addStopToFavorites() {
-        if (_stop.value == null) statusRepo.updateStatus("BAD_INPUT")
-        else {
-            viewModelScope.launch(Dispatchers.IO) {
-                stop.value?.linesServed = //oh lawd, we'll simplify this
-                    apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
-                databaseRepository.addStops(stop.value!!)
-                statusRepo.updateStatus("FAVORITE_ADDED")
-            }
-        }
-    }
+//    fun addStopToFavorites() {
+//        if (_stop.value == null) statusRepo.updateStatus("BAD_INPUT")
+//        else {
+//            viewModelScope.launch(Dispatchers.IO) {
+//                stop.value?.linesServed = //oh lawd, we'll simplify this
+//                    apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
+//                databaseRepository.addStops(stop.value!!)
+//                statusRepo.updateStatus("FAVORITE_ADDED")
+//            }
+//        }
+//    }
 
     fun getWaypoints(routeName: String) {
         viewModelScope.launch(Dispatchers.IO) {
