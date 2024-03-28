@@ -1,5 +1,6 @@
-package com.taitsmith.busboy.utils
+package com.taitsmith.busboy.di
 
+import com.taitsmith.busboy.utils.StatusInterface
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel.LoadingState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

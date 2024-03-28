@@ -14,7 +14,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
+import com.taitsmith.busboy.di.LocationRepository
+import com.taitsmith.busboy.di.StatusRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
@@ -28,10 +29,10 @@ import javax.inject.Inject
 class NearbyViewModel @Inject constructor(
     private val application: Application,
     private val apiRepository: ApiRepository,
+    private val statusRepo: StatusRepo,
+    private val locationRepository: LocationRepository
                                           ) : AndroidViewModel(application) {
 
-    private val _permGrantedAndEnabled = MutableLiveData<Boolean>()
-    var permGrantedAndEnabled: LiveData<Boolean> = _permGrantedAndEnabled
 
     private val _isUpdated = MutableLiveData<Boolean>()
     val isUpdated: LiveData<Boolean> = _isUpdated
@@ -42,6 +43,10 @@ class NearbyViewModel @Inject constructor(
 
     private val _nearbyStopsFlow = MutableStateFlow<NearbyStopsState>(NearbyStopsState.Loading(ListLoadingState.START, emptyList()))
     val nearbyStopsState: StateFlow<NearbyStopsState> = _nearbyStopsFlow
+
+    //only enable the search button if there's a location or users has selected 'choose on map'
+    private val _enableSearchButton = MutableStateFlow(false)
+    val enableSearchButton: StateFlow<Boolean> = _enableSearchButton
 
     private lateinit var stopList: MutableList<Stop>
 
@@ -67,10 +72,10 @@ class NearbyViewModel @Inject constructor(
     //gets a list of all stops within [distance] feet of [lat]/[lon] that serve line [rt]
     //or all stops if unspecified
     fun getNearbyStops() {
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
+        statusRepo.isLoading(true)
         if (rt == null) rt = ""
         if (currentLocation.latitude == 0.0) {
-            mutableErrorMessage.value = "NULL_LOCATION"
+            statusRepo.updateStatus("NULL_LOCATION")
         } else {
             AcTransitRemoteDataSource.setNearbyInfo(
                 currentLocation.latitude,
@@ -81,8 +86,8 @@ class NearbyViewModel @Inject constructor(
                 apiRepository.nearbyStops
                     .catch {
                         it.printStackTrace()
-                        if (it.message == "timeout") mutableErrorMessage.postValue("CALL_FAILURE")
-                        else mutableErrorMessage.postValue("404")
+                        if (it.message.equals("timeout")) statusRepo.updateStatus("CALL_FAILURE")
+                        else statusRepo.updateStatus("404")
                     }
                     .collect{
                         _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
@@ -93,7 +98,9 @@ class NearbyViewModel @Inject constructor(
     }
 
     //collects edited stops (lines added) and updates the stop in list
+    //hella goofy
     fun getNearbyStopsWithLines() {
+        statusRepo.isLoading(false)
         var i = 0
         viewModelScope.launch {
             apiRepository.nearbyStopsWithLines
@@ -118,14 +125,15 @@ class NearbyViewModel @Inject constructor(
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             return if (loc.hasLocationEnabled()) {
-                _permGrantedAndEnabled.value = true
+                locationRepository.startUpdates()
+                statusRepo.updateStatus("WAITING_ON_LOCATION")
                 true
             } else {
-                mutableErrorMessage.value = "NO_LOC_ENABLED" //granted permissions, but location is disabled.
+                statusRepo.updateStatus("NO_LOC_ENABLED")
                 false
             }
         }
-        mutableErrorMessage.value = "NO_PERMISSION"
+        statusRepo.updateStatus("NO_PERMISSION")
         return false
     }
 
@@ -137,7 +145,7 @@ class NearbyViewModel @Inject constructor(
                 _isUpdated.postValue(false)
             }.onFailure {
                 Log.d("FAILURE: ", it.message.toString())
-                mutableErrorMessage.postValue("DIRECTION_FAILURE")
+                statusRepo.updateStatus("DIRECTION_FAILURE")
             }
         }
     }
@@ -148,17 +156,28 @@ class NearbyViewModel @Inject constructor(
 
     fun setLocation(location: Location) {
         currentLocation = location
+        _enableSearchButton.value = true
     }
 
     fun setIsUsingLocation(usingLocation: Boolean) {
         //if user has selected the option to use the device location, make sure we have
         //permission and location setting is enabled
-        if (usingLocation && checkLocationPerm()) _permGrantedAndEnabled.value = true
+        if (usingLocation && checkLocationPerm()) _enableSearchButton.value = true
 
         //disable the 'choose location method' dialog for now
         shouldShowDialog = false
 
         isUsingLocation = usingLocation
+    }
+
+    fun updateStatus(s: String) = statusRepo.updateStatus(s)
+
+    private fun listenForLocation() {
+        viewModelScope.launch {
+            locationRepository.lastLocation.collect { location ->
+                if (location != null) setLocation(location)
+            }
+        }
     }
 
 
@@ -172,11 +191,12 @@ class NearbyViewModel @Inject constructor(
     init {
         currentLocation = Location(null)
         distance = 1000
+
+        listenForLocation()
     }
 
     sealed class NearbyStopsState {
         data class Success(val stops: Stop): NearbyStopsState()
-        data class Error(val exception: Throwable): NearbyStopsState()
         data class Loading(val loadState: ListLoadingState, var stopList: List<Stop>): NearbyStopsState()
     }
 
