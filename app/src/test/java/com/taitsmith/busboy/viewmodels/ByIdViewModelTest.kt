@@ -207,7 +207,7 @@ class ByIdViewModelTest {
         `when`(apiRepository.getStopPredictions("55555", null)).thenThrow(RuntimeException("no_service"))
         byIdViewModel.getStopPredictions("55555", null)
 
-        assertEquals("CALL_FAILURE", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
+        assertEquals("NO_SERVICE_SCHEDULED", MainActivityViewModel.mutableErrorMessage.getOrAwaitValue())
     }
 
     @Test
