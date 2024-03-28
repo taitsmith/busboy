@@ -27,11 +27,11 @@ import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 
-class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
+class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
     OnMapsSdkInitializedCallback {
+
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
@@ -83,8 +83,6 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnMarkerDragListener(this)
 
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-
         view?.rootView?.let {
             Snackbar.make(it, R.string.snackbar_map_long_press_drag, Snackbar.LENGTH_LONG)
                 .show()
@@ -125,8 +123,6 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 LatLng(bus.latitude!!, bus.longitude!!), 15F))
         }
-
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
     }
 
     override fun onCreateView(
