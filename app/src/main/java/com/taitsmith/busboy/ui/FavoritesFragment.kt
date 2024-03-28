@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.databinding.FavoritesFragmentBinding
 import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.FavoritesViewModel
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -21,7 +20,7 @@ import kotlinx.coroutines.launch
 class FavoritesFragment : Fragment() {
 
     private val favoritesViewModel: FavoritesViewModel by viewModels()
-    lateinit var favoritesListView: RecyclerView
+    private lateinit var favoritesListView: RecyclerView
     private lateinit var nearbyAdapter: NearbyAdapter
 
     private var _binding: FavoritesFragmentBinding? = null
@@ -41,7 +40,6 @@ class FavoritesFragment : Fragment() {
         favoritesListView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         nearbyAdapter = NearbyAdapter ({
-            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
             val action = FavoritesFragmentDirections
                 .actionFavoritesFragmentToByIdFragment(it)
             view.findNavController().navigate(action)

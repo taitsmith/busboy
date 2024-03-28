@@ -12,7 +12,7 @@ import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
-import com.taitsmith.busboy.utils.StatusRepo
+import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class ByIdViewModel @Inject constructor(
                                         private val databaseRepository: DatabaseRepository,
                                         private val apiRepository: ApiRepository,
-                                        private val statusRepo: StatusRepo
+                                        private val statusRepository: StatusRepository
 ) : ViewModel() {
     private val _isUpdated = MutableLiveData<Boolean>()
     var isUpdated: LiveData<Boolean> = _isUpdated
@@ -52,7 +52,7 @@ class ByIdViewModel @Inject constructor(
     val predictionFlow: StateFlow<PredictionState> = _predictionFlow
 
     fun getPredictions(id: String, rt: String?) {
-        statusRepo.isLoading(true)
+        statusRepository.isLoading(true)
         AcTransitRemoteDataSource.setStopInfo(id, rt)
         viewModelScope.launch {
             _stopId.postValue(id)
@@ -63,7 +63,7 @@ class ByIdViewModel @Inject constructor(
                 .collect { predictions ->
                     _predictionFlow.value = PredictionState.Success(predictions)
                     getAlerts()
-                    statusRepo.isLoading(false)
+                    statusRepository.isLoading(false)
             }
         }
     }
@@ -84,13 +84,13 @@ class ByIdViewModel @Inject constructor(
     }
 
     fun getBusLocation(vehicleId: String) {
-        statusRepo.isLoading(true)
+        statusRepository.isLoading(true)
         viewModelScope.launch(Dispatchers.IO){
             kotlin.runCatching {
                 _bus.postValue(apiRepository.getBusLocation(vehicleId))
             }.onFailure {
                 when (it.message) {
-                    "null_coords" -> statusRepo.updateStatus("NULL_BUS_COORDS")
+                    "null_coords" -> statusRepository.updateStatus("NULL_BUS_COORDS")
                 }
             }
         }
@@ -116,15 +116,15 @@ class ByIdViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {
-                    "empty_response" -> statusRepo.updateStatus("NO_WAYPOINTS")
+                    "empty_response" -> statusRepository.updateStatus("NO_WAYPOINTS")
                 }
             }
         }
     }
 
     fun updateStatus(loading: Boolean?, message: String?) {
-        if (loading == null) statusRepo.updateStatus(message!!)
-        else statusRepo.isLoading(loading)
+        if (loading == null) statusRepository.updateStatus(message!!)
+        else statusRepository.isLoading(loading)
     }
 
     fun setIsUpdated(update: Boolean) {

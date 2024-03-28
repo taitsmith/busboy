@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class StatusRepo @Inject constructor(): StatusInterface {
+class StatusRepository @Inject constructor(): StatusInterface {
 
     var state: MutableStateFlow<LoadingState> = MutableStateFlow(LoadingState.Success)
 
