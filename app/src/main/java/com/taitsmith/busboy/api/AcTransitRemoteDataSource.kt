@@ -26,7 +26,11 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         while (true) {
             when (val response = acTransitApiInterface.getStopPredictionList(stopId, rt)) {
                 is Success -> {
-                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) throw Exception("NULL_PRED_RESPONSE")
+                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) {
+                        if (response.value.bustimeResponse.error!![0].msg.equals("No service scheduled"))
+                            throw Exception("NO_SERVICE_SCHEDULED")
+                        else throw Exception("UNKNOWN")
+                    }
                     else emit(response.value.bustimeResponse.prd!!)
                     delay(refreshIntervalMillis)
                 }
