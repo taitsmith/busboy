@@ -3,6 +3,7 @@ package com.taitsmith.busboy.api
 import com.google.android.gms.maps.model.LatLng
 import com.slack.eithernet.ApiResult.Failure
 import com.slack.eithernet.ApiResult.Success
+import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
@@ -39,7 +40,6 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
                 is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
                 is Failure.UnknownFailure -> throw Exception("UNKNOWN")
             }
-
         }
     }
 
@@ -93,6 +93,23 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
+    //leave the map open to update the bus location every $refreshIntervalMillis
+    val vehicleLocation: Flow<Bus> = flow {
+        while (true) {
+            when (val response = acTransitApiInterface.getVehicleInfo(vehicleId)) {
+                is Success -> {
+                    if (response.value.latitude == null) throw Exception("NULL_BUS_COORDS")
+                    else emit(response.value)
+                    delay(refreshIntervalMillis)
+                }
+                is Failure.ApiFailure -> throw Exception("404")
+                is Failure.HttpFailure -> throw Exception("404")
+                is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
+                is Failure.UnknownFailure -> throw Exception("UNKNOWN")
+            }
+        }
+    }
+
     companion object {
         fun setStopInfo(s: String, r: String?) {
             stopId = s
@@ -105,10 +122,15 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
             rt = r
         }
 
-        private lateinit var stopId: String
-        private lateinit var latLng: LatLng
-        private lateinit var stopList: List<Stop>
-        private var distance: Int = 500
-        private var rt: String? = null
+        fun setVehicleId(vid: String) {
+            vehicleId = vid
+        }
+
+        private lateinit var stopId:    String
+        private lateinit var latLng:    LatLng
+        private lateinit var stopList:  List<Stop>
+        private var vehicleId =         "000"
+        private var distance: Int =     500
+        private var rt: String? =       null
     }
 }

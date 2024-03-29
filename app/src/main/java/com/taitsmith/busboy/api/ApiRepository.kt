@@ -37,12 +37,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
 
     val nearbyStopsWithLines: Flow<Stop> = remoteDataSource.nearbyLinesServed
 
-    suspend fun getBusLocation(vehicleId: String): Bus {
-        val returnBus = acTransitApiInterface.getVehicleInfo(vehicleId)
-        if (returnBus.latitude == null || returnBus.longitude == null) {
-            throw Exception("null_coords")
-        } else return acTransitApiInterface.getVehicleInfo(vehicleId)
-    }
+    val vehicleInfo: Flow<Bus> = remoteDataSource.vehicleLocation
 
     suspend fun getDetailedBusInfo(vid: String): Bus {
         return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]

@@ -39,14 +39,14 @@ class ByIdViewModel @Inject constructor(
     private val _busRouteWaypoints = MutableLiveData<List<LatLng>>()
     val busRouteWaypoints: LiveData<List<LatLng>> = _busRouteWaypoints
 
-    private val _bus = MutableLiveData<Bus>()
-    val bus: LiveData<Bus> = _bus
-
     private val _alerts = MutableLiveData<ServiceAlertResponse>()
     val alerts: LiveData<ServiceAlertResponse> = _alerts
 
     private val _alertShown = MutableLiveData(false)
     val alertShown: LiveData<Boolean> = _alertShown
+
+    private val _bus = MutableStateFlow<BusState>(BusState.Loading)
+    val bus: StateFlow<BusState> = _bus
 
     private val _predictionFlow = MutableStateFlow<PredictionState>(PredictionState.Loading(false))
     val predictionFlow: StateFlow<PredictionState> = _predictionFlow
@@ -78,20 +78,23 @@ class ByIdViewModel @Inject constructor(
 
     fun getBusDetails(vid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _bus.postValue(apiRepository.getDetailedBusInfo(vid))
+            _bus.value = BusState.Detail(apiRepository.getDetailedBusInfo(vid))
             _isUpdated.postValue(false)
         }
     }
 
     fun getBusLocation(vehicleId: String) {
         statusRepository.isLoading(true)
-        viewModelScope.launch(Dispatchers.IO){
-            kotlin.runCatching {
-                _bus.postValue(apiRepository.getBusLocation(vehicleId))
-            }.onFailure {
-                when (it.message) {
-                    "null_coords" -> statusRepository.updateStatus("NULL_BUS_COORDS")
+        _bus.value = BusState.Loading
+        AcTransitRemoteDataSource.setVehicleId(vehicleId)
+        viewModelScope.launch {
+            apiRepository.vehicleInfo
+                .catch { exception ->
+                    _bus.value = BusState.Error(exception)
                 }
+                .collect {
+                    if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
+                    else _bus.value = BusState.Updated(it)
             }
         }
     }
@@ -136,8 +139,16 @@ class ByIdViewModel @Inject constructor(
     }
 
     sealed class PredictionState {
-        data class Success(val predictions: List<Prediction>): PredictionState()
-        data class Error(val exception: Throwable): PredictionState()
-        data class Loading(val loading: Boolean): PredictionState()
+        data class Success(val predictions: List<Prediction>):  PredictionState()
+        data class Error(val exception: Throwable):             PredictionState()
+        data class Loading(val loading: Boolean):               PredictionState()
+    }
+
+    sealed class BusState {
+        data object Loading:                        BusState()
+        data class Initial(val bus: Bus):           BusState()
+        data class Updated(val bus: Bus):           BusState()
+        data class Detail(val bus: Bus):            BusState()
+        data class Error(val exception: Throwable): BusState()
     }
 }

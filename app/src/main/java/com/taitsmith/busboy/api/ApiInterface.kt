@@ -50,7 +50,7 @@ interface ApiInterface {
      suspend fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): Bus
+    ): ApiResult<Bus, Unit>
 
     //get detailed info about a bus because you're a nerd and you like that stuff
      @GET("vehicle/{vehicleId}/characteristics")
