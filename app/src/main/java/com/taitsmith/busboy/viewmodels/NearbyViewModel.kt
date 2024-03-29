@@ -15,7 +15,7 @@ import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.LocationRepository
-import com.taitsmith.busboy.di.StatusRepo
+import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.delight.android.location.SimpleLocation
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class NearbyViewModel @Inject constructor(
     private val application: Application,
     private val apiRepository: ApiRepository,
-    private val statusRepo: StatusRepo,
+    private val statusRepository: StatusRepository,
     private val locationRepository: LocationRepository
                                           ) : AndroidViewModel(application) {
 
@@ -72,10 +72,10 @@ class NearbyViewModel @Inject constructor(
     //gets a list of all stops within [distance] feet of [lat]/[lon] that serve line [rt]
     //or all stops if unspecified
     fun getNearbyStops() {
-        statusRepo.isLoading(true)
+        statusRepository.isLoading(true)
         if (rt == null) rt = ""
         if (currentLocation.latitude == 0.0) {
-            statusRepo.updateStatus("NULL_LOCATION")
+            statusRepository.updateStatus("NULL_LOCATION")
         } else {
             AcTransitRemoteDataSource.setNearbyInfo(
                 currentLocation.latitude,
@@ -86,8 +86,8 @@ class NearbyViewModel @Inject constructor(
                 apiRepository.nearbyStops
                     .catch {
                         it.printStackTrace()
-                        if (it.message.equals("timeout")) statusRepo.updateStatus("CALL_FAILURE")
-                        else statusRepo.updateStatus("404")
+                        if (it.message.equals("timeout")) statusRepository.updateStatus("CALL_FAILURE")
+                        else statusRepository.updateStatus("404")
                     }
                     .collect{
                         _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
@@ -100,7 +100,7 @@ class NearbyViewModel @Inject constructor(
     //collects edited stops (lines added) and updates the stop in list
     //hella goofy
     fun getNearbyStopsWithLines() {
-        statusRepo.isLoading(false)
+        statusRepository.isLoading(false)
         var i = 0
         viewModelScope.launch {
             apiRepository.nearbyStopsWithLines
@@ -126,14 +126,14 @@ class NearbyViewModel @Inject constructor(
         ) {
             return if (loc.hasLocationEnabled()) {
                 locationRepository.startUpdates()
-                statusRepo.updateStatus("WAITING_ON_LOCATION")
+                statusRepository.updateStatus("WAITING_ON_LOCATION")
                 true
             } else {
-                statusRepo.updateStatus("NO_LOC_ENABLED")
+                statusRepository.updateStatus("NO_LOC_ENABLED")
                 false
             }
         }
-        statusRepo.updateStatus("NO_PERMISSION")
+        statusRepository.updateStatus("NO_PERMISSION")
         return false
     }
 
@@ -145,7 +145,7 @@ class NearbyViewModel @Inject constructor(
                 _isUpdated.postValue(false)
             }.onFailure {
                 Log.d("FAILURE: ", it.message.toString())
-                statusRepo.updateStatus("DIRECTION_FAILURE")
+                statusRepository.updateStatus("DIRECTION_FAILURE")
             }
         }
     }
@@ -170,7 +170,7 @@ class NearbyViewModel @Inject constructor(
         isUsingLocation = usingLocation
     }
 
-    fun updateStatus(s: String) = statusRepo.updateStatus(s)
+    fun updateStatus(s: String) = statusRepository.updateStatus(s)
 
     private fun listenForLocation() {
         viewModelScope.launch {

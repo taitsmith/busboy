@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -24,19 +23,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
-import com.taitsmith.busboy.di.LocationRepository
 import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
-import com.taitsmith.busboy.viewmodels.NearbyViewModel.NearbyStopsState
 import com.taitsmith.busboy.viewmodels.NearbyViewModel.ListLoadingState
+import com.taitsmith.busboy.viewmodels.NearbyViewModel.NearbyStopsState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener {
-    @Inject
-    lateinit var locationRepository: LocationRepository
 
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
@@ -144,7 +139,6 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         buslineSpinner.onItemSelectedListener = null
         buslineSpinner.adapter = null
         _binding = null
-        locationRepository.stopUpdates()
     }
 
     private fun setObservers() {

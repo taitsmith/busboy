@@ -19,6 +19,7 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.BusState
 import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +68,25 @@ class ByIdFragment : Fragment() {
             }
         }
 
+        /*  we want to determine if we're going to take this bus and display its location
+            on a map, or if we're going to take it and display detailed information about
+            it to the user. the bus object for map display has minimal information so we can
+            check if certain things are null/empty and determine where to go from there
+         */
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                byIdViewModel.bus.collect {
+                    when (it) {
+                        is BusState.Error   -> {}
+                        is BusState.Initial -> byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
+                        is BusState.Updated -> {}
+                        is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "deatils")
+                        BusState.Loading    -> {}
+                    }
+                }
+            }
+        }
+
         setListeners()
         setObservers()
 
@@ -95,20 +115,6 @@ class ByIdFragment : Fragment() {
     }
 
     private fun setObservers() {
-        /*  we want to determine if we're going to take this bus and display its location
-            on a map, or if we're going to take it and display detailed information about
-            it to the user. the bus object for map display has minimal information so we can
-            check if certain things are null/empty and determine where to go from there
-         */
-        byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
-            if (byIdViewModel.isUpdated.value == true) {
-                if (bus.length.isNullOrEmpty()) byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
-                else {
-                    BusDetailFragment(bus).show(childFragmentManager, "detail")
-                }
-            }
-        }
-
         byIdViewModel.busRouteWaypoints.observe(viewLifecycleOwner) {
             if (byIdViewModel.isUpdated.value == true) {
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
@@ -167,7 +173,6 @@ class ByIdFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        byIdViewModel.bus.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
         _binding = null
         _predictionListView = null

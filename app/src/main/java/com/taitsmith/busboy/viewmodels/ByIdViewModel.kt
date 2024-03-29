@@ -12,7 +12,7 @@ import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
-import com.taitsmith.busboy.utils.StatusRepo
+import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class ByIdViewModel @Inject constructor(
                                         private val databaseRepository: DatabaseRepository,
                                         private val apiRepository: ApiRepository,
-                                        private val statusRepo: StatusRepo
+                                        private val statusRepository: StatusRepository
 ) : ViewModel() {
     private val _isUpdated = MutableLiveData<Boolean>()
     var isUpdated: LiveData<Boolean> = _isUpdated
@@ -39,20 +39,20 @@ class ByIdViewModel @Inject constructor(
     private val _busRouteWaypoints = MutableLiveData<List<LatLng>>()
     val busRouteWaypoints: LiveData<List<LatLng>> = _busRouteWaypoints
 
-    private val _bus = MutableLiveData<Bus>()
-    val bus: LiveData<Bus> = _bus
-
     private val _alerts = MutableLiveData<ServiceAlertResponse>()
     val alerts: LiveData<ServiceAlertResponse> = _alerts
 
     private val _alertShown = MutableLiveData(false)
     val alertShown: LiveData<Boolean> = _alertShown
 
+    private val _bus = MutableStateFlow<BusState>(BusState.Loading)
+    val bus: StateFlow<BusState> = _bus
+
     private val _predictionFlow = MutableStateFlow<PredictionState>(PredictionState.Loading(false))
     val predictionFlow: StateFlow<PredictionState> = _predictionFlow
 
     fun getPredictions(id: String, rt: String?) {
-        statusRepo.isLoading(true)
+        statusRepository.isLoading(true)
         AcTransitRemoteDataSource.setStopInfo(id, rt)
         viewModelScope.launch {
             _stopId.postValue(id)
@@ -63,7 +63,7 @@ class ByIdViewModel @Inject constructor(
                 .collect { predictions ->
                     _predictionFlow.value = PredictionState.Success(predictions)
                     getAlerts()
-                    statusRepo.isLoading(false)
+                    statusRepository.isLoading(false)
             }
         }
     }
@@ -78,20 +78,23 @@ class ByIdViewModel @Inject constructor(
 
     fun getBusDetails(vid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _bus.postValue(apiRepository.getDetailedBusInfo(vid))
+            _bus.value = BusState.Detail(apiRepository.getDetailedBusInfo(vid))
             _isUpdated.postValue(false)
         }
     }
 
     fun getBusLocation(vehicleId: String) {
-        statusRepo.isLoading(true)
-        viewModelScope.launch(Dispatchers.IO){
-            kotlin.runCatching {
-                _bus.postValue(apiRepository.getBusLocation(vehicleId))
-            }.onFailure {
-                when (it.message) {
-                    "null_coords" -> statusRepo.updateStatus("NULL_BUS_COORDS")
+        statusRepository.isLoading(true)
+        _bus.value = BusState.Loading
+        AcTransitRemoteDataSource.setVehicleId(vehicleId)
+        viewModelScope.launch {
+            apiRepository.vehicleInfo
+                .catch { exception ->
+                    _bus.value = BusState.Error(exception)
                 }
+                .collect {
+                    if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
+                    else _bus.value = BusState.Updated(it)
             }
         }
     }
@@ -116,15 +119,15 @@ class ByIdViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
                 when (it.message) {
-                    "empty_response" -> statusRepo.updateStatus("NO_WAYPOINTS")
+                    "empty_response" -> statusRepository.updateStatus("NO_WAYPOINTS")
                 }
             }
         }
     }
 
     fun updateStatus(loading: Boolean?, message: String?) {
-        if (loading == null) statusRepo.updateStatus(message!!)
-        else statusRepo.isLoading(loading)
+        if (loading == null) statusRepository.updateStatus(message!!)
+        else statusRepository.isLoading(loading)
     }
 
     fun setIsUpdated(update: Boolean) {
@@ -136,8 +139,16 @@ class ByIdViewModel @Inject constructor(
     }
 
     sealed class PredictionState {
-        data class Success(val predictions: List<Prediction>): PredictionState()
-        data class Error(val exception: Throwable): PredictionState()
-        data class Loading(val loading: Boolean): PredictionState()
+        data class Success(val predictions: List<Prediction>):  PredictionState()
+        data class Error(val exception: Throwable):             PredictionState()
+        data class Loading(val loading: Boolean):               PredictionState()
+    }
+
+    sealed class BusState {
+        data object Loading:                        BusState()
+        data class Initial(val bus: Bus):           BusState()
+        data class Updated(val bus: Bus):           BusState()
+        data class Detail(val bus: Bus):            BusState()
+        data class Error(val exception: Throwable): BusState()
     }
 }
