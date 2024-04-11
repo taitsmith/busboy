@@ -61,6 +61,12 @@ class ByIdViewModel @Inject constructor(
                     _predictionFlow.value = PredictionState.Error(exception)
                 }
                 .collect { predictions ->
+                    _stop.postValue(
+                        Stop(
+                            stopId = id,
+                            name = predictions[0].stpnm
+                        )
+                    )
                     _predictionFlow.value = PredictionState.Success(predictions)
                     getAlerts()
                     statusRepository.isLoading(false)
@@ -99,17 +105,15 @@ class ByIdViewModel @Inject constructor(
         }
     }
 
-//    fun addStopToFavorites() {
-//        if (_stop.value == null) statusRepo.updateStatus("BAD_INPUT")
-//        else {
-//            viewModelScope.launch(Dispatchers.IO) {
-//                stop.value?.linesServed = //oh lawd, we'll simplify this
-//                    apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
-//                databaseRepository.addStops(stop.value!!)
-//                statusRepo.updateStatus("FAVORITE_ADDED")
-//            }
-//        }
-//    }
+    fun addStopToFavorites() {
+        if (_stop.value == null) statusRepository.updateStatus("BAD_INPUT")
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                databaseRepository.addStops(stop.value!!)
+                statusRepository.updateStatus("FAVORITE_ADDED")
+            }
+        }
+    }
 
     fun getWaypoints(routeName: String) {
         viewModelScope.launch(Dispatchers.IO) {
