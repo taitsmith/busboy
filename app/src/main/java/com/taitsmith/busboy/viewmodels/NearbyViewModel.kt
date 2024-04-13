@@ -77,34 +77,33 @@ class NearbyViewModel @Inject constructor(
         if (currentLocation.latitude == 0.0) {
             statusRepository.updateStatus("NULL_LOCATION")
         } else {
-            AcTransitRemoteDataSource.setNearbyInfo(
-                currentLocation.latitude,
-                currentLocation.longitude,
-                distance,
-                rt)
             viewModelScope.launch {
-                apiRepository.nearbyStops
-                    .catch {
-                        it.printStackTrace()
-                        if (it.message.equals("timeout")) statusRepository.updateStatus("CALL_FAILURE")
-                        else statusRepository.updateStatus("404")
-                    }
-                    .collect{
-                        _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
-                        stopList = it.toMutableList()
-                    }
+                val nearby = apiRepository.getNearbyStops(
+                    LatLng(currentLocation.latitude, currentLocation.longitude),
+                    distance,
+                    rt
+                )
+                nearby.catch {
+                    it.printStackTrace()
+                    if (it.message.equals("timeout")) statusRepository.updateStatus("CALL_FAILURE")
+                    else statusRepository.updateStatus("404")
+                }
+                .collect{
+                    _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
+                    stopList = it.toMutableList()
+                }
             }
         }
     }
 
     //collects edited stops (lines added) and updates the stop in list
     //hella goofy
-    fun getNearbyStopsWithLines() {
+    fun getNearbyStopsWithLines(stops: List<Stop>) {
         statusRepository.isLoading(false)
         var i = 0
         viewModelScope.launch {
-            apiRepository.nearbyStopsWithLines
-            .collect {
+            val s = apiRepository.getLinesServedByStops(stops)
+            s.collect {
                 stopList[i] = it
                 _nearbyStopsFlow.value = NearbyStopsState.Success(it)
                 i++
