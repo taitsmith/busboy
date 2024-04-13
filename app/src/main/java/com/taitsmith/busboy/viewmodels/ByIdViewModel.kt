@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
@@ -95,13 +94,13 @@ class ByIdViewModel @Inject constructor(
         _bus.value = BusState.Loading
         viewModelScope.launch {
             val b = apiRepository.vehicleInfo(vehicleId)
-                b.catch { exception ->
-                    _bus.value = BusState.Error(exception)
-                }
-                .collect {
-                    if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
-                    else _bus.value = BusState.Updated(it)
+            b.catch { exception ->
+                _bus.value = BusState.Error(exception)
             }
+            .collect {
+                if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
+                else _bus.value = BusState.Updated(it)
+        }
         }
     }
 

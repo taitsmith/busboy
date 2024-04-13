@@ -11,7 +11,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.LocationRepository

@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.slack.eithernet.ApiResult.Failure
 import com.slack.eithernet.ApiResult.Success
 import com.taitsmith.busboy.data.Bus
-import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import dagger.Module
@@ -23,16 +22,11 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
     //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
 
-    fun predictions(s: String, r: String?): Flow<List<Prediction>> = flow {
+    fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
         while (true) {
             when (val response = acTransitApiInterface.getStopPredictionList(s, r)) {
                 is Success -> {
-                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) {
-                        if (response.value.bustimeResponse.error!![0].msg.equals("No service scheduled"))
-                            throw Exception("NO_SERVICE_SCHEDULED")
-                        else throw Exception("UNKNOWN")
-                    }
-                    else emit(response.value.bustimeResponse.prd!!)
+                    emit(response.value.bustimeResponse)
                     delay(refreshIntervalMillis)
                 }
                 is Failure.ApiFailure -> throw Exception("404")

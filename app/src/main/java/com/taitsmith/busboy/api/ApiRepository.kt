@@ -23,11 +23,18 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
     ) {
 
     fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
-        .map { predictions ->
-            predictions.filter { it.dyn == 0 } //whatever 'dyn' means, a non-zero indicates the bus isn't coming
-            predictions.onEach {
-                if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
-                else it.prdctdn = "in " + it.prdctdn + " minutes"
+        .map { response ->
+            if (!response.error.isNullOrEmpty()) {
+                if (response.error[0].msg.equals("No service scheduled")) {
+                    throw Exception("NO_SERVICE_SCHEDULED")
+                } else throw Exception("UNKNOWN")
+            } else {
+                response.prd?.filter { it.dyn == 0 } //whatever 'dyn' means, a non-zero value means the bus isn't stopping
+                response.prd?.onEach {
+                    if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                    else it.prdctdn = "in " + it.prdctdn + " minutes"
+                }
+                return@map response.prd!!
             }
         }
 
