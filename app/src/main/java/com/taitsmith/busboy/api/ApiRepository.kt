@@ -10,6 +10,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -54,6 +55,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
         }
 
     fun getLinesServedByStops(stops: List<Stop>): Flow<Stop> = remoteDataSource.linesServedByStop(stops)
+        .filter { !it.routeDestinations.isNullOrEmpty() }
         .map { response ->
             val sb = StringBuilder()
             response.routeDestinations?.forEach {
