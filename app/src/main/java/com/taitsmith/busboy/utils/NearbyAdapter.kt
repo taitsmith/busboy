@@ -16,7 +16,7 @@ class NearbyAdapter(
     companion object {
         private val DiffCallback = object: DiffUtil.ItemCallback<Stop>() {
             override fun areItemsTheSame(oldItem: Stop, newItem: Stop): Boolean {
-                return oldItem.id == newItem.id
+                return oldItem.stopId == newItem.stopId
             }
 
             override fun areContentsTheSame(oldItem: Stop, newItem: Stop): Boolean {
