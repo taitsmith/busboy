@@ -71,7 +71,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
                         is NearbyStopsState.Loading -> {
                             when (it.loadState) {
                                 ListLoadingState.START -> {}
-                                ListLoadingState.PARTIAL -> nearbyViewModel.getNearbyStopsWithLines()
+                                ListLoadingState.PARTIAL -> nearbyViewModel.getNearbyStopsWithLines(it.stopList)
                                 ListLoadingState.COMPLETE -> nearbyAdapter.submitList(it.stopList)
                             }
                         }

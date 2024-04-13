@@ -19,25 +19,55 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
                                         val acTransitApiInterface: ApiInterface,
                                         @MapsApiInterface
                                         val mapsApiInterface: ApiInterface,
-                                        remoteDataSource: AcTransitRemoteDataSource
+                                        private val remoteDataSource: AcTransitRemoteDataSource
     ) {
 
-    val stopPredictions: Flow<List<Prediction>> = remoteDataSource.predictions
-        .map { predictions ->
-            predictions.filter { it.dyn == 0 } //whatever 'dyn' means, a non-zero indicates the bus isn't coming
-            predictions.onEach {
-                if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
-                else it.prdctdn = "in " + it.prdctdn + " minutes"
+    fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
+        .map { response ->
+            if (!response.error.isNullOrEmpty()) {
+                if (response.error[0].msg.equals("No service scheduled")) {
+                    throw Exception("NO_SERVICE_SCHEDULED")
+                } else throw Exception("UNKNOWN")
+            } else {
+                response.prd?.filter { it.dyn == 0 } //whatever 'dyn' means, a non-zero value means the bus isn't stopping
+                response.prd?.onEach {
+                    if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                    else it.prdctdn = "in " + it.prdctdn + " minutes"
+                }
+                return@map response.prd!!
             }
         }
 
-    val serviceAlerts: Flow<ServiceAlertResponse> = remoteDataSource.serviceAlerts
+    fun serviceAlerts(stpid: String) = remoteDataSource.serviceAlerts(stpid)
 
-    val nearbyStops: Flow<List<Stop>> = remoteDataSource.nearbyStops
+    fun getNearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> =
+        remoteDataSource.nearbyStops(
+            latLng,
+            distance,
+            route
+        )
 
-    val nearbyStopsWithLines: Flow<Stop> = remoteDataSource.nearbyLinesServed
+    fun vehicleInfo(vid: String): Flow<Bus> = remoteDataSource.vehicleLocation(vid)
+        .map {
+            if (it.latitude == null) throw Exception("NULL_BUS_COORDS")
+            else return@map it
+        }
 
-    val vehicleInfo: Flow<Bus> = remoteDataSource.vehicleLocation
+    fun getLinesServedByStops(stops: List<Stop>): Flow<Stop> = remoteDataSource.linesServedByStop(stops)
+        .map { response ->
+            val sb = StringBuilder()
+            response.routeDestinations?.forEach {
+                sb.append(it.routeId)
+                    .append(" ")
+                    .append(it.destination)
+                    .append("\n")
+            }
+            return@map Stop(
+                name = response.stopName,
+                stopId = response.stopId.toString(),
+                linesServed = sb.toString()
+            )
+        }
 
     suspend fun getDetailedBusInfo(vid: String): Bus {
         return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]

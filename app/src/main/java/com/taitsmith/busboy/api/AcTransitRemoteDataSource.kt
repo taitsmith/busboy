@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.slack.eithernet.ApiResult.Failure
 import com.slack.eithernet.ApiResult.Success
 import com.taitsmith.busboy.data.Bus
-import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.AcTransitApiInterface
 import dagger.Module
@@ -23,16 +22,11 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
     //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
 
-    val predictions: Flow<List<Prediction>> = flow {
+    fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
         while (true) {
-            when (val response = acTransitApiInterface.getStopPredictionList(stopId, rt)) {
+            when (val response = acTransitApiInterface.getStopPredictionList(s, r)) {
                 is Success -> {
-                    if (!response.value.bustimeResponse.error.isNullOrEmpty()) {
-                        if (response.value.bustimeResponse.error!![0].msg.equals("No service scheduled"))
-                            throw Exception("NO_SERVICE_SCHEDULED")
-                        else throw Exception("UNKNOWN")
-                    }
-                    else emit(response.value.bustimeResponse.prd!!)
+                    emit(response.value.bustimeResponse)
                     delay(refreshIntervalMillis)
                 }
                 is Failure.ApiFailure -> throw Exception("404")
@@ -43,8 +37,8 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    val serviceAlerts: Flow<ServiceAlertResponse> = flow {
-        when (val response = acTransitApiInterface.getServiceAlertsForStop(stopId)) {
+    fun serviceAlerts(stpid: String): Flow<ServiceAlertResponse> = flow {
+        when (val response = acTransitApiInterface.getServiceAlertsForStop(stpid)) {
             is Success -> emit(response.value)
             is Failure.ApiFailure -> throw Exception("404")
             is Failure.HttpFailure -> throw Exception("404")
@@ -53,16 +47,15 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    val nearbyStops: Flow<List<Stop>> = flow {
-        when (val response = acTransitApiInterface.getNearbyStops(latLng.latitude,
+    fun nearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> = flow {
+        when (val response = acTransitApiInterface.getNearbyStops(
+            latLng.latitude,
             latLng.longitude,
-            1000,
+            distance,
             true,
-            rt)) {
-            is Success -> {
-                stopList = response.value
-                emit(response.value)
-            }
+            route
+        )) {
+            is Success -> emit(response.value)
             is Failure.ApiFailure -> throw Exception("404")
             is Failure.HttpFailure -> throw Exception("404")
             is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
@@ -70,36 +63,27 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    val nearbyLinesServed: Flow<Stop> = flow {
-        stopList.forEach { stop ->
-            when (val destinations = acTransitApiInterface.getStopDestinations(stop.stopId)) {
+    fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
+        stops.forEach { stop ->
+            when (val response = acTransitApiInterface.getStopDestinations(stop.stopId)) {
                 is Success -> {
-                    val currentStop = destinations.value
-                    val sb = StringBuilder()
-                   currentStop.routeDestinations?.forEach {
-                        sb.append(it.routeId)
-                            .append(" ")
-                            .append(it.destination)
-                            .append("\n")
-                        stop.linesServed = sb.toString()
-                   }
+                    response.value.stopName = stop.name
+                    emit(response.value)
                 }
                 is Failure.ApiFailure -> throw Exception("404")
                 is Failure.HttpFailure -> throw Exception("404")
                 is Failure.NetworkFailure -> throw Exception("CALL_FAILURE")
                 is Failure.UnknownFailure -> throw Exception("UNKNOWN")
             }
-            emit(stop)
         }
     }
 
     //leave the map open to update the bus location every $refreshIntervalMillis
-    val vehicleLocation: Flow<Bus> = flow {
+    fun vehicleLocation(vid: String): Flow<Bus> = flow {
         while (true) {
-            when (val response = acTransitApiInterface.getVehicleInfo(vehicleId)) {
+            when (val response = acTransitApiInterface.getVehicleInfo(vid)) {
                 is Success -> {
-                    if (response.value.latitude == null) throw Exception("NULL_BUS_COORDS")
-                    else emit(response.value)
+                    emit(response.value)
                     delay(refreshIntervalMillis)
                 }
                 is Failure.ApiFailure -> throw Exception("404")
@@ -108,29 +92,5 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
                 is Failure.UnknownFailure -> throw Exception("UNKNOWN")
             }
         }
-    }
-
-    companion object {
-        fun setStopInfo(s: String, r: String?) {
-            stopId = s
-            rt = r
-        }
-
-        fun setNearbyInfo(lat: Double, lng: Double, d: Int, r: String?) {
-            latLng = LatLng(lat, lng)
-            distance = d
-            rt = r
-        }
-
-        fun setVehicleId(vid: String) {
-            vehicleId = vid
-        }
-
-        private lateinit var stopId:    String
-        private lateinit var latLng:    LatLng
-        private lateinit var stopList:  List<Stop>
-        private var vehicleId =         "000"
-        private var distance: Int =     500
-        private var rt: String? =       null
     }
 }

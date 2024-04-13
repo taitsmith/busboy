@@ -21,6 +21,8 @@ class StopDestinationResponse {
     @SerializedName("RouteDestinations")
     var routeDestinations: List<RouteDestination>? = null
 
+    var stopName: String? = null
+
     @Entity
     data class RouteDestination (
 

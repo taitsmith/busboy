@@ -68,11 +68,6 @@ class ByIdFragment : Fragment() {
             }
         }
 
-        /*  we want to determine if we're going to take this bus and display its location
-            on a map, or if we're going to take it and display detailed information about
-            it to the user. the bus object for map display has minimal information so we can
-            check if certain things are null/empty and determine where to go from there
-         */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 byIdViewModel.bus.collect {
@@ -111,7 +106,7 @@ class ByIdFragment : Fragment() {
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
-//        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
+        binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
     }
 
     private fun setObservers() {

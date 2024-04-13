@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.AcTransitRemoteDataSource
 import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
@@ -53,15 +52,21 @@ class ByIdViewModel @Inject constructor(
 
     fun getPredictions(id: String, rt: String?) {
         statusRepository.isLoading(true)
-        AcTransitRemoteDataSource.setStopInfo(id, rt)
         viewModelScope.launch {
             _stopId.postValue(id)
-            apiRepository.stopPredictions
+            val predictions = apiRepository.stopPredictions(id, rt)
+            predictions
                 .catch { exception ->
                     _predictionFlow.value = PredictionState.Error(exception)
                 }
-                .collect { predictions ->
-                    _predictionFlow.value = PredictionState.Success(predictions)
+                .collect { p ->
+                    _stop.postValue(
+                        Stop(
+                            stopId = id,
+                            name = p[0].stpnm
+                        )
+                    )
+                    _predictionFlow.value = PredictionState.Success(p)
                     getAlerts()
                     statusRepository.isLoading(false)
             }
@@ -70,7 +75,8 @@ class ByIdViewModel @Inject constructor(
 
     private fun getAlerts() {
         viewModelScope.launch {
-            apiRepository.serviceAlerts.collect {
+            val alerts = apiRepository.serviceAlerts(stopId.value!!)
+            alerts.collect {
                 _alerts.postValue(it)
             }
         }
@@ -86,30 +92,27 @@ class ByIdViewModel @Inject constructor(
     fun getBusLocation(vehicleId: String) {
         statusRepository.isLoading(true)
         _bus.value = BusState.Loading
-        AcTransitRemoteDataSource.setVehicleId(vehicleId)
         viewModelScope.launch {
-            apiRepository.vehicleInfo
-                .catch { exception ->
-                    _bus.value = BusState.Error(exception)
-                }
-                .collect {
-                    if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
-                    else _bus.value = BusState.Updated(it)
+            val b = apiRepository.vehicleInfo(vehicleId)
+            b.catch { exception ->
+                _bus.value = BusState.Error(exception)
             }
+            .collect {
+                if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
+                else _bus.value = BusState.Updated(it)
+        }
         }
     }
 
-//    fun addStopToFavorites() {
-//        if (_stop.value == null) statusRepo.updateStatus("BAD_INPUT")
-//        else {
-//            viewModelScope.launch(Dispatchers.IO) {
-//                stop.value?.linesServed = //oh lawd, we'll simplify this
-//                    apiRepository.getLinesServedByStop(listOf(stop.value!!))[0].linesServed
-//                databaseRepository.addStops(stop.value!!)
-//                statusRepo.updateStatus("FAVORITE_ADDED")
-//            }
-//        }
-//    }
+    fun addStopToFavorites() {
+        if (_stop.value == null) statusRepository.updateStatus("BAD_INPUT")
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                databaseRepository.addStops(stop.value!!)
+                statusRepository.updateStatus("FAVORITE_ADDED")
+            }
+        }
+    }
 
     fun getWaypoints(routeName: String) {
         viewModelScope.launch(Dispatchers.IO) {
