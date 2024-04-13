@@ -47,8 +47,10 @@ class ByIdViewModel @Inject constructor(
     private val _bus = MutableStateFlow<BusState>(BusState.Loading)
     val bus: StateFlow<BusState> = _bus
 
-    private val _predictionFlow = MutableStateFlow<PredictionState>(PredictionState.Loading(false))
-    val predictionFlow: StateFlow<PredictionState> = _predictionFlow
+    private val _predictions = MutableStateFlow<PredictionState>(PredictionState.Loading(false))
+    val predictions: StateFlow<PredictionState> = _predictions
+
+    private var route: String= ""
 
     fun getPredictions(id: String, rt: String?) {
         statusRepository.isLoading(true)
@@ -57,7 +59,7 @@ class ByIdViewModel @Inject constructor(
             val predictions = apiRepository.stopPredictions(id, rt)
             predictions
                 .catch { exception ->
-                    _predictionFlow.value = PredictionState.Error(exception)
+                    _predictions.value = PredictionState.Error(exception)
                 }
                 .collect { p ->
                     _stop.postValue(
@@ -66,7 +68,7 @@ class ByIdViewModel @Inject constructor(
                             name = p[0].stpnm
                         )
                     )
-                    _predictionFlow.value = PredictionState.Success(p)
+                    _predictions.value = PredictionState.Success(p)
                     getAlerts()
                     statusRepository.isLoading(false)
             }
@@ -89,9 +91,10 @@ class ByIdViewModel @Inject constructor(
         }
     }
 
-    fun getBusLocation(vehicleId: String) {
+    fun getBusLocation(vehicleId: String, route: String) {
         statusRepository.isLoading(true)
         _bus.value = BusState.Loading
+        this.route = route
         viewModelScope.launch {
             val b = apiRepository.vehicleInfo(vehicleId)
             b.catch { exception ->
@@ -100,7 +103,7 @@ class ByIdViewModel @Inject constructor(
             .collect {
                 if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
                 else _bus.value = BusState.Updated(it)
-        }
+            }
         }
     }
 
@@ -108,16 +111,19 @@ class ByIdViewModel @Inject constructor(
         if (_stop.value == null) statusRepository.updateStatus("BAD_INPUT")
         else {
             viewModelScope.launch(Dispatchers.IO) {
-                databaseRepository.addStops(stop.value!!)
-                statusRepository.updateStatus("FAVORITE_ADDED")
+                val stop = apiRepository.getLinesServedByStops(listOf(_stop.value!!))
+                stop.collect {
+                    databaseRepository.addStops(it)
+                    statusRepository.updateStatus("FAVORITE_ADDED")
+                }
             }
         }
     }
 
-    fun getWaypoints(routeName: String) {
+    fun getWaypoints() {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                _busRouteWaypoints.postValue(apiRepository.getBusRouteWaypoints(routeName))
+                _busRouteWaypoints.postValue(apiRepository.getBusRouteWaypoints(route))
                 _isUpdated.postValue(false)
             }.onFailure {
                 it.printStackTrace()

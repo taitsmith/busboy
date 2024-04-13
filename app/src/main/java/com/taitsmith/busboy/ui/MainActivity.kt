@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -21,7 +20,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
-import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
@@ -32,9 +30,12 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private val PERMISSION_REQUEST_FINE_LOCATION = 6
+
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
+    private lateinit var mainActivityViewModel: MainActivityViewModel
 
     private var nearbyStatusUpdateTv: TextView? = null
     private var _binding: ActivityMainBinding? = null
@@ -162,14 +163,5 @@ class MainActivity : AppCompatActivity() {
                 NearbyViewModel.locationPermGranted.value = true
             }
         }
-    }
-
-    companion object {
-        private const val PERMISSION_REQUEST_FINE_LOCATION = 6
-
-        var mainActivityViewModel: MainActivityViewModel? = null
-        var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
-
-        lateinit var prediction: Prediction
     }
 }

@@ -58,7 +58,7 @@ class ByIdFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                byIdViewModel.predictionFlow.collect {
+                byIdViewModel.predictions.collect {
                     when(it) {
                         is PredictionState.Success  -> setList(it.predictions)
                         is PredictionState.Error    -> byIdViewModel.updateStatus(null, it.exception.message!!)
@@ -73,9 +73,9 @@ class ByIdFragment : Fragment() {
                 byIdViewModel.bus.collect {
                     when (it) {
                         is BusState.Error   -> {}
-                        is BusState.Initial -> byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
+                        is BusState.Initial -> byIdViewModel.getWaypoints()
                         is BusState.Updated -> {}
-                        is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "deatils")
+                        is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "details")
                         BusState.Loading    -> {}
                     }
                 }
@@ -94,12 +94,10 @@ class ByIdFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         predictionAdapter = PredictionAdapter({ prediction ->
             byIdViewModel.setIsUpdated(true)
-            MainActivity.prediction = prediction
-            byIdViewModel.getBusLocation(prediction.vid!!)
+            byIdViewModel.getBusLocation(prediction.vid!!, prediction.rt!!)
         },{
             byIdViewModel.setIsUpdated(true)
-            it.vid?.let { it1 -> byIdViewModel.getBusDetails(it1)
-            }
+            it.vid?.let { vid -> byIdViewModel.getBusDetails(vid) }
         })
         predictionListView.adapter = predictionAdapter
     }
