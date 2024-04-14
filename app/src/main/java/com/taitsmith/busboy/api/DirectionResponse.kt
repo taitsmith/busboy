@@ -1,7 +1,7 @@
 package com.taitsmith.busboy.api
 
-import com.google.gson.annotations.SerializedName
 import com.google.android.gms.maps.model.LatLng
+import com.google.gson.annotations.SerializedName
 
 class DirectionResponse {
     @SerializedName("geocoded_waypoints")

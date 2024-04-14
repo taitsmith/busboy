@@ -7,6 +7,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -28,10 +29,11 @@ class LocationRepository @Inject constructor(
     //this can't be called without permission so ignore lint
     @SuppressLint("MissingPermission")
     fun startUpdates() {
-        val request = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_LOW_POWER
-            interval = 300_000
-        }
+        val request = LocationRequest.Builder(
+            Priority.PRIORITY_LOW_POWER,
+            300_000
+        ).build()
+
         locationProviderClient.requestLocationUpdates(
             request,
             callback,

@@ -1,8 +1,10 @@
 package com.taitsmith.busboy.api
 
+import com.slack.eithernet.ApiResult
+import com.slack.eithernet.DecodeErrorBody
 import com.taitsmith.busboy.BuildConfig
-import com.taitsmith.busboy.data.*
-import com.taitsmith.busboy.ui.MainActivity
+import com.taitsmith.busboy.data.Bus
+import com.taitsmith.busboy.data.Stop
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -10,12 +12,13 @@ import retrofit2.http.Query
 interface ApiInterface {
 
     //returns predictions for given route at stop, otherwise all routes if rt == null
+    @DecodeErrorBody
     @GET("actrealtime/prediction/")
     suspend fun getStopPredictionList(
         @Query("stpid") stopId: String,
         @Query("rt") routeId: String?,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): StopPredictionResponse
+    ): ApiResult<StopPredictionResponse, Unit>
 
     //find all active stops within {distance} feet of point
     @GET("stops/{latitude}/{longitude}/")
@@ -26,14 +29,14 @@ interface ApiInterface {
         @Query("active") active: Boolean,
         @Query("routeName") routeName: String?,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): List<Stop>
+    ): ApiResult<List<Stop>, Unit>
 
     //get destinations for given stop so we can display NB/SB/EB/WB
     @GET("stop/{stopID}/destinations")
     suspend fun getStopDestinations(
         @Path("stopID") stopId: String?,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): StopDestinationResponse
+    ): ApiResult<StopDestinationResponse, Unit>
 
     //get lat/lon waypoints so we can draw the route on a map
     @GET("route/{route}/waypoints")
@@ -47,7 +50,7 @@ interface ApiInterface {
      suspend fun getVehicleInfo(
         @Path("vehicleId") vehicleId: String,
         @Query("token") token: String = BuildConfig.ac_transit_key
-    ): Bus
+    ): ApiResult<Bus, Unit>
 
     //get detailed info about a bus because you're a nerd and you like that stuff
      @GET("vehicle/{vehicleId}/characteristics")
@@ -61,7 +64,7 @@ interface ApiInterface {
      suspend fun getServiceAlertsForStop(
          @Query("stpid") stopId: String,
          @Query("token") token: String = BuildConfig.ac_transit_key
-     ): ServiceAlertResponse
+     ): ApiResult<ServiceAlertResponse, Unit>
 
     //talk to google and get walking directions from our location to the selected stop
     @GET("maps/api/directions/json")

@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.di.DatabaseRepository
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,7 @@ class FavoritesViewModel @Inject constructor(application: Application,
         viewModelScope.launch(Dispatchers.IO) {
             databaseRepository.deleteStop(stop)
         }
-        mutableStatusMessage.value = "STOP_DELETED"
+//        mutableStatusMessage.value = "STOP_DELETED"
     }
 
     init {

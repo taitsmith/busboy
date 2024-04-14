@@ -1,22 +1,33 @@
 package com.taitsmith.busboy.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    application: Application) : AndroidViewModel(application) {
+    private val statusRepository: StatusRepository
+)  : ViewModel() {
 
-    companion object {
-        lateinit var mutableStatusMessage: MutableLiveData<String>
-        lateinit var mutableErrorMessage: MutableLiveData<String>
-    }
+    private val _uiState = MutableStateFlow<LoadingState>(LoadingState.Success)
+    val uiState: StateFlow<LoadingState> = _uiState
 
     init {
-        mutableStatusMessage = MutableLiveData()
-        mutableErrorMessage = MutableLiveData()
+        viewModelScope.launch {
+            statusRepository.state.collect {
+                _uiState.value = it
+            }
+        }
+    }
+
+    sealed class LoadingState {
+        data object Loading : LoadingState()
+        data object Success : LoadingState()
+        data class StatusUpdate(val msg: String) : LoadingState()
     }
 }

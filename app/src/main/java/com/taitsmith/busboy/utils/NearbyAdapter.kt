@@ -3,8 +3,8 @@ package com.taitsmith.busboy.utils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.ListItemNearbyBinding
 
@@ -16,7 +16,7 @@ class NearbyAdapter(
     companion object {
         private val DiffCallback = object: DiffUtil.ItemCallback<Stop>() {
             override fun areItemsTheSame(oldItem: Stop, newItem: Stop): Boolean {
-                return oldItem.id == newItem.id
+                return oldItem.stopId == newItem.stopId
             }
 
             override fun areContentsTheSame(oldItem: Stop, newItem: Stop): Boolean {

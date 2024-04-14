@@ -9,6 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -27,19 +30,21 @@ import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.BusState
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import kotlinx.coroutines.launch
 
-class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
+class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
     OnMapsSdkInitializedCallback {
+
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val nearbyViewModel: NearbyViewModel by activityViewModels()
 
     private lateinit var polylineCoords: List<LatLng>
     private lateinit var locationChoice: LatLng
-    private lateinit var bus: Bus
     private lateinit var googleMap: GoogleMap
+    private var busMarker: Marker? = null
 
     private val callback = OnMapReadyCallback { googleMap ->
         this.googleMap = googleMap
@@ -83,8 +88,6 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnMarkerDragListener(this)
 
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-
         view?.rootView?.let {
             Snackbar.make(it, R.string.snackbar_map_long_press_drag, Snackbar.LENGTH_LONG)
                 .show()
@@ -113,20 +116,27 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
         )
 
-        //only want to do this if we're showing a bus route
-        if (args.polylineType == "route") {
-            bus = byIdViewModel.bus.value!!
-            googleMap.addMarker(
-                MarkerOptions()
-                    .position(LatLng(bus.latitude!!, bus.longitude!!))
-                    .title("THE BUS")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-            )
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                LatLng(bus.latitude!!, bus.longitude!!), 15F))
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                byIdViewModel.bus.collect {
+                    when (it) {
+                        is BusState.Error -> {}
+                        is BusState.Initial -> {
+                            val latLng = LatLng(it.bus.latitude!!, it.bus.longitude!!)
+                            val options = MarkerOptions()
+                                .position(latLng)
+                                .title("the bus")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                            busMarker = googleMap.addMarker(options)
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
+                        }
+                        is BusState.Updated -> updateBusMarker(it.bus)
+                        is BusState.Detail -> {}
+                        BusState.Loading -> {}
+                    }
+                }
+            }
         }
-
-        MainActivityViewModel.mutableStatusMessage.value = "LOADED"
     }
 
     override fun onCreateView(
@@ -136,6 +146,12 @@ class MapsFragment : Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMar
     ): View? {
         context?.let { MapsInitializer.initialize(it, Renderer.LATEST, this) }
         return inflater.inflate(R.layout.fragment_maps, container, false)
+    }
+
+    private fun updateBusMarker(bus: Bus) {
+        val latLng = LatLng(bus.latitude!!, bus.longitude!!)
+        busMarker!!.position = latLng
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

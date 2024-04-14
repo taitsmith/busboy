@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +19,8 @@ import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.BusState
+import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,8 +39,6 @@ class ByIdFragment : Fragment() {
 
     private lateinit var predictionAdapter: PredictionAdapter
 
-    private var predictionList: List<Prediction>? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,7 +51,33 @@ class ByIdFragment : Fragment() {
         if (args.selectedNearbyStop != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 args.selectedNearbyStop?.stopId?.let {
-                    byIdViewModel.getStopPredictions(it , null)
+                    byIdViewModel.getPredictions(it , null)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                byIdViewModel.predictions.collect {
+                    when(it) {
+                        is PredictionState.Success  -> setList(it.predictions)
+                        is PredictionState.Error    -> byIdViewModel.updateStatus(null, it.exception.message!!)
+                        is PredictionState.Loading  -> {}
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                byIdViewModel.bus.collect {
+                    when (it) {
+                        is BusState.Error   -> {}
+                        is BusState.Initial -> byIdViewModel.getWaypoints()
+                        is BusState.Updated -> {}
+                        is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "details")
+                        BusState.Loading    -> {}
+                    }
                 }
             }
         }
@@ -61,24 +88,19 @@ class ByIdFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         predictionListView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         predictionAdapter = PredictionAdapter({ prediction ->
             byIdViewModel.setIsUpdated(true)
-            MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-            MainActivity.prediction = prediction
-            byIdViewModel.getBusLocation(prediction.vid!!)
+            byIdViewModel.getBusLocation(prediction.vid!!, prediction.rt!!)
         },{
             byIdViewModel.setIsUpdated(true)
-            it.vid?.let { it1 -> byIdViewModel.getBusDetails(it1)
-            }
+            it.vid?.let { vid -> byIdViewModel.getBusDetails(vid) }
         })
         predictionListView.adapter = predictionAdapter
     }
-
 
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
@@ -86,44 +108,17 @@ class ByIdFragment : Fragment() {
     }
 
     private fun setObservers() {
-        byIdViewModel.stopPredictions.observe(
-            viewLifecycleOwner
-        ) { predictions: List<Prediction> ->
-            predictionList = predictions
-            predictionAdapter.submitList(predictionList)
-            binding.busFlagIV.visibility = View.INVISIBLE
-            try {
-                updateTextHint(predictions[0].stpnm!!)
-            } catch (e: IndexOutOfBoundsException) {
-                e.printStackTrace()
-            }
-            MainActivityViewModel.mutableStatusMessage.value = "LOADED"
-        }
-
-        /*  we want to determine if we're going to take this bus and display its location
-            on a map, or if we're going to take it and display detailed information about
-            it to the user. the bus object for map display has minimal information so we can
-            check if certain things are null/empty and determine where to go from there
-         */
-        byIdViewModel.bus.observe(viewLifecycleOwner) { bus ->
-            if (byIdViewModel.isUpdated.value == true) {
-                if (bus.length.isNullOrEmpty()) byIdViewModel.getWaypoints(MainActivity.prediction.rt!!)
-                else {
-                    BusDetailFragment(bus).show(childFragmentManager, "detail")
-                }
-            }
-        }
-
         byIdViewModel.busRouteWaypoints.observe(viewLifecycleOwner) {
             if (byIdViewModel.isUpdated.value == true) {
                 val action = ByIdFragmentDirections.actionByIdFragmentToMapsFragment("route")
                 findNavController().navigate(action)
                 byIdViewModel.setIsUpdated(false)
+                byIdViewModel.updateStatus(false, null)
             }
         }
 
         byIdViewModel.alerts.observe(viewLifecycleOwner) { alerts ->
-            val alertList = alerts.bustimeResponse?.sb
+            val alertList = alerts.bustimeResponse.sb
             if (!alertList.isNullOrEmpty() && byIdViewModel.alertShown.value == false) {
                 val snackbar = Snackbar.make(binding.root,
                     resources.getQuantityString(R.plurals.snackbar_service_alerts, alertList.size, alertList.size),
@@ -139,6 +134,17 @@ class ByIdFragment : Fragment() {
         }
     }
 
+    private fun setList(predictionList: List<Prediction>) {
+        predictionAdapter.submitList(predictionList)
+        binding.busFlagIV.visibility = View.INVISIBLE
+        try {
+            updateTextHint(predictionList[0].stpnm!!)
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+        }
+
+    }
+
     private fun updateTextHint(s: String) {
         binding.stopEntryEditText.text = null
         binding.stopEntryEditText.hint = s
@@ -146,24 +152,20 @@ class ByIdFragment : Fragment() {
     }
 
     private fun search() {
-        MainActivityViewModel.mutableStatusMessage.value = "LOADING"
-
         //allow users to re-click the search button to update currently displayed stop
         //if they haven't entered a new valid number, otherwise display newly entered stop
         //TODO replace this with swipe to refresh
         if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
-            byIdViewModel.getStopPredictions(byIdViewModel.stopId.value!!, null)
+            byIdViewModel.getPredictions(byIdViewModel.stopId.value!!, null)
         } else if (binding.stopEntryEditText.text.length == 5) {
-            byIdViewModel.getStopPredictions(binding.stopEntryEditText.text.toString(), null)
+            byIdViewModel.getPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
-            MainActivityViewModel.mutableErrorMessage.value = "BAD_INPUT"
+            byIdViewModel.updateStatus(null, "BAD_INPUT")
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        byIdViewModel.stopPredictions.removeObservers(viewLifecycleOwner)
-        byIdViewModel.bus.removeObservers(viewLifecycleOwner)
         predictionListView.adapter = null
         _binding = null
         _predictionListView = null

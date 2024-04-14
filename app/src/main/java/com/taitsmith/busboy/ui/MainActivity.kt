@@ -9,8 +9,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -18,21 +20,22 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
-import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableErrorMessage
-import com.taitsmith.busboy.viewmodels.MainActivityViewModel.Companion.mutableStatusMessage
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private val PERMISSION_REQUEST_FINE_LOCATION = 6
+
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
     private lateinit var navHostFragment: NavHostFragment
+    private lateinit var mainActivityViewModel: MainActivityViewModel
 
     private var nearbyStatusUpdateTv: TextView? = null
     private var _binding: ActivityMainBinding? = null
@@ -50,7 +53,18 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
         bottomNavigationView.setupWithNavController(navController)
 
-        setObservers()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainActivityViewModel!!.uiState.collect { uiState ->
+                    when (uiState) {
+                        is MainActivityViewModel.LoadingState.Loading -> hideUi(true)
+                        is MainActivityViewModel.LoadingState.StatusUpdate -> updateStatus(uiState.msg)
+                        is MainActivityViewModel.LoadingState.Success -> hideUi(false)
+                    }
+                }
+            }
+        }
+
         setTabListeners()
     }
 
@@ -66,13 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setObservers() {
-        mutableStatusMessage.observe(this) { s: String -> getStatusMessage(s) }
-        mutableErrorMessage.observe(this) { s: String -> getErrorMessage(s) }
-        mutableNearbyStatusUpdater.observe(this) { s -> updateNearbyStatusText(s) }
-    }
-
-    private fun getErrorMessage(s: String) {
+    private fun updateStatus(s: String) {
         hideUi(false)
         when (s) {
             "NO_LOC_ENABLED"        -> askToEnableLoc()
@@ -90,21 +98,15 @@ class MainActivity : AppCompatActivity() {
             "DIRECTION_FAILURE"     -> showSnackbar(R.string.snackbar_direction_failure)
             "NO_WAYPOINTS"          -> showSnackbar(R.string.snackbar_no_waypoints)
             "NO_SERVICE_SCHEDULED"  -> showSnackbar(R.string.snackbar_no_service_scheduled)
+            "UNKNOWN"               -> showSnackbar(R.string.snackbar_unknown_error)
+            "HELP_REQUESTED"        -> showHelp()
+            "FAVORITE_ADDED"        -> showSnackbar(R.string.snackbar_favorite_added)
+            "STOP_DELETED"          -> showSnackbar(R.string.snackbar_favorite_deleted)
         }
     }
 
     private fun showSnackbar(message: Int) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
-    }
-
-    private fun getStatusMessage(s: String) {
-        when (s) {
-            "HELP_REQUESTED"    -> showHelp()
-            "FAVORITE_ADDED"    -> showSnackbar(R.string.snackbar_favorite_added)
-            "STOP_DELETED"      -> showSnackbar(R.string.snackbar_favorite_deleted)
-            "LOADING"           -> hideUi(true)
-            "LOADED"            -> hideUi(false)
-        }
     }
 
     private fun hideUi(shouldHide: Boolean) {
@@ -120,9 +122,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mutableStatusMessage.removeObservers(this)
-        mutableErrorMessage.removeObservers(this)
-        mainActivityViewModel = null
         _binding = null
     }
 
@@ -153,15 +152,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showAlertDialogs() {
-
-    }
-
-    private fun updateNearbyStatusText(s: String) {
-        nearbyStatusUpdateTv?.visibility = View.VISIBLE
-        nearbyStatusUpdateTv?.text = getString(R.string.nearby_status_update, s)
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -173,14 +163,5 @@ class MainActivity : AppCompatActivity() {
                 NearbyViewModel.locationPermGranted.value = true
             }
         }
-    }
-
-    companion object {
-        private const val PERMISSION_REQUEST_FINE_LOCATION = 6
-
-        var mainActivityViewModel: MainActivityViewModel? = null
-        var mutableNearbyStatusUpdater: MutableLiveData<String> = MutableLiveData()
-
-        lateinit var prediction: Prediction
     }
 }
