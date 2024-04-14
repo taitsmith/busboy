@@ -1,11 +1,14 @@
-package com.taitsmith.busboy.api
+package com.taitsmith.busboy.di
 
 import com.google.android.gms.maps.model.LatLng
 import com.slack.eithernet.ApiResult.Failure
 import com.slack.eithernet.ApiResult.Success
+import com.taitsmith.busboy.api.ApiInterface
+import com.taitsmith.busboy.api.BustimeResponse
+import com.taitsmith.busboy.api.ServiceAlertResponse
+import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Stop
-import com.taitsmith.busboy.di.AcTransitApiInterface
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
@@ -16,13 +19,13 @@ import javax.inject.Inject
 
 @Module
 @InstallIn(ViewModelComponent::class)
-class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
+class AcTransitRemoteDataSourceImpl @Inject constructor (@AcTransitApiInterface
                                                     private val acTransitApiInterface: ApiInterface
-) {
+) : AcTransitRemoteDataSource {
     //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
 
-    fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
+    override fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
         while (true) {
             when (val response = acTransitApiInterface.getStopPredictionList(s, r)) {
                 is Success -> {
@@ -37,7 +40,7 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    fun serviceAlerts(stpid: String): Flow<ServiceAlertResponse> = flow {
+    override fun serviceAlerts(stpid: String): Flow<ServiceAlertResponse> = flow {
         when (val response = acTransitApiInterface.getServiceAlertsForStop(stpid)) {
             is Success -> emit(response.value)
             is Failure.ApiFailure -> throw Exception("404")
@@ -47,7 +50,7 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    fun nearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> = flow {
+    override fun nearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> = flow {
         when (val response = acTransitApiInterface.getNearbyStops(
             latLng.latitude,
             latLng.longitude,
@@ -63,7 +66,7 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
         }
     }
 
-    fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
+    override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
         stops.forEach { stop ->
             when (val response = acTransitApiInterface.getStopDestinations(stop.stopId)) {
                 is Success -> {
@@ -79,7 +82,7 @@ class AcTransitRemoteDataSource @Inject constructor (@AcTransitApiInterface
     }
 
     //leave the map open to update the bus location every $refreshIntervalMillis
-    fun vehicleLocation(vid: String): Flow<Bus> = flow {
+    override fun vehicleLocation(vid: String): Flow<Bus> = flow {
         while (true) {
             when (val response = acTransitApiInterface.getVehicleInfo(vid)) {
                 is Success -> {

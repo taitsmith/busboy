@@ -1,11 +1,10 @@
-package com.taitsmith.busboy.api
+package com.taitsmith.busboy.di
 
 import com.google.android.gms.maps.model.LatLng
+import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
-import com.taitsmith.busboy.di.AcTransitApiInterface
-import com.taitsmith.busboy.di.MapsApiInterface
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
@@ -16,14 +15,13 @@ import javax.inject.Inject
 
 @Module
 @InstallIn(ViewModelComponent::class)
-class ApiRepository @Inject constructor(@AcTransitApiInterface
-                                        val acTransitApiInterface: ApiInterface,
-                                        @MapsApiInterface
-                                        val mapsApiInterface: ApiInterface,
-                                        private val remoteDataSource: AcTransitRemoteDataSource
-    ) {
+class ApiRepositoryImpl @Inject constructor(
+    @AcTransitApiInterface val acTransitApiInterface: ApiInterface,
+    @MapsApiInterface val mapsApiInterface: ApiInterface,
+    private val remoteDataSource: AcTransitRemoteDataSourceImpl
+    ) : ApiRepository {
 
-    fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
+    override fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
         .map { response ->
             if (!response.error.isNullOrEmpty()) {
                 if (response.error[0].msg.equals("No service scheduled")) {
@@ -39,22 +37,22 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
             }
         }
 
-    fun serviceAlerts(stpid: String) = remoteDataSource.serviceAlerts(stpid)
+    override fun serviceAlerts(stpid: String) = remoteDataSource.serviceAlerts(stpid)
 
-    fun getNearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> =
+    override fun getNearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> =
         remoteDataSource.nearbyStops(
             latLng,
             distance,
             route
         )
 
-    fun vehicleInfo(vid: String): Flow<Bus> = remoteDataSource.vehicleLocation(vid)
+    override fun vehicleInfo(vid: String): Flow<Bus> = remoteDataSource.vehicleLocation(vid)
         .map {
             if (it.latitude == null) throw Exception("NULL_BUS_COORDS")
             else return@map it
         }
 
-    fun getLinesServedByStops(stops: List<Stop>): Flow<Stop> = remoteDataSource.linesServedByStop(stops)
+    override fun getLinesServedByStops(stops: List<Stop>): Flow<Stop> = remoteDataSource.linesServedByStop(stops)
         .filter { !it.routeDestinations.isNullOrEmpty() }
         .map { response ->
             val sb = StringBuilder()
@@ -71,14 +69,14 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
             )
         }
 
-    suspend fun getDetailedBusInfo(vid: String): Bus {
+    override suspend fun getDetailedBusInfo(vid: String): Bus {
         return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
     }
 
     //get walking directions from current location to a bus stop. google returns a ton of information
     //and you have to dig through the list to get what we want: a collection of lat/lon points
     //to draw a polyline on our map to represent walking directions
-    suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng> {
+    override suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng> {
         val polylineCoords: MutableList<LatLng> = ArrayList()
 
         val directionResponse = mapsApiInterface.getNavigationToStop(
@@ -96,7 +94,7 @@ class ApiRepository @Inject constructor(@AcTransitApiInterface
 
     //get a list of lat/lon points so we can create a polyline of the selected bus route
     //and then display it on a map along with the current location of the bus
-    suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
+    override suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
         val polylineCoords: MutableList<LatLng> = ArrayList()
 
         val waypointResponse = acTransitApiInterface.getBusRouteWaypoints(routeName)
