@@ -1,7 +1,6 @@
 package com.taitsmith.busboy.di
 
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
@@ -16,9 +15,7 @@ import javax.inject.Inject
 @Module
 @InstallIn(ViewModelComponent::class)
 class ApiRepositoryImpl @Inject constructor(
-    @AcTransitApiInterface val acTransitApiInterface: ApiInterface,
-    @MapsApiInterface val mapsApiInterface: ApiInterface,
-    private val remoteDataSource: AcTransitRemoteDataSourceImpl
+    private val remoteDataSource: RemoteDataSource
     ) : ApiRepository {
 
     override fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
@@ -69,43 +66,13 @@ class ApiRepositoryImpl @Inject constructor(
             )
         }
 
-    override suspend fun getDetailedBusInfo(vid: String): Bus {
-        return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
-    }
+    override suspend fun getDetailedBusInfo(vid: String) = remoteDataSource.getDetailedBusInfo(vid)
 
-    //get walking directions from current location to a bus stop. google returns a ton of information
-    //and you have to dig through the list to get what we want: a collection of lat/lon points
-    //to draw a polyline on our map to represent walking directions
-    override suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng> {
-        val polylineCoords: MutableList<LatLng> = ArrayList()
 
-        val directionResponse = mapsApiInterface.getNavigationToStop(
-            start, stop, "walking")
+    override suspend fun getDirectionsToStop(start: String, stop: String) =
+        remoteDataSource.getDirectionsToStop(start, stop)
 
-        //too many damn lists
-        val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList
 
-        stepList?.forEach {
-            it.endCoords?.returnCoords()?.let { it1 -> polylineCoords.add(it1) }
-        }
-
-        return polylineCoords
-    }
-
-    //get a list of lat/lon points so we can create a polyline of the selected bus route
-    //and then display it on a map along with the current location of the bus
-    override suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
-        val polylineCoords: MutableList<LatLng> = ArrayList()
-
-        val waypointResponse = acTransitApiInterface.getBusRouteWaypoints(routeName)
-
-        if (waypointResponse.isEmpty()) throw Exception("empty_response")
-
-        //need to go through several layers to get the good stuff
-        waypointResponse[0].patterns?.get(0)?.waypoints?.forEach {
-            polylineCoords.add(it.latLng)
-        }
-
-        return  polylineCoords
-    }
+    override suspend fun getBusRouteWaypoints(routeName: String) =
+        remoteDataSource.getBusRouteWaypoints(routeName)
 }

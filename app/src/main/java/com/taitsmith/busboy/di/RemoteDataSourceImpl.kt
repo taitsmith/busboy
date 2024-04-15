@@ -19,9 +19,12 @@ import javax.inject.Inject
 
 @Module
 @InstallIn(ViewModelComponent::class)
-class AcTransitRemoteDataSourceImpl @Inject constructor (@AcTransitApiInterface
-                                                    private val acTransitApiInterface: ApiInterface
-) : AcTransitRemoteDataSource {
+class RemoteDataSourceImpl @Inject constructor (
+    @AcTransitApiInterface
+    private val acTransitApiInterface: ApiInterface,
+    @MapsApiInterface
+    private val mapsApiInterface: ApiInterface
+) : RemoteDataSource {
     //if you've got the app open on the by id screen we'll update it once per minute.
     private val refreshIntervalMillis: Long = 60000
 
@@ -95,5 +98,45 @@ class AcTransitRemoteDataSourceImpl @Inject constructor (@AcTransitApiInterface
                 is Failure.UnknownFailure -> throw Exception("UNKNOWN")
             }
         }
+    }
+
+    override suspend fun getDetailedBusInfo(vid: String): Bus {
+        return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
+    }
+
+    //get a list of lat/lon points so we can create a polyline of the selected bus route
+    //and then display it on a map along with the current location of the bus
+    override suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
+        val polylineCoords: MutableList<LatLng> = ArrayList()
+
+        val waypointResponse = acTransitApiInterface.getBusRouteWaypoints(routeName)
+
+        if (waypointResponse.isEmpty()) throw Exception("empty_response")
+
+        //need to go through several layers to get the good stuff
+        waypointResponse[0].patterns?.get(0)?.waypoints?.forEach {
+            polylineCoords.add(it.latLng)
+        }
+
+        return  polylineCoords
+    }
+
+    //get walking directions from current location to a bus stop. google returns a ton of information
+    //and you have to dig through the list to get what we want: a collection of lat/lon points
+    //to draw a polyline on our map to represent walking directions
+    override suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng> {
+        val polylineCoords: MutableList<LatLng> = ArrayList()
+
+        val directionResponse = mapsApiInterface.getNavigationToStop(
+            start, stop, "walking")
+
+        //too many damn lists
+        val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList
+
+        stepList?.forEach {
+            it.endCoords?.returnCoords()?.let { it1 -> polylineCoords.add(it1) }
+        }
+
+        return polylineCoords
     }
 }
