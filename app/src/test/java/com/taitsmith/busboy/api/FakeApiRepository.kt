@@ -101,4 +101,13 @@ class FakeApiRepository : ApiRepository {
 
         return mockedBus
     }
+
+    fun createServiceAlerts(): ServiceAlertResponse {
+        val alert = ServiceAlert()
+        val btr = BustimeResponse()
+        alert.nm = "Test alert"
+        alert.prty = "Low"
+        btr.sb = listOf(alert)
+        return ServiceAlertResponse(btr)
+    }
 }

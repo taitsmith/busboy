@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.taitsmith.busboy.MainDispatchRule
 import com.taitsmith.busboy.api.FakeApiRepository
+import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.di.ApiRepository
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.di.StatusRepository
@@ -49,7 +50,7 @@ class ByIdViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val apiRepository = FakeApiRepository()
-    private val mockedServiceAlertResponse = TestUtils.serviceAlertResponseFlow()
+    private lateinit var mockedServiceAlertResponse: ServiceAlertResponse
 
     private lateinit var byIdViewModel: ByIdViewModel
     private lateinit var mockedViewModel: ByIdViewModel
@@ -58,6 +59,7 @@ class ByIdViewModelTest {
     @Before
     fun setup() {
         openMocks(this)
+        mockedServiceAlertResponse = apiRepository.createServiceAlerts()
         byIdViewModel = ByIdViewModel(databaseRepository, apiRepository, statusRepository)
         mockedViewModel = ByIdViewModel(databaseRepository, mockedApiRep, statusRepository)
     }

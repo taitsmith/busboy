@@ -2,28 +2,30 @@ package com.taitsmith.busboy.viewmodels
 
 import android.app.Application
 import android.location.Location
-import android.location.LocationProvider
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.BuildConfig
 import com.taitsmith.busboy.MainDispatchRule
-import com.taitsmith.busboy.api.ApiRepository
-import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.api.FakeApiRepository
+import com.taitsmith.busboy.di.StatusRepository
 import com.taitsmith.busboy.getOrAwaitValue
-import junit.framework.TestCase.assertEquals
+import com.taitsmith.busboy.viewmodels.NearbyViewModel.ListLoadingState
+import com.taitsmith.busboy.viewmodels.NearbyViewModel.NearbyStopsState
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
+import org.mockito.MockitoAnnotations.openMocks
 
 @RunWith(JUnit4::class)
 class NearbyViewModelTest {
@@ -35,28 +37,25 @@ class NearbyViewModelTest {
     val mainDispatcherRule = MainDispatchRule()
 
     @Mock
-    private lateinit var apiRepository: ApiRepository
+    private lateinit var location: Location
     @Mock
     private lateinit var application: Application
-    @Mock
-    private lateinit var location: Location
+    private lateinit var statusRepository: StatusRepository
 
     private lateinit var nearbyViewModel: NearbyViewModel
     private lateinit var mainActivityViewModel: MainActivityViewModel
 
-    private var mockedWaypoints = mutableListOf<LatLng>()
-    private var mockedNearbyStops = mutableListOf<Stop>()
+    private val locationRepository = FakeLocationRepository()
+
     private val testDispatcher = TestCoroutineDispatcher()
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
+        openMocks(this)
+        statusRepository = StatusRepository()
 
-        createMockedStops()
-        createMockedWaypoints()
-
-        mainActivityViewModel = MainActivityViewModel(application)
-        nearbyViewModel = NearbyViewModel(application, apiRepository)
+        mainActivityViewModel = MainActivityViewModel(statusRepository)
+        nearbyViewModel = NearbyViewModel(application, FakeApiRepository(), statusRepository, locationRepository)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -65,60 +64,59 @@ class NearbyViewModelTest {
         testDispatcher.cleanupTestCoroutines()
     }
 
-    private fun createMockedStops() {
-        val stop1 = Stop(id = 1, stopId = "55555")
-        val stop2 = Stop(id = 2, stopId = "58829")
-        val stop3 = Stop(id = 3, stopId = "56669")
-
-        mockedNearbyStops.add(0, stop1)
-        mockedNearbyStops.add(1, stop2)
-        mockedNearbyStops.add(2, stop3)
-    }
-
-    private fun createMockedWaypoints() {
-        val latlng1 = LatLng(1.1,1.1)
-        val latlng2 = LatLng(2.2, 2.2)
-        mockedWaypoints.add(0, latlng1)
-        mockedWaypoints.add(1, latlng2)
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `test nearby stops added to livedata`() = testDispatcher.runBlockingTest {
-        `when`(apiRepository.getNearbyStops(location.latitude, location.longitude, 1000, true, null))
-            .thenReturn(mockedNearbyStops)
-        `when`(apiRepository.getLinesServedByStop(mockedNearbyStops)).thenReturn(mockedNearbyStops)
-
+    fun `test nearby stops`() = runTest {
+        val statusJob = launch(UnconfinedTestDispatcher(testScheduler)) {
+            statusRepository.state.collect {}
+        }
+        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
+            nearbyViewModel.nearbyStopsState.collect {}
+        }
         `when`(location.longitude).thenReturn(1.1)
         `when`(location.latitude).thenReturn(1.1)
 
         nearbyViewModel.setLocation(location)
 
         nearbyViewModel.getNearbyStops()
-        val returnedStops = apiRepository.getNearbyStops(1.1, 1.1, 1000, true, null)
-        assertEquals(returnedStops, nearbyViewModel.nearbyStops.getOrAwaitValue())
+
+        val nss = nearbyViewModel.nearbyStopsState.value
+
+        statusRepository.state.value.shouldBeTypeOf<MainActivityViewModel.LoadingState.Loading>()
+        nss.shouldBeTypeOf<NearbyStopsState.Loading>()
+        nss.loadState.shouldBe(ListLoadingState.PARTIAL)
+
+        nearbyViewModel.getNearbyStopsWithLines(nss.stopList)
+
+        nearbyViewModel.nearbyStopsState.value.shouldBeTypeOf<NearbyStopsState.Success>()
+
+        collectJob.cancel()
+        statusJob.cancel()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `test get directions added to live data`() = testDispatcher.runBlockingTest {
-        `when`(apiRepository.getDirectionsToStop("1", "1"))
-            .thenReturn(mockedWaypoints)
-
-        nearbyViewModel.getDirectionsToStop("1", "1")
-
-        val returnedWaypoints = apiRepository.getDirectionsToStop("1", "1")
-
-        assertEquals(mockedWaypoints, returnedWaypoints)
-        assertEquals(false, nearbyViewModel.isUpdated.getOrAwaitValue())
-        assertEquals(returnedWaypoints, nearbyViewModel.directionPolylineCoords.getOrAwaitValue())
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun `test isUpdated is updated`() = testDispatcher.runBlockingTest {
+    fun `test is updated`() = runTest {
         nearbyViewModel.setIsUpdated(true)
-        assertEquals(true, nearbyViewModel.isUpdated.getOrAwaitValue())
+
+        assertEquals(
+            true,
+            nearbyViewModel.isUpdated.getOrAwaitValue()
+        )
     }
 
+    @Test
+    fun `test get directions to stop`() = runTest {
+        nearbyViewModel.getDirectionsToStop("start","stop")
+        val directions = nearbyViewModel.directionPolylineCoords.getOrAwaitValue()
+
+        assertEquals(
+            1,
+            directions.size,
+        )
+        assertEquals(
+            1.1,
+            directions[0].latitude,
+            0.0
+        )
+    }
 }

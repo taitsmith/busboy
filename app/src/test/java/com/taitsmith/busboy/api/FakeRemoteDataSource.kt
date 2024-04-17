@@ -13,14 +13,21 @@ class FakeRemoteDataSource : RemoteDataSource {
 
     override fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
         val btr = BustimeResponse()
-        btr.prd = listOf(
-                    Prediction(
-                        stpnm = "Broadway & 25th St",
-                        rt = "51A",
-                        vid = "1832",
-                        prdctdn = "10"
-                    )
+
+        if (s == "good") {
+            btr.prd = listOf(
+                Prediction(
+                    stpnm = "Broadway & 25th St",
+                    rt = "51A",
+                    vid = "1832",
+                    prdctdn = "10"
                 )
+            )
+        } else {
+            val error = BustimeResponse.BusError()
+            error.msg = "No service scheduled"
+            btr.error = listOf(error)
+        }
         emit(btr)
     }
 
@@ -40,7 +47,19 @@ class FakeRemoteDataSource : RemoteDataSource {
     }
 
     override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
-
+        stops.forEach {
+            val sdr = StopDestinationResponse()
+            if (it.name.equals("good")) {
+                sdr.routeDestinations = listOf(
+                    StopDestinationResponse.RouteDestination(
+                        destination = "to good destination",
+                        id = 2345,
+                        routeId = "51A",
+                    )
+                )
+                emit(sdr)
+            } else emit(sdr)
+        }
     }
 
     override fun vehicleLocation(vid: String): Flow<Bus> = flow {
@@ -49,14 +68,26 @@ class FakeRemoteDataSource : RemoteDataSource {
         mockedBus.currentTripId = 2837
         mockedBus.hasAC = false
         mockedBus.hasWiFi = false
-        mockedBus.latitude = 84.23
-        mockedBus.longitude = -122.23
+
+        if (vid == "1234") {
+            mockedBus.latitude = 84.23
+            mockedBus.longitude = -122.23
+        } else {
+            mockedBus.latitude = null
+            mockedBus.longitude = null
+        }
 
         emit(mockedBus)
     }
 
     override suspend fun getDetailedBusInfo(vid: String): Bus {
-        return Bus()
+        val mockedBus = Bus()
+        mockedBus.vehicleId = 1529
+        mockedBus.currentTripId = 2837
+        mockedBus.hasAC = false
+        mockedBus.hasWiFi = false
+
+        return mockedBus
     }
 
     override suspend fun getBusRouteWaypoints(routeName: String): List<LatLng> {
