@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.di.ApiRepository
 import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,13 +18,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
 
 @HiltViewModel
 class ByIdViewModel @Inject constructor(
-                                        private val databaseRepository: DatabaseRepository,
-                                        private val apiRepository: ApiRepository,
-                                        private val statusRepository: StatusRepository
+    private val databaseRepository: DatabaseRepository,
+    private val apiRepository: ApiRepository,
+    private val statusRepository: StatusRepository
 ) : ViewModel() {
     private val _isUpdated = MutableLiveData<Boolean>()
     var isUpdated: LiveData<Boolean> = _isUpdated
@@ -75,7 +76,8 @@ class ByIdViewModel @Inject constructor(
         }
     }
 
-    private fun getAlerts() {
+    @VisibleForTesting
+    fun getAlerts() {
         viewModelScope.launch {
             val alerts = apiRepository.serviceAlerts(stopId.value!!)
             alerts.collect {
@@ -96,7 +98,7 @@ class ByIdViewModel @Inject constructor(
         _bus.value = BusState.Loading
         this.route = route
         viewModelScope.launch {
-            val b = apiRepository.vehicleInfo(vehicleId)
+            val b = apiRepository.vehicleLocation(vehicleId)
             b.catch { exception ->
                 _bus.value = BusState.Error(exception)
             }
@@ -145,6 +147,11 @@ class ByIdViewModel @Inject constructor(
 
     fun setAlertShown(shown: Boolean) {
         _alertShown.value = shown
+    }
+
+    @VisibleForTesting
+    fun setStopId(id: String) {
+        _stopId.value = id
     }
 
     sealed class PredictionState {

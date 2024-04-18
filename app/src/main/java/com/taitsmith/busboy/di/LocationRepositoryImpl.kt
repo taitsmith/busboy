@@ -9,26 +9,27 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocationRepository @Inject constructor(
+class LocationRepositoryImpl @Inject constructor(
     private val locationProviderClient: FusedLocationProviderClient
-) {
+) : LocationRepository {
 
     private val callback = Callback()
 
     private val _lastLocation = MutableStateFlow<Location?>(null)
-    val lastLocation =  _lastLocation.asStateFlow()
+    override val lastLocation = _lastLocation.asStateFlow()
 
     private val _isReceivingUpdates = MutableStateFlow(false)
     val isReceivingLocationUpdates = _isReceivingUpdates.asStateFlow()
 
     //this can't be called without permission so ignore lint
     @SuppressLint("MissingPermission")
-    fun startUpdates() {
+    override fun startUpdates() {
         val request = LocationRequest.Builder(
             Priority.PRIORITY_LOW_POWER,
             300_000
@@ -42,7 +43,7 @@ class LocationRepository @Inject constructor(
         _isReceivingUpdates.value = true
     }
 
-    fun stopUpdates() {
+    override fun stopUpdates() {
         locationProviderClient.removeLocationUpdates(callback)
         _lastLocation.value = null
         _isReceivingUpdates.value = false

@@ -11,7 +11,7 @@ interface ApiRepository {
     fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>>
     fun serviceAlerts(stpid: String): Flow<ServiceAlertResponse>
     fun getNearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>>
-    fun vehicleInfo(vid: String): Flow<Bus>
+    fun vehicleLocation(vid: String): Flow<Bus>
     fun getLinesServedByStops(stops: List<Stop>): Flow<Stop>
     suspend fun getDetailedBusInfo(vid: String): Bus
     suspend fun getDirectionsToStop(start: String, stop: String): List<LatLng>

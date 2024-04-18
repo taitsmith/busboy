@@ -17,4 +17,9 @@ abstract class DataSourceModule {
     abstract fun bindApiRepository(
         apiRepository: ApiRepositoryImpl
     ) : ApiRepository
+
+    @Binds
+    abstract fun bindLocationRepository(
+        locationRepository: LocationRepositoryImpl
+    ) : LocationRepository
 }

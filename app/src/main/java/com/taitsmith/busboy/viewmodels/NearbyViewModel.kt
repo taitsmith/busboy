@@ -11,8 +11,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.taitsmith.busboy.api.ApiRepository
 import com.taitsmith.busboy.data.Stop
+import com.taitsmith.busboy.di.ApiRepository
 import com.taitsmith.busboy.di.LocationRepository
 import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,8 +30,7 @@ class NearbyViewModel @Inject constructor(
     private val apiRepository: ApiRepository,
     private val statusRepository: StatusRepository,
     private val locationRepository: LocationRepository
-                                          ) : AndroidViewModel(application) {
-
+) : AndroidViewModel(application) {
 
     private val _isUpdated = MutableLiveData<Boolean>()
     val isUpdated: LiveData<Boolean> = _isUpdated
@@ -178,7 +177,6 @@ class NearbyViewModel @Inject constructor(
         }
     }
 
-
     companion object {
         lateinit var loc: SimpleLocation
         lateinit var currentLocation: Location
@@ -187,7 +185,7 @@ class NearbyViewModel @Inject constructor(
     }
 
     init {
-        currentLocation = Location(null)
+        currentLocation = Location("provider")
         distance = 1000
 
         listenForLocation()
