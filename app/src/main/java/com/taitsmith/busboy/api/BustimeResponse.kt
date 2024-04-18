@@ -13,7 +13,7 @@ class BustimeResponse {
     //body returned for stop prediction calls
     @SerializedName("prd")
     @Expose
-    val prd: List<Prediction>? = null
+    var prd: List<Prediction>? = null
 
     //body returned for service alert calls
     @SerializedName("sb")
@@ -23,7 +23,7 @@ class BustimeResponse {
     //almost always empty
     @SerializedName("error")
     @Expose
-    val error: List<BusError>? = null
+    var error: List<BusError>? = null
 
     class BusError {
         @SerializedName("rtpidatafeed")
