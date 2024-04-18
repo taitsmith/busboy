@@ -21,7 +21,7 @@ class ApiRepositoryImpl @Inject constructor(
     override fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
         .map { response ->
             if (!response.error.isNullOrEmpty()) {
-                if (response.error[0].msg.equals("No service scheduled")) {
+                if (response.error!![0].msg.equals("No service scheduled")) {
                     throw Exception("NO_SERVICE_SCHEDULED")
                 } else throw Exception("UNKNOWN")
             } else {
@@ -43,7 +43,7 @@ class ApiRepositoryImpl @Inject constructor(
             route
         )
 
-    override fun vehicleInfo(vid: String): Flow<Bus> = remoteDataSource.vehicleLocation(vid)
+    override fun vehicleLocation(vid: String): Flow<Bus> = remoteDataSource.vehicleLocation(vid)
         .map {
             if (it.latitude == null) throw Exception("NULL_BUS_COORDS")
             else return@map it
