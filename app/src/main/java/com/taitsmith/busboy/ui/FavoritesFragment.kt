@@ -6,10 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.findNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.taitsmith.busboy.databinding.FavoritesFragmentBinding
 import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.FavoritesViewModel
@@ -20,7 +21,6 @@ import kotlinx.coroutines.launch
 class FavoritesFragment : Fragment() {
 
     private val favoritesViewModel: FavoritesViewModel by viewModels()
-    private lateinit var favoritesListView: RecyclerView
     private lateinit var nearbyAdapter: NearbyAdapter
 
     private var _binding: FavoritesFragmentBinding? = null
@@ -36,29 +36,29 @@ class FavoritesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        favoritesListView = binding.favoritesListView
-        favoritesListView.layoutManager =
+        binding.favoritesListView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         nearbyAdapter = NearbyAdapter ({
             val action = FavoritesFragmentDirections
                 .actionFavoritesFragmentToByIdFragment(it)
-            view.findNavController().navigate(action)
+            findNavController().navigate(action)
         }, {
             favoritesViewModel.deleteStop(it)
         })
-        favoritesListView.adapter = nearbyAdapter
+        binding.favoritesListView.adapter = nearbyAdapter
 
-        lifecycle.coroutineScope.launch {
-            favoritesViewModel.getFavoriteStops().collect {
-                nearbyAdapter.submitList(it)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                favoritesViewModel.getFavoriteStops().collect {
+                    nearbyAdapter.submitList(it)
+                }
             }
         }
     }
     override fun onDestroyView() {
         super.onDestroyView()
-        favoritesListView.removeAllViews()
-        _binding = null
-        favoritesListView.adapter = null
+        binding.favoritesListView.adapter = null
         nearbyAdapter.submitList(null)
+        _binding = null
     }
 }

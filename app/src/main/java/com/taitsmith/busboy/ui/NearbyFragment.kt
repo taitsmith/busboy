@@ -9,7 +9,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -35,10 +34,8 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
 
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
-    private lateinit var buslineSpinner: Spinner
     private lateinit var nearbyEditText: EditText
     private lateinit var nearbyAdapter: NearbyAdapter
-    private lateinit var buslineAdapter: ArrayAdapter<CharSequence>
 
     private var _binding: FragmentNearbyBinding? = null
 
@@ -52,17 +49,16 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentNearbyBinding.inflate(inflater, container, false)
-        buslineSpinner = binding.buslineSpinner
         nearbySearchButton = binding.nearbySearchButton
         nearbyEditText = binding.nearbyEditText
 
-        buslineAdapter= ArrayAdapter.createFromResource(
+        val buslineAdapter = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.bus_lines, android.R.layout.simple_spinner_item
         )
         buslineAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        buslineSpinner.adapter = buslineAdapter
-        buslineSpinner.onItemSelectedListener = this
+        binding.buslineSpinner.adapter = buslineAdapter
+        binding.buslineSpinner.onItemSelectedListener = this
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -136,8 +132,9 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
 
     override fun onDestroyView() {
         super.onDestroyView()
-        buslineSpinner.onItemSelectedListener = null
-        buslineSpinner.adapter = null
+        binding.buslineSpinner.onItemSelectedListener = null
+        binding.buslineSpinner.adapter = null
+        nearbyStopListView.adapter = null
         _binding = null
     }
 
