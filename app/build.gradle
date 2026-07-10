@@ -9,12 +9,6 @@ plugins {
 }
 
 android {
-    signingConfigs {
-        release {
-        storeFile file(keystore_location)
-        }
-    }
-
     compileSdkVersion 36
 
     defaultConfig {
@@ -30,12 +24,6 @@ android {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
-
-        buildConfigField("String", "google_maps_key", google_maps_key)
-        buildConfigField("String", "google_directions_key", google_directions_key)
-        buildConfigField("String", "ac_transit_key", ac_transit_key)
-
-        manifestPlaceholders = [google_maps_key: google_maps_key]
     }
 
     compileOptions {
@@ -65,8 +53,13 @@ android {
         unitTests.returnDefaultValues = true
     }
     namespace 'com.taitsmith.busboy'
-
 }
+
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
