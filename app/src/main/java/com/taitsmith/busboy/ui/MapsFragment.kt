@@ -205,6 +205,14 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
     }
 
     override fun onMarkerClick(p0: Marker): Boolean {
+        //tapping the marker commits its current position (the snackbar says "click to select").
+        //without this, a user who taps the default marker instead of dragging returns with
+        //currentLocation still at 0.0 and the search button never enabled. onMarkerClick only
+        //fires in the "choice" flow (only setupForLocationChoice registers this listener).
+        val loc = Location(null)
+        loc.latitude = p0.position.latitude
+        loc.longitude = p0.position.longitude
+        nearbyViewModel.setLocation(loc)
         findNavController().navigate(R.id.nearbyFragment)
         return false
     }

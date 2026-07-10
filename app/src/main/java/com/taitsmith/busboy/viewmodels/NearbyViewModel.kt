@@ -87,8 +87,13 @@ class NearbyViewModel @Inject constructor(
                     else statusRepository.updateStatus("404")
                 }
                 .collect{
-                    _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
+                    //assign stopList BEFORE emitting PARTIAL: that emission synchronously drives the
+                    //fragment to call getNearbyStopsWithLines(), which reads stopList. On Main.immediate
+                    //that reader runs inline before the next line executes, so emitting first would read
+                    //stopList before it exists (UninitializedPropertyAccessException) — deterministically
+                    //for CTA, whose linesServedByStop emits without suspending.
                     stopList = it.toMutableList()
+                    _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
                 }
             }
         }
