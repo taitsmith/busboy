@@ -46,8 +46,6 @@ class NearbyViewModel @Inject constructor(
     private val _enableSearchButton = MutableStateFlow(false)
     val enableSearchButton: StateFlow<Boolean> = _enableSearchButton
 
-    private lateinit var stopList: MutableList<Stop>
-
     var rt: String? = null
     var distance: Int
 
@@ -87,31 +85,26 @@ class NearbyViewModel @Inject constructor(
                     else statusRepository.updateStatus("404")
                 }
                 .collect{
-                    //assign stopList BEFORE emitting PARTIAL: that emission synchronously drives the
-                    //fragment to call getNearbyStopsWithLines(), which reads stopList. On Main.immediate
-                    //that reader runs inline before the next line executes, so emitting first would read
-                    //stopList before it exists (UninitializedPropertyAccessException) — deterministically
-                    //for CTA, whose linesServedByStop emits without suspending.
-                    stopList = it.toMutableList()
                     _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.PARTIAL, it)
                 }
             }
         }
     }
 
-    //collects edited stops (lines added) and updates the stop in list
-    //hella goofy
+    //collects edited stops (lines added) and rebuilds the list. Some providers (AC Transit) omit
+    //stops that serve no lines, so the enriched stream can be shorter than the input list. Accumulate
+    //whatever is emitted, in order, rather than indexing back into the original list by emission count
+    //(which misaligned lines onto the wrong stop when any were skipped), and signal COMPLETE when the
+    //stream finishes instead of counting to a fixed size (which never matched when stops were skipped).
     fun getNearbyStopsWithLines(stops: List<Stop>) {
         statusRepository.isLoading(false)
-        var i = 0
         viewModelScope.launch {
-            val s = apiRepository.getLinesServedByStops(stops)
-            s.collect {
-                stopList[i] = it
+            val enrichedStops = mutableListOf<Stop>()
+            apiRepository.getLinesServedByStops(stops).collect {
+                enrichedStops.add(it)
                 _nearbyStopsFlow.value = NearbyStopsState.Success(it)
-                i++
-                if (i == stopList.size) _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.COMPLETE, stopList)
             }
+            _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.COMPLETE, enrichedStops)
         }
     }
 

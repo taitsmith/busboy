@@ -78,7 +78,11 @@ class NearbyViewModelTest {
 
         nearbyViewModel.getNearbyStopsWithLines(nss.stopList)
 
-        nearbyViewModel.nearbyStopsState.value.shouldBeTypeOf<NearbyStopsState.Success>()
+        //once the lines-served stream finishes, the state settles on COMPLETE carrying the enriched
+        //stops (the fake emits lines for one stop, so one enriched stop is accumulated).
+        val completed = nearbyViewModel.nearbyStopsState.value.shouldBeTypeOf<NearbyStopsState.Loading>()
+        completed.loadState.shouldBe(ListLoadingState.COMPLETE)
+        completed.stopList.size.shouldBe(1)
 
         collectJob.cancel()
         statusJob.cancel()
