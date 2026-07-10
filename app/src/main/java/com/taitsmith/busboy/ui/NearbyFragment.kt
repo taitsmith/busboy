@@ -20,17 +20,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.data.Stop
 import com.taitsmith.busboy.databinding.FragmentNearbyBinding
+import com.taitsmith.busboy.di.SettingsRepository
 import com.taitsmith.busboy.utils.NearbyAdapter
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel.ListLoadingState
 import com.taitsmith.busboy.viewmodels.NearbyViewModel.NearbyStopsState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener {
+
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private lateinit var nearbyStopListView: RecyclerView
     private lateinit var nearbySearchButton: Button
@@ -52,9 +57,12 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         nearbySearchButton = binding.nearbySearchButton
         nearbyEditText = binding.nearbyEditText
 
+        val buslineArray =
+            if (settingsRepository.selectedAgencyState.value == Agency.CTA) R.array.cta_bus_lines
+            else R.array.bus_lines
         val buslineAdapter = ArrayAdapter.createFromResource(
             requireContext(),
-            R.array.bus_lines, android.R.layout.simple_spinner_item
+            buslineArray, android.R.layout.simple_spinner_item
         )
         buslineAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.buslineSpinner.adapter = buslineAdapter

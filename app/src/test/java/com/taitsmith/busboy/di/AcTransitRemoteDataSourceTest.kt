@@ -165,16 +165,22 @@ class AcTransitRemoteDataSourceTest {
     // region linesServedByStop -------------------------------------------------------------------
 
     @Test
-    fun `linesServedByStop stamps stop name onto response and emits`() = runTest {
-        val response = StopDestinationResponse()
+    fun `linesServedByStop builds a Stop with its lines from destinations`() = runTest {
+        val response = StopDestinationResponse().apply {
+            stopId = 55555
+            routeDestinations = listOf(
+                StopDestinationResponse.RouteDestination(routeId = "51A", destination = "Fruitvale BART")
+            )
+        }
         whenever(acTransit.getStopDestinations(anyOrNull(), any())).thenReturn(ApiResult.success(response))
 
         val emitted = remoteDataSource
             .linesServedByStop(listOf(Stop().apply { stopId = "55555"; name = "Broadway & 25th St" }))
             .first()
 
-        emitted shouldBe response
-        emitted.stopName shouldBe "Broadway & 25th St"
+        emitted.name shouldBe "Broadway & 25th St"
+        emitted.stopId shouldBe "55555"
+        emitted.linesServed?.trim() shouldBe "51A Fruitvale BART"
     }
 
     @Test

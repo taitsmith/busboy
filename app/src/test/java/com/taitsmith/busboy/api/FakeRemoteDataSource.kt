@@ -46,19 +46,12 @@ class FakeRemoteDataSource : RemoteDataSource {
         emit(listOf(stop))
     }
 
-    override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
+    override fun linesServedByStop(stops: List<Stop>): Flow<Stop> = flow {
         stops.forEach {
-            val sdr = StopDestinationResponse()
+            //mirror the real sources: only emit stops that have lines, one per input stop
             if (it.name.equals("good")) {
-                sdr.routeDestinations = listOf(
-                    StopDestinationResponse.RouteDestination(
-                        destination = "to good destination",
-                        id = 2345,
-                        routeId = "51A",
-                    )
-                )
-                emit(sdr)
-            } else emit(sdr)
+                emit(Stop(name = "good", stopId = "0", linesServed = "51A to good destination\n"))
+            }
         }
     }
 

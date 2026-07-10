@@ -33,13 +33,15 @@ class CtaRemoteDataSourceTest {
 
     private lateinit var cta: CtaApiInterface
     private lateinit var maps: ApiInterface
+    private lateinit var catalog: CtaStopCatalog
     private lateinit var dataSource: CtaRemoteDataSource
 
     @Before
     fun setup() {
         cta = mock()
         maps = mock()
-        dataSource = CtaRemoteDataSource(cta, maps)
+        catalog = mock()
+        dataSource = CtaRemoteDataSource(cta, maps, catalog)
     }
 
     @Test

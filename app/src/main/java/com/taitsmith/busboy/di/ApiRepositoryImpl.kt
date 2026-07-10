@@ -8,7 +8,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -52,22 +51,9 @@ class ApiRepositoryImpl @Inject constructor(
             else return@map it
         }
 
+    //each RemoteDataSource populates lines-served in its own way (AC via a per-stop call, CTA from
+    //the bundled catalog), so this is a straight passthrough.
     override fun getLinesServedByStops(stops: List<Stop>): Flow<Stop> = remoteDataSource.linesServedByStop(stops)
-        .filter { !it.routeDestinations.isNullOrEmpty() }
-        .map { response ->
-            val sb = StringBuilder()
-            response.routeDestinations?.forEach {
-                sb.append(it.routeId)
-                    .append(" ")
-                    .append(it.destination)
-                    .append("\n")
-            }
-            return@map Stop(
-                name = response.stopName,
-                stopId = response.stopId.toString(),
-                linesServed = sb.toString()
-            )
-        }
 
     override suspend fun getDetailedBusInfo(vid: String) = remoteDataSource.getDetailedBusInfo(vid)
 

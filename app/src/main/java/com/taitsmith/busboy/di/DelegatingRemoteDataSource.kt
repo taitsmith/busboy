@@ -3,7 +3,6 @@ package com.taitsmith.busboy.di
 import com.google.android.gms.maps.model.LatLng
 import com.taitsmith.busboy.api.BustimeResponse
 import com.taitsmith.busboy.api.ServiceAlertResponse
-import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Stop
@@ -38,7 +37,7 @@ class DelegatingRemoteDataSource @Inject constructor(
     override fun nearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> =
         flow { emitAll(active().nearbyStops(latLng, distance, route)) }
 
-    override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> =
+    override fun linesServedByStop(stops: List<Stop>): Flow<Stop> =
         flow { emitAll(active().linesServedByStop(stops)) }
 
     override fun vehicleLocation(vid: String): Flow<Bus> =

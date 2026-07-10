@@ -7,7 +7,6 @@ import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.BustimeResponse
 import com.taitsmith.busboy.api.CtaApiInterface
 import com.taitsmith.busboy.api.ServiceAlertResponse
-import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.api.toServiceAlert
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Stop
@@ -28,9 +27,12 @@ import javax.inject.Inject
 class CtaRemoteDataSource @Inject constructor(
     private val ctaApiInterface: CtaApiInterface,
     @MapsApiInterface
-    private val mapsApiInterface: ApiInterface
+    private val mapsApiInterface: ApiInterface,
+    private val ctaStopCatalog: CtaStopCatalog
 ) : RemoteDataSource {
     private val refreshIntervalMillis: Long = 60000
+    //the Nearby screen's search distance is entered in feet; convert to meters for the geo query
+    private val feetToMeters: Double = 0.3048
 
     override fun predictions(s: String, r: String?): Flow<BustimeResponse> = flow {
         while (true) {
@@ -62,12 +64,27 @@ class CtaRemoteDataSource @Inject constructor(
     }
 
     override fun nearbyStops(latLng: LatLng, distance: Int, route: String?): Flow<List<Stop>> = flow {
-        //CTA nearby is served from the bundled GTFS catalog (Phase 4). Not yet available.
-        emit(emptyList())
+        val stops = ctaStopCatalog
+            .nearbyStops(latLng.latitude, latLng.longitude, distance * feetToMeters, route)
+            .map {
+                Stop(
+                    stopId = it.stopId,
+                    name = it.name,
+                    latitude = it.lat,
+                    longitude = it.lon,
+                    linesServed = it.linesServed
+                )
+            }
+        emit(stops)
     }
 
-    override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
-        //no-op for CTA; lines-served ships with the catalog in Phase 4.
+    override fun linesServedByStop(stops: List<Stop>): Flow<Stop> = flow {
+        //catalog stops already carry linesServed; enrich any that don't (e.g. a favorite added from
+        //the By-ID screen) by looking the stop up in the catalog. One emission per input stop.
+        stops.forEach { stop ->
+            val lines = stop.linesServed ?: ctaStopCatalog.linesServedFor(stop.stopId)
+            emit(stop.copy(linesServed = lines))
+        }
     }
 
     override fun vehicleLocation(vid: String): Flow<Bus> = flow {
