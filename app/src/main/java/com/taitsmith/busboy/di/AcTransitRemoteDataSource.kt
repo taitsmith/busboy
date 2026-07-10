@@ -9,17 +9,12 @@ import com.taitsmith.busboy.api.ServiceAlertResponse
 import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Stop
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-@Module
-@InstallIn(ViewModelComponent::class)
-class RemoteDataSourceImpl @Inject constructor (
+class AcTransitRemoteDataSource @Inject constructor (
     @AcTransitApiInterface
     private val acTransitApiInterface: ApiInterface,
     @MapsApiInterface
