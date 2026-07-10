@@ -21,7 +21,8 @@ class DatabaseModule {
                             context,
                             BusboyDatabase::class.java,
                             "busboy_database"
-                        ).build()
+                        ).addMigrations(BusboyDatabase.MIGRATION_3_4)
+                        .build()
 
     @Singleton
     @Provides

@@ -50,6 +50,13 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    //expose the exported Room schemas to instrumented tests so MigrationTestHelper can find them
+    sourceSets {
+        androidTest {
+            assets.srcDirs += files("$projectDir/schemas".toString())
+        }
+    }
     namespace 'com.taitsmith.busboy'
 }
 
