@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
@@ -9,12 +11,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 36
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.taitsmith.busboy"
-        minSdkVersion 26
-        targetSdkVersion 36
+        minSdk 26
+        targetSdk 36
         versionCode 26
         versionName "1.2.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,10 +31,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
-    }
-
-    kotlinOptions {
-        jvmTarget = '21'
     }
 
     buildTypes {
@@ -55,6 +53,12 @@ android {
     namespace 'com.taitsmith.busboy'
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
+    }
+}
+
 secrets {
     propertiesFileName = "secrets.properties"
     defaultPropertiesFileName = "secrets.defaults.properties"
@@ -63,71 +67,62 @@ secrets {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation platform('androidx.compose:compose-bom:2025.03.01')
+    implementation platform('androidx.compose:compose-bom:2026.06.01')
 
     //regular old java dependencies
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.room:room-runtime:2.6.1'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
-    implementation 'androidx.navigation:navigation-dynamic-features-fragment:2.7.7'
+    implementation 'androidx.room:room-runtime:2.8.4'
 
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
-    implementation 'com.google.android.gms:play-services-maps:19.1.0'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.google.dagger:hilt-android:2.55'
+    implementation 'com.google.android.gms:play-services-location:21.4.0'
+    implementation 'com.google.android.gms:play-services-maps:20.0.0'
+    implementation 'com.google.android.material:material:1.14.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
+    implementation 'com.google.dagger:hilt-android:2.58'
 
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.6'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.6'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.4.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.4.0'
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
 
     implementation 'com.github.delight-im:Android-SimpleLocation:v1.0.1'
     implementation 'com.slack.eithernet:eithernet:1.8.1'
 
     //kotlin dependencies
-    implementation 'androidx.core:core-ktx:1.15.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
-    implementation 'androidx.room:room-ktx:2.6.1'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.8.9'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.8.9'
+    implementation 'androidx.core:core-ktx:1.18.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0'
+    implementation 'androidx.room:room-ktx:2.8.4'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.9.8'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.9.8'
 
     implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.activity:activity-compose:1.8.2'
-    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation 'androidx.activity:activity-compose:1.13.0'
     implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.navigation:navigation-compose'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation 'org.mobilitydata:gtfs-realtime-bindings:0.0.8'
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.3'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    kapt 'androidx.room:room-compiler:2.6.1'
-    kapt 'com.google.dagger:hilt-compiler:2.55'
+    kapt 'androidx.room:room-compiler:2.8.4'
+    kapt 'com.google.dagger:hilt-compiler:2.58'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
 
-    androidTestImplementation 'androidx.room:room-testing:2.6.1'
-    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+    androidTestImplementation 'androidx.room:room-testing:2.8.4'
+    androidTestImplementation 'androidx.test:core-ktx:1.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:5.4.0'
-    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.0.0'
-    testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:6.3.0'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
-    testImplementation 'androidx.test:core-ktx:1.5.0'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
-    testImplementation 'io.kotest:kotest-assertions-core:5.8.1'
+    testImplementation 'androidx.test:core-ktx:1.7.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
+    testImplementation 'io.kotest:kotest-assertions-core:6.2.2'
 }
 repositories {
     mavenCentral()
