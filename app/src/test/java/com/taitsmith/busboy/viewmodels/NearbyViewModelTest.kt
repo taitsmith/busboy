@@ -13,10 +13,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -47,8 +45,6 @@ class NearbyViewModelTest {
 
     private val locationRepository = FakeLocationRepository()
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
     @Before
     fun setup() {
         openMocks(this)
@@ -56,12 +52,6 @@ class NearbyViewModelTest {
 
         mainActivityViewModel = MainActivityViewModel(statusRepository)
         nearbyViewModel = NearbyViewModel(application, FakeApiRepository(), statusRepository, locationRepository)
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @After
-    fun teardown() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

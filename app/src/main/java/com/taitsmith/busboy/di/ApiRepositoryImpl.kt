@@ -25,12 +25,14 @@ class ApiRepositoryImpl @Inject constructor(
                     throw Exception("NO_SERVICE_SCHEDULED")
                 } else throw Exception("UNKNOWN")
             } else {
-                response.prd?.filter { it.dyn == 0 } //whatever 'dyn' means, a non-zero value means the bus isn't stopping
-                response.prd?.onEach {
-                    if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
-                    else it.prdctdn = "in " + it.prdctdn + " minutes"
-                }
+                //a non-zero 'dyn' means the bus isn't stopping, so drop it. treat a null/unknown
+                //dyn as stopping so we don't hide predictions the api didn't tag.
                 return@map response.prd!!
+                    .filter { (it.dyn ?: 0) == 0 }
+                    .onEach {
+                        if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                        else it.prdctdn = "in " + it.prdctdn + " minutes"
+                    }
             }
         }
 
