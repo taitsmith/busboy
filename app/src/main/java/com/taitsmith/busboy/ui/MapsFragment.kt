@@ -28,14 +28,21 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.data.Bus
+import com.taitsmith.busboy.di.SettingsRepository
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.ByIdViewModel.BusState
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener,
     OnMapsSdkInitializedCallback {
+
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private val args: MapsFragmentArgs by navArgs()
     private val byIdViewModel: ByIdViewModel by activityViewModels()
@@ -61,7 +68,7 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
         polylineCoords = when (args.polylineType) {
             "directions" -> nearbyViewModel.directionPolylineCoords.value!!
             "route" -> byIdViewModel.busRouteWaypoints.value!!
-            "choice" -> mutableListOf(LatLng(37.811, -122.268))
+            "choice" -> mutableListOf(defaultMapCenter())
             else -> mutableListOf()
         }
 
@@ -71,6 +78,13 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
             setupForRouteDisplay()
         }
     }
+
+    //the "choose on map" flow needs a starting camera position; center on the selected agency's
+    //downtown (Chicago Loop for CTA, downtown Oakland for AC Transit) so the user isn't panning
+    //across the country to find their city.
+    private fun defaultMapCenter(): LatLng =
+        if (settingsRepository.selectedAgencyState.value == Agency.CTA) LatLng(41.8786, -87.6251)
+        else LatLng(37.811, -122.268)
 
     //if we're letting user pick a location we want it empty
     private fun setupForLocationChoice() {

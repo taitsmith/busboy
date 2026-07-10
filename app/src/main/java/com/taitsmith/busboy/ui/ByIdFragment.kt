@@ -152,13 +152,16 @@ class ByIdFragment : Fragment() {
     }
 
     private fun search() {
-        //allow users to re-click the search button to update currently displayed stop
-        //if they haven't entered a new valid number, otherwise display newly entered stop
+        //allow users to re-click the search button to update currently displayed stop if they
+        //haven't entered a new id, otherwise display the newly entered stop. AC Transit stop ids are
+        //five digits; CTA's run shorter (e.g. 1926), so accept any 1-5 digit numeric id.
         //TODO replace this with swipe to refresh
-        if (byIdViewModel.stopId.value != null && binding.stopEntryEditText.text.length != 5) {
+        val entered = binding.stopEntryEditText.text.toString()
+        val isValidId = entered.isNotEmpty() && entered.length <= 5 && entered.all { it.isDigit() }
+        if (isValidId) {
+            byIdViewModel.getPredictions(entered, null)
+        } else if (entered.isEmpty() && byIdViewModel.stopId.value != null) {
             byIdViewModel.getPredictions(byIdViewModel.stopId.value!!, null)
-        } else if (binding.stopEntryEditText.text.length == 5) {
-            byIdViewModel.getPredictions(binding.stopEntryEditText.text.toString(), null)
         } else {
             byIdViewModel.updateStatus(null, "BAD_INPUT")
         }

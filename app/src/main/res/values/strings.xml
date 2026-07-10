@@ -59,9 +59,8 @@
 
     <!-- snackbars (error related) -->
     <string name="snackbar_404">Looks like nothing was found, try expanding your range</string>
-    <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
-    <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
-        this stop.</string>
+    <string name="snackbar_bad_input">Please enter a valid stop ID</string>
+    <string name="snackbar_no_predictions">Looks like there\'s no info for this stop.</string>
     <string name="snackbar_null_bus_coords">Looks like there\'s no data for this bus</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="snackbar_network_error">Looks like a network issue, try again shortly</string>
