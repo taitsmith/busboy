@@ -14,23 +14,30 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.databinding.ActivityMainBinding
+import com.taitsmith.busboy.di.SettingsRepository
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val PERMISSION_REQUEST_FINE_LOCATION = 6
+
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
@@ -65,6 +72,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                //react only to changes after the current value, so a switch resets the app to a
+                //clean By-ID screen for the newly selected agency.
+                settingsRepository.selectedAgencyState.drop(1).collect { onAgencyChanged(it) }
+            }
+        }
+
         setTabListeners()
     }
 
@@ -74,10 +89,25 @@ class MainActivity : AppCompatActivity() {
                 R.id.byId       -> navController.navigate(R.id.byIdFragment)
                 R.id.nearby     -> navController.navigate(R.id.nearbyFragment)
                 R.id.favorites  -> navController.navigate(R.id.favoritesFragment)
+                R.id.settings   -> navController.navigate(R.id.settingsFragment)
                 R.id.help       -> showHelp()
             }
             true
         }
+    }
+
+    private fun onAgencyChanged(agency: Agency) {
+        val options = NavOptions.Builder()
+            .setPopUpTo(navController.graph.startDestinationId, true)
+            .build()
+        navController.navigate(navController.graph.startDestinationId, null, options)
+        bottomNavigationView.selectedItemId = R.id.byId
+
+        val name = when (agency) {
+            Agency.AC_TRANSIT -> getString(R.string.agency_ac_transit)
+            Agency.CTA        -> getString(R.string.agency_cta)
+        }
+        showSnackbar(getString(R.string.snackbar_agency_switched, name))
     }
 
     private fun updateStatus(s: String) {
@@ -106,6 +136,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(message: Int) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+
+    private fun showSnackbar(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 

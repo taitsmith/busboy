@@ -83,4 +83,9 @@
             android:name="serviceAlertResponse"
             app:argType="com.taitsmith.busboy.api.ServiceAlertResponse" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.taitsmith.busboy.ui.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/settings_fragment" />
 </navigation>
