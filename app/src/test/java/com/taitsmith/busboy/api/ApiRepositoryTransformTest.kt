@@ -54,6 +54,13 @@ class ApiRepositoryTransformTest {
     }
 
     @Test
+    fun `prdctdn of DUE (CTA uppercase) becomes Arriving`() = runTest {
+        stubPredictions(Prediction(stpnm = "Clark & Addison", prdctdn = "DUE", dyn = 0))
+
+        apiRepository.stopPredictions("1", null).first()[0].prdctdn shouldBe "Arriving"
+    }
+
+    @Test
     fun `numeric prdctdn becomes in X minutes`() = runTest {
         stubPredictions(Prediction(stpnm = "Broadway & 25th St", prdctdn = "10", dyn = 0))
 

@@ -30,7 +30,8 @@ class ApiRepositoryImpl @Inject constructor(
                 return@map response.prd!!
                     .filter { (it.dyn ?: 0) == 0 }
                     .onEach {
-                        if (it.prdctdn == "1" || it.prdctdn == "Due") it.prdctdn = "Arriving"
+                        //AC Transit returns "Due"; CTA returns "DUE" — treat both, case-insensitively.
+                        if (it.prdctdn == "1" || it.prdctdn.equals("Due", ignoreCase = true)) it.prdctdn = "Arriving"
                         else it.prdctdn = "in " + it.prdctdn + " minutes"
                     }
             }

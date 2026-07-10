@@ -21,6 +21,13 @@ abstract class DataSourceModule {
     ) : RemoteDataSource
 
     @Binds
+    @IntoMap
+    @AgencyKey(Agency.CTA)
+    abstract fun bindCtaDataSource(
+        dataSource: CtaRemoteDataSource
+    ) : RemoteDataSource
+
+    @Binds
     abstract fun bindRemoteDataSource(
         remoteDataSource: DelegatingRemoteDataSource
     ) : RemoteDataSource
