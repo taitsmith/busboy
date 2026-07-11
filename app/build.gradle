@@ -50,6 +50,13 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    //expose the exported Room schemas to instrumented tests so MigrationTestHelper can find them
+    sourceSets {
+        androidTest {
+            assets.srcDirs += files("$projectDir/schemas".toString())
+        }
+    }
     namespace 'com.taitsmith.busboy'
 }
 
@@ -96,6 +103,7 @@ dependencies {
     implementation 'androidx.room:room-ktx:2.8.4'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.9.8'
     implementation 'androidx.navigation:navigation-ui-ktx:2.9.8'
+    implementation 'androidx.datastore:datastore-preferences:1.1.1'
 
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.activity:activity-compose:1.13.0'

@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StopDao {
-    @Query("SELECT * FROM stop")
-    fun getAll(): Flow<List<Stop>>
+    @Query("SELECT * FROM stop WHERE agency = :agency")
+    fun getAll(agency: String): Flow<List<Stop>>
 
     @Insert(onConflict =  OnConflictStrategy.REPLACE)
     fun insertAll(vararg stops: Stop)

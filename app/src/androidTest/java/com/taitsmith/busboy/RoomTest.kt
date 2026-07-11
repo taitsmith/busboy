@@ -48,7 +48,7 @@ class RoomRWTest {
     fun writeStopAndRead() = runTest {
         val stop: Stop = TestUtils.createStop()
         stopDao.insertAll(stop)
-        val returnStop = stopDao.getAll().first()[0]
+        val returnStop = stopDao.getAll(Agency.AC_TRANSIT.name).first()[0]
         assertThat(returnStop, equalTo(stop))
     }
 
@@ -61,13 +61,13 @@ class RoomRWTest {
             stopDao.insertAll(it)
         }
 
-        var returnedList: List<Stop> = stopDao.getAll().first()
+        var returnedList: List<Stop> = stopDao.getAll(Agency.AC_TRANSIT.name).first()
 
         assertThat(stopList[0], equalTo(returnedList[0]))
 
         stopDao.delete(stopList[0])
 
-        returnedList = stopDao.getAll().first()
+        returnedList = stopDao.getAll(Agency.AC_TRANSIT.name).first()
 
         assertThat(returnedList.size, equalTo(2))
         assertThat(returnedList[0], equalTo(stopList[1]))
@@ -77,7 +77,7 @@ class RoomRWTest {
     @Throws(Exception::class)
     fun deleteStops() {
         stopDao.delete(stop)
-        val stopList = stopDao.getAll()
+        val stopList = stopDao.getAll(Agency.AC_TRANSIT.name)
     }
 
     @Test

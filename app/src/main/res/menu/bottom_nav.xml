@@ -20,4 +20,9 @@
         android:icon="@drawable/help_tab_icon"
         android:contentDescription="@string/tab_layout_help"
         android:title="@string/tab_layout_help" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/settings_tab_icon"
+        android:contentDescription="@string/tab_layout_settings"
+        android:title="@string/tab_layout_settings" />
 </menu>
