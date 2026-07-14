@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View" />
         <variable
             name="busDetailFragment"
             type="com.taitsmith.busboy.ui.BusDetailFragment" />
@@ -38,6 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_length(bus.length)}"
+        android:visibility="@{bus.length != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,6 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_description(bus.description)}"
+        android:visibility="@{bus.description != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busLengthTv"
@@ -61,6 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="@{@string/bus_make(bus.make)}"
+        android:visibility="@{bus.make != null ? View.VISIBLE : View.GONE}"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,6 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_serial(bus.serialNumber)}"
+        android:visibility="@{bus.serialNumber != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busMakeTv"
@@ -82,6 +87,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_license(bus.licenseNumber)}"
+        android:visibility="@{bus.licenseNumber != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busSerialTv"
@@ -93,6 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_propulsion(bus.propulsionType)}"
+        android:visibility="@{bus.propulsionType != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busLicenseTv"
@@ -104,6 +111,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_wifi_ac(bus.hasWiFi, bus.hasAC)}"
+        android:visibility="@{(bus.hasWiFi != null || bus.hasAC != null) ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busPropulsionTv"
@@ -115,6 +123,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@{@string/bus_limit_capacity(bus.limitCapacity)}"
+        android:visibility="@{bus.limitCapacity != null ? View.VISIBLE : View.GONE}"
         android:layout_margin="16dp"
         android:textAlignment="center"
         app:layout_constraintTop_toBottomOf="@id/busWifiAcTv"

@@ -59,9 +59,8 @@
 
     <!-- snackbars (error related) -->
     <string name="snackbar_404">Looks like nothing was found, try expanding your range</string>
-    <string name="snackbar_bad_input">Please enter a valid five-digit stop ID</string>
-    <string name="snackbar_no_predictions">Looks like there\'s no info from AC Transit for
-        this stop.</string>
+    <string name="snackbar_bad_input">Please enter a valid stop ID</string>
+    <string name="snackbar_no_predictions">Looks like there\'s no info for this stop.</string>
     <string name="snackbar_null_bus_coords">Looks like there\'s no data for this bus</string>
     <string name="snackbar_location_disabled">The Nearby search function requires location to be enabled</string>
     <string name="snackbar_network_error">Looks like a network issue, try again shortly</string>
@@ -89,6 +88,14 @@
     <string name="tab_layout_nearby">Nearby</string>
     <string name="tab_layout_help">Help</string>
     <string name="tab_layout_favorites">Favorites</string>
+    <string name="tab_layout_settings">Settings</string>
+
+    <!-- settings / transit system switching -->
+    <string name="settings_transit_system">Transit system</string>
+    <string name="settings_transit_system_desc">Choose which agency Busboy shows bus data for.</string>
+    <string name="agency_ac_transit">AC Transit (Oakland)</string>
+    <string name="agency_cta">CTA (Chicago)</string>
+    <string name="snackbar_agency_switched">Now showing %1$s</string>
 
     <!-- strings for accessibility -->
     <string name="accessibility_busflag_img_desc">An image displaying a a picture of an AC Transit

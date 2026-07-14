@@ -16,6 +16,7 @@ import io.kotest.matchers.types.shouldBeTypeOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -27,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.openMocks
 
 @RunWith(JUnit4::class)
@@ -93,6 +95,9 @@ class ByIdViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `test api 404 updates status message`() = runTest(testDispatcher) {
+        `when`(mockedApiRep.stopPredictions("404", null))
+            .thenReturn(flow { throw Exception("404") })
+
         mockedViewModel.predictions.value.shouldBeTypeOf<PredictionState.Loading>()
 
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -100,7 +105,7 @@ class ByIdViewModelTest {
         }
 
         mockedViewModel.getPredictions("404", null)
-        val predValue = byIdViewModel.predictions.value
+        val predValue = mockedViewModel.predictions.value
 
         predValue.shouldBeTypeOf<PredictionState.Error>()
 
@@ -153,11 +158,11 @@ class ByIdViewModelTest {
         val returnedAlerts = apiRepository.serviceAlerts("55555")
 
         assertEquals(
-            mockedServiceAlertResponse.first().bustimeResponse.sb?.get(0)?.nm,
+            mockedServiceAlertResponse.bustimeResponse.sb?.get(0)?.nm,
             returnedAlerts.first().bustimeResponse.sb?.get(0)?.nm
         )
         assertEquals(
-            mockedServiceAlertResponse.first().bustimeResponse.sb?.get(0)?.nm,
+            mockedServiceAlertResponse.bustimeResponse.sb?.get(0)?.nm,
             byIdViewModel.alerts.getOrAwaitValue().bustimeResponse.sb?.get(0)?.nm)
     }
 

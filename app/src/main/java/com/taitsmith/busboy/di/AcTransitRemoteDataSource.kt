@@ -6,20 +6,14 @@ import com.slack.eithernet.ApiResult.Success
 import com.taitsmith.busboy.api.ApiInterface
 import com.taitsmith.busboy.api.BustimeResponse
 import com.taitsmith.busboy.api.ServiceAlertResponse
-import com.taitsmith.busboy.api.StopDestinationResponse
 import com.taitsmith.busboy.data.Bus
 import com.taitsmith.busboy.data.Stop
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-@Module
-@InstallIn(ViewModelComponent::class)
-class RemoteDataSourceImpl @Inject constructor (
+class AcTransitRemoteDataSource @Inject constructor (
     @AcTransitApiInterface
     private val acTransitApiInterface: ApiInterface,
     @MapsApiInterface
@@ -69,12 +63,20 @@ class RemoteDataSourceImpl @Inject constructor (
         }
     }
 
-    override fun linesServedByStop(stops: List<Stop>): Flow<StopDestinationResponse> = flow {
+    override fun linesServedByStop(stops: List<Stop>): Flow<Stop> = flow {
         stops.forEach { stop ->
             when (val response = acTransitApiInterface.getStopDestinations(stop.stopId)) {
                 is Success -> {
-                    response.value.stopName = stop.name
-                    emit(response.value)
+                    val resp = response.value
+                    //AC Transit needs a per-stop call to learn which lines serve it; skip stops
+                    //that come back with none, matching the previous behavior.
+                    if (!resp.routeDestinations.isNullOrEmpty()) {
+                        val sb = StringBuilder()
+                        resp.routeDestinations?.forEach {
+                            sb.append(it.routeId).append(" ").append(it.destination).append("\n")
+                        }
+                        emit(Stop(name = stop.name, stopId = resp.stopId.toString(), linesServed = sb.toString()))
+                    }
                 }
                 is Failure.ApiFailure -> throw Exception("404")
                 is Failure.HttpFailure -> throw Exception("404")
