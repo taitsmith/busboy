@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import org.jetbrains.annotations.VisibleForTesting
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,7 +32,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val selectedAgency: Flow<Agency> = dataStore.data
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
-        .map { prefs -> prefs[AGENCY_KEY].toAgency() }
+        .map { prefs -> toAgency(prefs[AGENCY_KEY]) }
 
     override val selectedAgencyState: StateFlow<Agency> =
         selectedAgency.stateIn(scope, SharingStarted.Eagerly, Agency.AC_TRANSIT)
@@ -40,10 +41,13 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[AGENCY_KEY] = agency.name }
     }
 
-    private fun String?.toAgency(): Agency =
-        this?.let { runCatching { Agency.valueOf(it) }.getOrNull() } ?: Agency.AC_TRANSIT
-
     companion object {
         private val AGENCY_KEY = stringPreferencesKey("selected_agency")
+
+        //parse the stored agency name, defaulting to AC_TRANSIT for a missing or unrecognized value
+        //so the app behaves like a fresh install rather than crashing on bad persisted data.
+        @VisibleForTesting
+        internal fun toAgency(stored: String?): Agency =
+            stored?.let { runCatching { Agency.valueOf(it) }.getOrNull() } ?: Agency.AC_TRANSIT
     }
 }

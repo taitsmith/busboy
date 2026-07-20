@@ -11,8 +11,11 @@ import com.taitsmith.busboy.api.CtaPatternResponse
 import com.taitsmith.busboy.api.CtaVehicle
 import com.taitsmith.busboy.api.CtaVehicleResponse
 import com.taitsmith.busboy.api.StopPredictionResponse
+import com.taitsmith.busboy.data.CtaStop
+import com.taitsmith.busboy.data.Stop
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -21,6 +24,7 @@ import org.junit.runners.JUnit4
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.io.IOException
 
@@ -116,5 +120,32 @@ class CtaRemoteDataSourceTest {
 
         dataSource.getBusRouteWaypoints("22") shouldBe
             listOf(LatLng(1.0, 1.0), LatLng(2.0, 2.0), LatLng(3.0, 3.0))
+    }
+
+    @Test
+    fun `nearbyStops converts the feet radius to meters and maps catalog rows to stops`() = runTest {
+        whenever(catalog.nearbyStops(any(), any(), any(), anyOrNull()))
+            .thenReturn(listOf(CtaStop("1926", "Belmont", 41.9, -87.6, "22, 36")))
+
+        val stops = dataSource.nearbyStops(LatLng(41.9, -87.6), 1000, "22").first()
+
+        //the Nearby UI enters feet; the catalog works in meters (1000 ft = 1000 * 0.3048 m).
+        verify(catalog).nearbyStops(41.9, -87.6, 1000 * 0.3048, "22")
+        stops.size shouldBe 1
+        stops[0].stopId shouldBe "1926"
+        stops[0].latitude shouldBe 41.9
+        stops[0].linesServed shouldBe "22, 36"
+    }
+
+    @Test
+    fun `linesServedByStop keeps existing lines and looks up missing ones from the catalog`() = runTest {
+        whenever(catalog.linesServedFor("1926")).thenReturn("22, 36")
+
+        val enriched = dataSource
+            .linesServedByStop(listOf(Stop(stopId = "1926"), Stop(stopId = "500", linesServed = "8")))
+            .toList()
+
+        enriched[0].linesServed shouldBe "22, 36"
+        enriched[1].linesServed shouldBe "8"
     }
 }
