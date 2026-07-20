@@ -16,7 +16,9 @@ class PredictionAdapter(
     companion object {
         private val DiffCallback = object: DiffUtil.ItemCallback<Prediction>() {
             override fun areItemsTheSame(oldItem: Prediction, newItem: Prediction): Boolean {
-                return oldItem.stpnm == newItem.stpnm
+                //every prediction at a stop shares the same stpnm; identify a row by the specific
+                //vehicle + predicted arrival time so list diffing/animations behave correctly.
+                return oldItem.vid == newItem.vid && oldItem.prdtm == newItem.prdtm
             }
 
             override fun areContentsTheSame(oldItem: Prediction, newItem: Prediction): Boolean {

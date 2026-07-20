@@ -3,7 +3,6 @@ package com.taitsmith.busboy.ui
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -230,11 +229,6 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
     }
 
     override fun onMapsSdkInitialized(p0: Renderer) {
-        when (p0) {
-            //we should always get the latest but sometimes there's a weird
-            //issue with legacy renderer being loaded which causes issues.
-            Renderer.LATEST -> Log.d("MAPS", "latest renderer")
-            Renderer.LEGACY -> Log.d("MAPS", "legacy renderer")
-        }
+        //required by OnMapsSdkInitializedCallback; nothing to do once the SDK reports its renderer.
     }
 }

@@ -206,9 +206,9 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val s = p0?.getItemAtPosition(p2).toString()
-        if (s == "All lines") nearbyViewModel.rt = null
-        else nearbyViewModel.rt = s
+        //position 0 is the "All lines" entry in both bus_lines and cta_bus_lines; comparing the
+        //position instead of the literal keeps this working if the label is ever localized/reworded.
+        nearbyViewModel.rt = if (p2 == 0) null else p0?.getItemAtPosition(p2).toString()
     }
 
     override fun onNothingSelected(adapterView: AdapterView<*>?) {}

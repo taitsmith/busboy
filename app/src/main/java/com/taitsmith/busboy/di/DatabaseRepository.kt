@@ -23,7 +23,8 @@ class DatabaseRepository @Inject constructor(
     }
 
     fun deleteStop(stop: Stop) = stopDao.delete(stop)
-    fun deleteAll() = stopDao.deleteAll()
+    //scope to the active agency so clearing favorites can't also wipe the other agency's saved stops.
+    fun deleteAll() = stopDao.deleteAll(settingsRepository.selectedAgencyState.value.name)
 
     fun getAllLines() = routeDao.getAll()
     fun addLines(vararg lines: RouteDestination) = routeDao.insertAll(*lines)

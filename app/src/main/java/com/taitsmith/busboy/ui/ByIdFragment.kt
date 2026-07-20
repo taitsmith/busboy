@@ -81,7 +81,7 @@ class ByIdFragment : Fragment() {
                         is BusState.Error   -> byIdViewModel.updateStatus(null, it.exception.message ?: "UNKNOWN")
                         is BusState.Initial -> byIdViewModel.getWaypoints()
                         is BusState.Updated -> {}
-                        is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "details")
+                        is BusState.Detail  -> BusDetailFragment.newInstance(it.bus).show(childFragmentManager, "details")
                         BusState.Loading    -> {}
                     }
                 }
@@ -161,12 +161,7 @@ class ByIdFragment : Fragment() {
     private fun setList(predictionList: List<Prediction>) {
         predictionAdapter.submitList(predictionList)
         binding.busFlagIV.visibility = View.INVISIBLE
-        try {
-            updateTextHint(predictionList[0].stpnm!!)
-        } catch (e: IndexOutOfBoundsException) {
-            e.printStackTrace()
-        }
-
+        predictionList.firstOrNull()?.stpnm?.let { updateTextHint(it) }
     }
 
     private fun updateTextHint(s: String) {

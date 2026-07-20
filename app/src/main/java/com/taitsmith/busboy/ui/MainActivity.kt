@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -50,7 +49,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var mainActivityViewModel: MainActivityViewModel
 
-    private var nearbyStatusUpdateTv: TextView? = null
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
@@ -60,7 +58,6 @@ class MainActivity : AppCompatActivity() {
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         mainActivityViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
         bottomNavigationView = binding.mainTabLayout
-        nearbyStatusUpdateTv = binding.nearbyStatusUpdater
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -161,7 +158,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.navHostFragment.visibility  = View.VISIBLE
             binding.progressBar.visibility      = View.INVISIBLE
-            nearbyStatusUpdateTv?.visibility    = View.INVISIBLE
         }
     }
 

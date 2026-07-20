@@ -13,18 +13,6 @@
     tools:context="com.taitsmith.busboy.ui.MainActivity">
 
 
-    <TextView
-        android:id="@+id/nearbyStatusUpdater"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nearby_status_update"
-        android:layout_marginTop="48dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/navHostFragment"
-        />
-
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/navHostFragment"
         android:name="androidx.navigation.fragment.NavHostFragment"

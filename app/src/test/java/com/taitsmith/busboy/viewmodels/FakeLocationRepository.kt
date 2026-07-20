@@ -15,13 +15,13 @@ class FakeLocationRepository : LocationRepository {
     }
 
     override fun stopUpdates() {
-        TODO("Not yet implemented")
+        //no-op: the fake never starts real updates, so there's nothing to stop.
     }
 
     private fun fakeLocation(): Location {
         val loc = Location(LocationManager.GPS_PROVIDER)
         loc.latitude = 1.1
-        loc.latitude = 1.1
+        loc.longitude = 1.1
         return loc
     }
 }

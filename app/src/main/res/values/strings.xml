@@ -7,8 +7,6 @@
     <string name="stop_id_edit_text_hint_cta">Enter your stop ID (ex 1926)</string>
     <string name="nearby_edit_text_hint">Search distance (in feet, default 1000)</string>
     <string name="nearby_edit_text_hint_updated">Displaying stops within %1$s feet</string>
-    <string name="nearby_status_update">Getting lines for nearby stop %1$s</string>
-    <string name="nearby_choose_on_map">Choose on map</string>
     <string name="map_you_are_here">You are here</string>
 
     <!-- dialogs -->

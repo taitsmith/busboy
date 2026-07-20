@@ -22,7 +22,7 @@ interface StopDao {
     @Update
     fun updateStops(vararg stops: Stop)
 
-    @Query("DELETE FROM stop")
-    fun deleteAll()
+    @Query("DELETE FROM stop WHERE agency = :agency")
+    fun deleteAll(agency: String)
 
 }

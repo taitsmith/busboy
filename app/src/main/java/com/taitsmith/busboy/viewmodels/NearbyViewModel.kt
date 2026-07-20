@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -80,7 +79,6 @@ class NearbyViewModel @Inject constructor(
                     rt
                 )
                 nearby.catch {
-                    it.printStackTrace()
                     if (it.message.equals("timeout")) statusRepository.updateStatus("CALL_FAILURE")
                     else statusRepository.updateStatus("404")
                 }
@@ -146,7 +144,6 @@ class NearbyViewModel @Inject constructor(
                     _isUpdated.postValue(false)
                 }
             }.onFailure {
-                Log.d("FAILURE: ", it.message.toString())
                 statusRepository.updateStatus("DIRECTION_FAILURE")
             }
         }
