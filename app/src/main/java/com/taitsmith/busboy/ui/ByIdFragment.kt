@@ -61,7 +61,7 @@ class ByIdFragment : Fragment() {
                 byIdViewModel.predictions.collect {
                     when(it) {
                         is PredictionState.Success  -> setList(it.predictions)
-                        is PredictionState.Error    -> byIdViewModel.updateStatus(null, it.exception.message!!)
+                        is PredictionState.Error    -> byIdViewModel.updateStatus(null, it.exception.message ?: "UNKNOWN")
                         is PredictionState.Loading  -> {}
                     }
                 }
@@ -72,7 +72,7 @@ class ByIdFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 byIdViewModel.bus.collect {
                     when (it) {
-                        is BusState.Error   -> {}
+                        is BusState.Error   -> byIdViewModel.updateStatus(null, it.exception.message ?: "UNKNOWN")
                         is BusState.Initial -> byIdViewModel.getWaypoints()
                         is BusState.Updated -> {}
                         is BusState.Detail  -> BusDetailFragment(it.bus).show(childFragmentManager, "details")

@@ -1,2 +1,27 @@
 # Local secrets — never commit real API keys
 secrets.properties
+
+# Signing material — never commit keystores or their passwords
+keystore.properties
+*.jks
+*.keystore
+
+# Machine-specific config
+local.properties
+
+# Build output
+/build
+/app/build
+.gradle/
+*.apk
+*.aab
+
+# Release artifacts (signed bundles are built + uploaded manually, not tracked)
+/app/release
+
+# Kotlin
+.kotlin/
+
+# IDE
+.idea/
+*.iml

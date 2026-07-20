@@ -10,6 +10,15 @@ plugins {
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
+// Release signing credentials are read from a gitignored keystore.properties at the repo root so the
+// keystore password never lands in version control (see keystore.properties.example). Absent that
+// file, release falls back to debug signing so a fresh clone / CI still builds.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
 android {
     compileSdk 36
 
@@ -17,13 +26,23 @@ android {
         applicationId "com.taitsmith.busboy"
         minSdk 26
         targetSdk 36
-        versionCode 26
-        versionName "1.2.4"
+        versionCode 27
+        versionName "2.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        signingConfig signingConfigs.debug
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties.getProperty("RELEASE_STORE_FILE", "bbks.jks"))
+                storePassword keystoreProperties.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias keystoreProperties.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword keystoreProperties.getProperty("RELEASE_KEY_PASSWORD")
             }
         }
     }
@@ -37,6 +56,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //use the real release key when keystore.properties is present; otherwise fall back to
+            //debug signing so a fresh clone / CI still produces an installable (non-shippable) build.
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
         }
     }
 
@@ -61,6 +83,7 @@ android {
 }
 
 kotlin {
+    jvmToolchain(21)
     compilerOptions {
         jvmTarget = JvmTarget.JVM_21
     }

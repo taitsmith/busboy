@@ -57,39 +57,59 @@ class ByIdViewModel @Inject constructor(
         statusRepository.isLoading(true)
         viewModelScope.launch {
             _stopId.postValue(id)
-            val predictions = apiRepository.stopPredictions(id, rt)
-            predictions
+            apiRepository.stopPredictions(id, rt)
                 .catch { exception ->
+                    statusRepository.isLoading(false)
                     _predictions.value = PredictionState.Error(exception)
                 }
                 .collect { p ->
+                    //an empty-but-successful list is a valid stop with no (stopping) buses- e.g. every
+                    //prediction was dropped by the dyn filter. don't index p[0]; that throws inside the
+                    //collector where .catch can't see it, crashing the app.
+                    val first = p.firstOrNull()
+                    if (first == null) {
+                        statusRepository.updateStatus("NULL_PRED_RESPONSE")
+                        statusRepository.isLoading(false)
+                        return@collect
+                    }
                     _stop.postValue(
                         Stop(
                             stopId = id,
-                            name = p[0].stpnm
+                            name = first.stpnm
                         )
                     )
                     _predictions.value = PredictionState.Success(p)
-                    getAlerts()
+                    getAlerts(id)
                     statusRepository.isLoading(false)
-            }
+                }
         }
     }
 
     @VisibleForTesting
     fun getAlerts() {
+        val id = stopId.value ?: return
+        getAlerts(id)
+    }
+
+    //alerts are best-effort context shown over the predictions- a fetch failure must not crash the app
+    //or interrupt the prediction view, so swallow it. the id is passed in rather than read from the
+    //async-posted stopId LiveData, which may not have landed yet when this runs.
+    private fun getAlerts(id: String) {
         viewModelScope.launch {
-            val alerts = apiRepository.serviceAlerts(stopId.value!!)
-            alerts.collect {
-                _alerts.postValue(it)
-            }
+            apiRepository.serviceAlerts(id)
+                .catch { }
+                .collect { _alerts.postValue(it) }
         }
     }
 
     fun getBusDetails(vid: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _bus.value = BusState.Detail(apiRepository.getDetailedBusInfo(vid))
-            _isUpdated.postValue(false)
+            try {
+                _bus.value = BusState.Detail(apiRepository.getDetailedBusInfo(vid))
+                _isUpdated.postValue(false)
+            } catch (e: Exception) {
+                _bus.value = BusState.Error(e)
+            }
         }
     }
 
@@ -98,14 +118,15 @@ class ByIdViewModel @Inject constructor(
         _bus.value = BusState.Loading
         this.route = route
         viewModelScope.launch {
-            val b = apiRepository.vehicleLocation(vehicleId)
-            b.catch { exception ->
-                _bus.value = BusState.Error(exception)
-            }
-            .collect {
-                if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
-                else _bus.value = BusState.Updated(it)
-            }
+            apiRepository.vehicleLocation(vehicleId)
+                .catch { exception ->
+                    statusRepository.isLoading(false)
+                    _bus.value = BusState.Error(exception)
+                }
+                .collect {
+                    if (bus.value == BusState.Loading) _bus.value = BusState.Initial(it)
+                    else _bus.value = BusState.Updated(it)
+                }
         }
     }
 
@@ -113,11 +134,12 @@ class ByIdViewModel @Inject constructor(
         if (_stop.value == null) statusRepository.updateStatus("BAD_INPUT")
         else {
             viewModelScope.launch(Dispatchers.IO) {
-                val stop = apiRepository.getLinesServedByStops(listOf(_stop.value!!))
-                stop.collect {
-                    databaseRepository.addStops(it)
-                    statusRepository.updateStatus("FAVORITE_ADDED")
-                }
+                apiRepository.getLinesServedByStops(listOf(_stop.value!!))
+                    .catch { statusRepository.updateStatus(it.message ?: "UNKNOWN") }
+                    .collect {
+                        databaseRepository.addStops(it)
+                        statusRepository.updateStatus("FAVORITE_ADDED")
+                    }
             }
         }
     }
@@ -128,9 +150,11 @@ class ByIdViewModel @Inject constructor(
                 _busRouteWaypoints.postValue(apiRepository.getBusRouteWaypoints(route))
                 _isUpdated.postValue(false)
             }.onFailure {
-                it.printStackTrace()
+                //emit a status either way- MainActivity hides the progress bar on any status update,
+                //so a waypoint failure can't leave the UI stuck in the loading state.
                 when (it.message) {
                     "empty_response" -> statusRepository.updateStatus("NO_WAYPOINTS")
+                    else -> statusRepository.updateStatus(it.message ?: "UNKNOWN")
                 }
             }
         }

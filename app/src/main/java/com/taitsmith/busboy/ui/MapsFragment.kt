@@ -176,9 +176,13 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
 
     override fun onDestroy() {
         super.onDestroy()
-        googleMap.clear()
-        googleMap.setOnMarkerDragListener(null)
-        googleMap.setOnMarkerClickListener(null)
+        //googleMap is only assigned inside the async OnMapReadyCallback; if the fragment is destroyed
+        //before the map finishes loading, the lateinit was never set- guard before touching it.
+        if (::googleMap.isInitialized) {
+            googleMap.clear()
+            googleMap.setOnMarkerDragListener(null)
+            googleMap.setOnMarkerClickListener(null)
+        }
     }
 
     override fun onMarkerDrag(p0: Marker) {
