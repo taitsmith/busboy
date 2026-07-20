@@ -183,6 +183,34 @@ class ByIdViewModelTest {
         )
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `test reset returns state to initial`() = runTest {
+        val predJob = launch(UnconfinedTestDispatcher(testScheduler)) {
+            byIdViewModel.predictions.collect {}
+        }
+        val busJob = launch(UnconfinedTestDispatcher(testScheduler)) {
+            byIdViewModel.bus.collect {}
+        }
+
+        byIdViewModel.getPredictions("55555", null)
+        byIdViewModel.setAlertShown(true)
+        byIdViewModel.predictions.value.shouldBeTypeOf<PredictionState.Success>()
+        byIdViewModel.stop.value?.stopId.shouldBe("55555")
+
+        byIdViewModel.reset()
+
+        byIdViewModel.predictions.value.shouldBeTypeOf<PredictionState.Loading>()
+        byIdViewModel.bus.value.shouldBeTypeOf<BusState.Loading>()
+        byIdViewModel.stopId.value.shouldBe(null)
+        byIdViewModel.stop.value.shouldBe(null)
+        byIdViewModel.alertShown.getOrAwaitValue().shouldBe(false)
+        byIdViewModel.isUpdated.getOrAwaitValue().shouldBe(false)
+
+        predJob.cancel()
+        busJob.cancel()
+    }
+
     @Test
     fun `test misc utility functions`() = runTest {
         byIdViewModel.setIsUpdated(true)

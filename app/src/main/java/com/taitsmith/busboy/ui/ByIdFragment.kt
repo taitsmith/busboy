@@ -105,6 +105,17 @@ class ByIdFragment : Fragment() {
     private fun setListeners() {
         binding.searchByIdButton.setOnClickListener { search() }
         binding.addToFavoritesFab.setOnClickListener { byIdViewModel.addStopToFavorites() }
+        binding.resetByIdFab.setOnClickListener { resetScreen() }
+    }
+
+    //zero out the screen- clear predictions, empty the entry field, restore the original hint, and
+    //re-show the bus-flag image that setList() only ever hides.
+    private fun resetScreen() {
+        predictionAdapter.submitList(emptyList())
+        binding.busFlagIV.visibility = View.VISIBLE
+        binding.stopEntryEditText.text = null
+        binding.stopEntryEditText.hint = getString(R.string.stop_id_edit_text_hint)
+        byIdViewModel.reset()
     }
 
     private fun setObservers() {
