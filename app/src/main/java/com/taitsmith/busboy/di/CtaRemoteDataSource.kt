@@ -144,7 +144,9 @@ class CtaRemoteDataSource @Inject constructor(
 
         val directionResponse = mapsApiInterface.getNavigationToStop(start, stop, "walking")
 
-        val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList
+        //firstOrNull() guards non-null but empty route/trip lists that .get(0) would throw on; an
+        //empty result is handled as a DIRECTION_FAILURE upstream.
+        val stepList = directionResponse.routeList?.firstOrNull()?.tripList?.firstOrNull()?.stepList
 
         stepList?.forEach {
             it.endCoords?.returnCoords()?.let { it1 -> polylineCoords.add(it1) }

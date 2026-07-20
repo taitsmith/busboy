@@ -155,6 +155,16 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
                 nearbyViewModel.setIsUpdated(false)
             }
         }
+
+        //when the system permission dialog grants location, start location updates so the search
+        //button enables and a fresh fix is available- otherwise a just-granted search never resumes
+        //and the user has to tap search again with no idea why nothing happened.
+        NearbyViewModel.locationPermGranted.observe(viewLifecycleOwner) { granted ->
+            if (granted == true) {
+                nearbyViewModel.checkLocationPerm()
+                NearbyViewModel.locationPermGranted.value = false
+            }
+        }
     }
 
     private fun setListeners() {
@@ -165,14 +175,16 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
                 || !nearbyViewModel.isUsingLocation) {
                 val s = nearbyEditText.text.toString()
                 if (s.isNotEmpty()) {
-                    val distance = s.toInt()
-                    if (distance < 500 || distance > 5000) {
+                    //toIntOrNull guards an over-long numeric entry (toInt() would throw
+                    //NumberFormatException and crash); an out-of-range value is a BAD_DISTANCE.
+                    val distance = s.toIntOrNull()
+                    if (distance == null || distance < 500 || distance > 5000) {
                         nearbyViewModel.updateStatus("BAD_DISTANCE")
-                    } else {
-                        nearbyViewModel.distance = distance
-                        nearbyEditText.text = null
-                        nearbyEditText.hint = getString(R.string.nearby_edit_text_hint_updated, s)
+                        return@setOnClickListener
                     }
+                    nearbyViewModel.distance = distance
+                    nearbyEditText.text = null
+                    nearbyEditText.hint = getString(R.string.nearby_edit_text_hint_updated, s)
                 }
                 nearbyViewModel.getNearbyStops()
             }

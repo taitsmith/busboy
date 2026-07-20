@@ -33,7 +33,7 @@ class ApiRepositoryImpl @Inject constructor(
             } else {
                 //a non-zero 'dyn' means the bus isn't stopping, so drop it. treat a null/unknown
                 //dyn as stopping so we don't hide predictions the api didn't tag.
-                return@map response.prd!!
+                return@map response.prd.orEmpty()
                     .filter { (it.dyn ?: 0) == 0 }
                     .onEach {
                         //AC Transit returns "Due"; CTA returns "DUE" — treat both, case-insensitively.

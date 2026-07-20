@@ -52,6 +52,9 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
     private lateinit var locationChoice: LatLng
     private lateinit var googleMap: GoogleMap
     private var busMarker: Marker? = null
+    //show the "no bus data" notice at most once per map view, so a persistently-failing 60s poll
+    //doesn't spam a snackbar every minute.
+    private var busErrorShown = false
 
     private val callback = OnMapReadyCallback { googleMap ->
         this.googleMap = googleMap
@@ -134,7 +137,12 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 byIdViewModel.bus.collect {
                     when (it) {
-                        is BusState.Error -> {}
+                        is BusState.Error -> if (!busErrorShown) {
+                            busErrorShown = true
+                            view?.let { v ->
+                                Snackbar.make(v, R.string.snackbar_null_bus_coords, Snackbar.LENGTH_LONG).show()
+                            }
+                        }
                         is BusState.Initial -> {
                             val latLng = LatLng(it.bus.latitude!!, it.bus.longitude!!)
                             val options = MarkerOptions()

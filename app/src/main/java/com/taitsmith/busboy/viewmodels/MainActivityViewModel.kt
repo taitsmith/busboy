@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,13 +15,19 @@ class MainActivityViewModel @Inject constructor(
     private val statusRepository: StatusRepository
 )  : ViewModel() {
 
-    private val _uiState = MutableStateFlow<LoadingState>(LoadingState.Success)
-    val uiState: StateFlow<LoadingState> = _uiState
+    //forward the repository's one-shot events as a SharedFlow (replay 0) so the Activity, which only
+    //collects while STARTED, gets every event without conflation and without replaying a stale one.
+    private val _uiState = MutableSharedFlow<LoadingState>(
+        replay = 0,
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val uiState: SharedFlow<LoadingState> = _uiState
 
     init {
         viewModelScope.launch {
             statusRepository.state.collect {
-                _uiState.value = it
+                _uiState.emit(it)
             }
         }
     }

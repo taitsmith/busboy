@@ -135,13 +135,12 @@ class MainActivity : AppCompatActivity() {
             "NULL_BUS_COORDS"       -> showSnackbar(R.string.snackbar_null_bus_coords)
             "CALL_FAILURE"          -> showSnackbar(R.string.snackbar_network_error)
             "BAD_DISTANCE"          -> showSnackbar(R.string.snackbar_bad_distance)
-            "NO_FAVORITE_STOPS"     -> showSnackbar(R.string.snackbar_no_favorites)
             "NULL_LOCATION"         -> showSnackbar(R.string.snackbar_loc_null)
+            "WAITING_ON_LOCATION"   -> showSnackbar(R.string.snackbar_loc_null)
             "DIRECTION_FAILURE"     -> showSnackbar(R.string.snackbar_direction_failure)
             "NO_WAYPOINTS"          -> showSnackbar(R.string.snackbar_no_waypoints)
             "NO_SERVICE_SCHEDULED"  -> showSnackbar(R.string.snackbar_no_service_scheduled)
             "UNKNOWN"               -> showSnackbar(R.string.snackbar_unknown_error)
-            "HELP_REQUESTED"        -> showHelp()
             "FAVORITE_ADDED"        -> showSnackbar(R.string.snackbar_favorite_added)
             "STOP_DELETED"          -> showSnackbar(R.string.snackbar_favorite_deleted)
         }
@@ -207,6 +206,9 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_FINE_LOCATION) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 NearbyViewModel.locationPermGranted.value = true
+            } else {
+                //permission denied- tell the user why Nearby won't work instead of failing silently.
+                showSnackbar(R.string.snackbar_location_disabled)
             }
         }
     }

@@ -103,7 +103,10 @@ class AcTransitRemoteDataSource @Inject constructor (
     }
 
     override suspend fun getDetailedBusInfo(vid: String): Bus {
-        return acTransitApiInterface.getDetailedVehicleInfo(vid)[0]
+        //an empty list means the vehicle isn't reporting- mirror the CTA source and throw a coded
+        //exception the ViewModel can surface, rather than an IndexOutOfBounds crash on [0].
+        return acTransitApiInterface.getDetailedVehicleInfo(vid).firstOrNull()
+            ?: throw Exception("NULL_BUS_COORDS")
     }
 
     //get a list of lat/lon points so we can create a polyline of the selected bus route
@@ -115,8 +118,9 @@ class AcTransitRemoteDataSource @Inject constructor (
 
         if (waypointResponse.isEmpty()) throw Exception("empty_response")
 
-        //need to go through several layers to get the good stuff
-        waypointResponse[0].patterns?.get(0)?.waypoints?.forEach {
+        //need to go through several layers to get the good stuff. firstOrNull() guards a non-null but
+        //empty patterns list, which .get(0) would throw on.
+        waypointResponse[0].patterns?.firstOrNull()?.waypoints?.forEach {
             polylineCoords.add(it.latLng)
         }
 
@@ -132,8 +136,9 @@ class AcTransitRemoteDataSource @Inject constructor (
         val directionResponse = mapsApiInterface.getNavigationToStop(
             start, stop, "walking")
 
-        //too many damn lists
-        val stepList = directionResponse.routeList?.get(0)?.tripList?.get(0)?.stepList
+        //too many damn lists. firstOrNull() guards non-null but empty route/trip lists that .get(0)
+        //would throw on; an empty result is handled as a DIRECTION_FAILURE upstream.
+        val stepList = directionResponse.routeList?.firstOrNull()?.tripList?.firstOrNull()?.stepList
 
         stepList?.forEach {
             it.endCoords?.returnCoords()?.let { it1 -> polylineCoords.add(it1) }

@@ -57,8 +57,10 @@ class NearbyViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `test nearby stops`() = runTest {
+        //status is now a one-shot SharedFlow (no .value); capture emissions to assert on them.
+        val statuses = mutableListOf<MainActivityViewModel.LoadingState>()
         val statusJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            statusRepository.state.collect {}
+            statusRepository.state.collect { statuses.add(it) }
         }
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
             nearbyViewModel.nearbyStopsState.collect {}
@@ -72,7 +74,7 @@ class NearbyViewModelTest {
 
         val nss = nearbyViewModel.nearbyStopsState.value
 
-        statusRepository.state.value.shouldBeTypeOf<MainActivityViewModel.LoadingState.Loading>()
+        statuses.last().shouldBeTypeOf<MainActivityViewModel.LoadingState.Loading>()
         nss.shouldBeTypeOf<NearbyStopsState.Loading>()
         nss.loadState.shouldBe(ListLoadingState.PARTIAL)
 

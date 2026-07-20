@@ -136,8 +136,15 @@ class NearbyViewModel @Inject constructor(
     fun getDirectionsToStop(start: String, stop: String) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                _directionPolylineCoords.postValue(apiRepository.getDirectionsToStop(start, stop))
-                _isUpdated.postValue(false)
+                val coords = apiRepository.getDirectionsToStop(start, stop)
+                //an empty route means Google returned no walkable steps- don't navigate to the map
+                //(setupForRouteDisplay indexes coords[0]); surface it as a failure instead.
+                if (coords.isEmpty()) {
+                    statusRepository.updateStatus("DIRECTION_FAILURE")
+                } else {
+                    _directionPolylineCoords.postValue(coords)
+                    _isUpdated.postValue(false)
+                }
             }.onFailure {
                 Log.d("FAILURE: ", it.message.toString())
                 statusRepository.updateStatus("DIRECTION_FAILURE")
