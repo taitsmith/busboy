@@ -30,11 +30,11 @@ class ByIdViewModel @Inject constructor(
     private val _isUpdated = MutableLiveData<Boolean>()
     var isUpdated: LiveData<Boolean> = _isUpdated
 
-    private val _stopId = MutableLiveData<String>()
-    val stopId: LiveData<String> = _stopId
+    private val _stopId = MutableLiveData<String?>()
+    val stopId: LiveData<String?> = _stopId
 
-    private val _stop = MutableLiveData<Stop>()
-    val stop: LiveData<Stop> = _stop
+    private val _stop = MutableLiveData<Stop?>()
+    val stop: LiveData<Stop?> = _stop
 
     private val _busRouteWaypoints = MutableLiveData<List<LatLng>>()
     val busRouteWaypoints: LiveData<List<LatLng>> = _busRouteWaypoints
@@ -134,6 +134,20 @@ class ByIdViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    //return the screen to its initial, empty state. see NearbyViewModel.reset() for the sibling.
+    //the predictions/bus collectors do nothing on Loading, so resetting to Loading won't re-render.
+    //clearing _stopId matters- otherwise an empty-field search re-fetches the last stop (see the
+    //fragment's search() fallback).
+    fun reset() {
+        _predictions.value = PredictionState.Loading(false)
+        _bus.value = BusState.Loading
+        _stopId.value = null
+        _stop.value = null
+        _alertShown.value = false
+        _isUpdated.value = false
+        route = ""
     }
 
     fun updateStatus(loading: Boolean?, message: String?) {

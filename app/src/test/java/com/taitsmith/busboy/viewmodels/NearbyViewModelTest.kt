@@ -88,6 +88,32 @@ class NearbyViewModelTest {
         statusJob.cancel()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `test reset returns state to initial`() = runTest {
+        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
+            nearbyViewModel.nearbyStopsState.collect {}
+        }
+        `when`(location.longitude).thenReturn(1.1)
+        `when`(location.latitude).thenReturn(1.1)
+
+        nearbyViewModel.setLocation(location)
+        nearbyViewModel.setIsUsingLocation(false)
+        nearbyViewModel.enableSearchButton.value.shouldBe(true)
+        NearbyViewModel.currentLocation.latitude.shouldBe(1.1)
+
+        nearbyViewModel.reset()
+
+        nearbyViewModel.enableSearchButton.value.shouldBe(false)
+        nearbyViewModel.isUsingLocation.shouldBe(false)
+        NearbyViewModel.currentLocation.latitude.shouldBe(0.0)
+        val nss = nearbyViewModel.nearbyStopsState.value.shouldBeTypeOf<NearbyStopsState.Loading>()
+        nss.loadState.shouldBe(ListLoadingState.START)
+        nss.stopList.size.shouldBe(0)
+
+        collectJob.cancel()
+    }
+
     @Test
     fun `test is updated`() = runTest {
         nearbyViewModel.setIsUpdated(true)

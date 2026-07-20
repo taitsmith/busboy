@@ -165,6 +165,18 @@ class NearbyViewModel @Inject constructor(
         isUsingLocation = usingLocation
     }
 
+    //return the screen to its initial, empty state. clearing the static currentLocation is the
+    //root-cause fix for 'stuck with a location until the app is killed'- getNearbyStops() guards on
+    //latitude == 0.0. the fragment re-opens the location-choice dialog so a new location can be picked.
+    fun reset() {
+        currentLocation = Location("provider")
+        _enableSearchButton.value = false
+        _nearbyStopsFlow.value = NearbyStopsState.Loading(ListLoadingState.START, emptyList())
+        isUsingLocation = false
+        rt = null
+        distance = 1000
+    }
+
     fun updateStatus(s: String) = statusRepository.updateStatus(s)
 
     private fun listenForLocation() {

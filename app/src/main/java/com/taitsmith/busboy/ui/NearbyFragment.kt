@@ -93,7 +93,7 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 nearbyViewModel.enableSearchButton.collect { enabled ->
-                    if (enabled) binding.nearbySearchButton.isEnabled = true
+                    binding.nearbySearchButton.isEnabled = enabled
                 }
             }
         }
@@ -177,6 +177,20 @@ class NearbyFragment : Fragment(), AdapterView.OnItemSelectedListener, DialogInt
                 nearbyViewModel.getNearbyStops()
             }
         }
+
+        binding.resetNearbyFab.setOnClickListener { resetScreen() }
+    }
+
+    //clear everything back to the initial state and re-prompt for a location. the fragment-local
+    //stopList feeds the RecyclerView on the Success path, so it must be cleared or old stops reappear.
+    private fun resetScreen() {
+        stopList.clear()
+        nearbyAdapter.submitList(emptyList())
+        nearbyEditText.text = null
+        nearbyEditText.hint = getString(R.string.nearby_edit_text_hint)
+        binding.buslineSpinner.setSelection(0)
+        nearbyViewModel.reset()
+        showDialog()
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {

@@ -84,6 +84,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/add_favorite_fab_icon"/>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/resetByIdFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:contentDescription="@string/accessibility_reset_fab"
+            android:layout_margin="8dp"
+            app:fabSize="mini"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/addToFavoritesFab"
+            app:srcCompat="@drawable/ic_reset"/>
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/byIdVertGuideline"
             android:layout_width="wrap_content"
