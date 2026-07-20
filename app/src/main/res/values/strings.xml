@@ -4,6 +4,7 @@
     <!-- buttons, edit/text views etc -->
     <string name="search_button_text">Search</string>
     <string name="stop_id_edit_text_hint">Enter your stop ID (ex 56669)</string>
+    <string name="stop_id_edit_text_hint_cta">Enter your stop ID (ex 1926)</string>
     <string name="nearby_edit_text_hint">Search distance (in feet, default 1000)</string>
     <string name="nearby_edit_text_hint_updated">Displaying stops within %1$s feet</string>
     <string name="nearby_status_update">Getting lines for nearby stop %1$s</string>
@@ -98,8 +99,8 @@
     <string name="snackbar_agency_switched">Now showing %1$s</string>
 
     <!-- strings for accessibility -->
-    <string name="accessibility_busflag_img_desc">An image displaying a a picture of an AC Transit
-        bus flag, with an arrow demonstrating where on the sign to find the stop ID information.</string>
+    <string name="accessibility_busflag_img_desc">An image of a bus stop flag, with an arrow
+        demonstrating where on the sign to find the stop ID information.</string>
     <string name="accessibility_favorites_fab">Image of a heart denoting add this stop to favorites</string>
     <string name="accessibility_reset_fab">Reset this screen to start a new search</string>
 </resources>

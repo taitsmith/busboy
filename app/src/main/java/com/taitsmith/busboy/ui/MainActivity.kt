@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
@@ -24,6 +25,7 @@ import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.di.SettingsRepository
+import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,6 +40,10 @@ class MainActivity : AppCompatActivity() {
     private val PERMISSION_REQUEST_FINE_LOCATION = 6
 
     @Inject lateinit var settingsRepository: SettingsRepository
+
+    //activity-scoped, the same instances the fragments obtain via activityViewModels(); reset on switch.
+    private val byIdViewModel: ByIdViewModel by viewModels()
+    private val nearbyViewModel: NearbyViewModel by viewModels()
 
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var navController: NavController
@@ -74,9 +80,10 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //react only to changes after the current value, so a switch resets the app to a
-                //clean By-ID screen for the newly selected agency.
-                settingsRepository.selectedAgencyState.drop(1).collect { onAgencyChanged(it) }
+                //collect the raw DataStore flow (not the eagerly-seeded StateFlow, whose synthetic
+                //AC_TRANSIT seed can look like a switch on cold start). Its first emission is the real
+                //persisted agency; drop(1) skips it so only genuine user switches trigger a reset.
+                settingsRepository.selectedAgency.drop(1).collect { onAgencyChanged(it) }
             }
         }
 
@@ -97,6 +104,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onAgencyChanged(agency: Agency) {
+        //the By-Id / Nearby view models are activity-scoped, so they outlive the nav reset and would
+        //otherwise re-render the previous agency's stale results. clear them before navigating.
+        byIdViewModel.reset()
+        nearbyViewModel.reset()
+
         val options = NavOptions.Builder()
             .setPopUpTo(navController.graph.startDestinationId, true)
             .build()

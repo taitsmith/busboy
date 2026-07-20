@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
+import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.data.Prediction
 import com.taitsmith.busboy.databinding.FragmentByIdBinding
+import com.taitsmith.busboy.di.SettingsRepository
 import com.taitsmith.busboy.utils.PredictionAdapter
 import com.taitsmith.busboy.viewmodels.ByIdViewModel
 import com.taitsmith.busboy.viewmodels.ByIdViewModel.BusState
@@ -24,12 +26,15 @@ import com.taitsmith.busboy.viewmodels.ByIdViewModel.PredictionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ByIdFragment : Fragment() {
 
     private val byIdViewModel: ByIdViewModel by activityViewModels()
     private val args: ByIdFragmentArgs by navArgs()
+
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private var _binding: FragmentByIdBinding? = null
     private var _predictionListView: RecyclerView? = null
@@ -45,6 +50,7 @@ class ByIdFragment : Fragment() {
     ): View {
         _binding = FragmentByIdBinding.inflate(inflater, container, false)
         _predictionListView = binding.predictionListView
+        binding.stopEntryEditText.hint = stopHint()
 
         //if we're coming to the predictions fragment from nearby / favorites,
         //we want to display predictions for the selected stop
@@ -114,9 +120,16 @@ class ByIdFragment : Fragment() {
         predictionAdapter.submitList(emptyList())
         binding.busFlagIV.visibility = View.VISIBLE
         binding.stopEntryEditText.text = null
-        binding.stopEntryEditText.hint = getString(R.string.stop_id_edit_text_hint)
+        binding.stopEntryEditText.hint = stopHint()
         byIdViewModel.reset()
     }
+
+    //the by-id hint shows an example stop id- AC Transit's are 5 digits, CTA's are shorter (e.g. 1926),
+    //so match the example to the active agency.
+    private fun stopHint(): String =
+        if (settingsRepository.selectedAgencyState.value == Agency.CTA)
+            getString(R.string.stop_id_edit_text_hint_cta)
+        else getString(R.string.stop_id_edit_text_hint)
 
     private fun setObservers() {
         byIdViewModel.busRouteWaypoints.observe(viewLifecycleOwner) {

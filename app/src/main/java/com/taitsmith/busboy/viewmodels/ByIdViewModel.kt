@@ -14,6 +14,7 @@ import com.taitsmith.busboy.di.DatabaseRepository
 import com.taitsmith.busboy.di.StatusRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -53,9 +54,15 @@ class ByIdViewModel @Inject constructor(
 
     private var route: String= ""
 
+    //the prediction/vehicle flows refresh forever (60s loop); hold their jobs so a new search- or an
+    //agency switch (via reset())- cancels the previous poller instead of stacking another on top.
+    private var predictionsJob: Job? = null
+    private var busLocationJob: Job? = null
+
     fun getPredictions(id: String, rt: String?) {
         statusRepository.isLoading(true)
-        viewModelScope.launch {
+        predictionsJob?.cancel()
+        predictionsJob = viewModelScope.launch {
             _stopId.postValue(id)
             apiRepository.stopPredictions(id, rt)
                 .catch { exception ->
@@ -117,7 +124,8 @@ class ByIdViewModel @Inject constructor(
         statusRepository.isLoading(true)
         _bus.value = BusState.Loading
         this.route = route
-        viewModelScope.launch {
+        busLocationJob?.cancel()
+        busLocationJob = viewModelScope.launch {
             apiRepository.vehicleLocation(vehicleId)
                 .catch { exception ->
                     statusRepository.isLoading(false)
@@ -165,6 +173,8 @@ class ByIdViewModel @Inject constructor(
     //clearing _stopId matters- otherwise an empty-field search re-fetches the last stop (see the
     //fragment's search() fallback).
     fun reset() {
+        predictionsJob?.cancel()
+        busLocationJob?.cancel()
         _predictions.value = PredictionState.Loading(false)
         _bus.value = BusState.Loading
         _stopId.value = null

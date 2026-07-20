@@ -20,7 +20,14 @@ class ApiRepositoryImpl @Inject constructor(
     override fun stopPredictions(stpId: String, route: String?): Flow<List<Prediction>> = remoteDataSource.predictions(stpId, route)
         .map { response ->
             if (!response.error.isNullOrEmpty()) {
-                if (response.error!![0].msg.equals("No service scheduled")) {
+                //AC Transit says "No service scheduled"; CTA's BusTracker phrases the same no-buses
+                //condition differently ("No arrival times", "No data found"). Map any of them to the
+                //friendly no-service state rather than a generic "unknown error".
+                val msg = response.error!![0].msg.orEmpty()
+                if (msg.contains("no service", ignoreCase = true) ||
+                    msg.contains("no arrival", ignoreCase = true) ||
+                    msg.contains("no data", ignoreCase = true)
+                ) {
                     throw Exception("NO_SERVICE_SCHEDULED")
                 } else throw Exception("UNKNOWN")
             } else {
