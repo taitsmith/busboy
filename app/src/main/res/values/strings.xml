@@ -96,6 +96,7 @@
     <string name="agency_ac_transit">AC Transit (Oakland)</string>
     <string name="agency_cta">CTA (Chicago)</string>
     <string name="snackbar_agency_switched">Now showing %1$s</string>
+    <string name="settings_active_agency">Showing %1$s</string>
 
     <!-- strings for accessibility -->
     <string name="accessibility_busflag_img_desc">An image displaying a a picture of an AC Transit

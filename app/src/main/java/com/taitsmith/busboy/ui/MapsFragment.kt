@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Agency
@@ -113,7 +114,13 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
     private fun setupForRouteDisplay() {
         val directionRoute = googleMap.addPolyline(PolylineOptions())
         directionRoute.points = polylineCoords
-        directionRoute.color = Color.RED
+        //resolved from the live Activity theme, so the route follows the selected agency
+        //without this fragment needing to know which one it is.
+        directionRoute.color = MaterialColors.getColor(
+            requireContext(),
+            androidx.appcompat.R.attr.colorPrimary,
+            Color.RED
+        )
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
 
         //start location

@@ -24,6 +24,8 @@ import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.di.SettingsRepository
+import com.taitsmith.busboy.ui.theme.displayNameRes
+import com.taitsmith.busboy.ui.theme.persistedAgencyThemeRes
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +51,9 @@ class MainActivity : AppCompatActivity() {
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        //must precede super.onCreate() so the window background resolved during attach
+        //matches the agency theme, otherwise the previous agency's color flashes.
+        setTheme(persistedAgencyThemeRes())
         super.onCreate(savedInstanceState)
 
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -62,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainActivityViewModel!!.uiState.collect { uiState ->
+                mainActivityViewModel.uiState.collect { uiState ->
                     when (uiState) {
                         is MainActivityViewModel.LoadingState.Loading -> hideUi(true)
                         is MainActivityViewModel.LoadingState.StatusUpdate -> updateStatus(uiState.msg)
@@ -74,13 +79,31 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //react only to changes after the current value, so a switch resets the app to a
-                //clean By-ID screen for the newly selected agency.
+                //drop(1) skips the current value and reacts only to later changes. Load-bearing:
+                //onAgencyChanged calls recreate(), and the rebuilt Activity starts collecting
+                //again — without the drop it would immediately re-fire on the value that
+                //triggered the switch and recreate forever.
                 settingsRepository.selectedAgencyState.drop(1).collect { onAgencyChanged(it) }
             }
         }
 
         setTabListeners()
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+
+        //a message parked here means this instance was rebuilt by an agency switch. recreate()
+        //restores the saved nav back stack, so the reset to By-ID has to be explicit — otherwise
+        //the previous agency's screen and data linger under the new theme.
+        //
+        //this has to run in onPostCreate rather than onCreate: onRestoreInstanceState lands in
+        //between and re-applies BottomNavigationView's saved selection, which would leave the
+        //Settings tab highlighted over By-ID content.
+        mainActivityViewModel.consumePendingAgencyMessage()?.let { message ->
+            resetToStartDestination()
+            showSnackbar(message)
+        }
     }
 
     private fun setTabListeners() {
@@ -97,17 +120,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onAgencyChanged(agency: Agency) {
+        //park the message first: recreate() tears this instance down before a Snackbar
+        //could render, and the rebuilt Activity shows it instead.
+        mainActivityViewModel.setPendingAgencyMessage(
+            getString(R.string.snackbar_agency_switched, getString(agency.displayNameRes))
+        )
+
+        //rebuilds the Activity so it inflates against the new agency's theme. The rebuilt
+        //instance picks the message back up and resets navigation.
+        recreate()
+    }
+
+    private fun resetToStartDestination() {
         val options = NavOptions.Builder()
             .setPopUpTo(navController.graph.startDestinationId, true)
             .build()
         navController.navigate(navController.graph.startDestinationId, null, options)
         bottomNavigationView.selectedItemId = R.id.byId
-
-        val name = when (agency) {
-            Agency.AC_TRANSIT -> getString(R.string.agency_ac_transit)
-            Agency.CTA        -> getString(R.string.agency_cta)
-        }
-        showSnackbar(getString(R.string.snackbar_agency_switched, name))
     }
 
     private fun updateStatus(s: String) {

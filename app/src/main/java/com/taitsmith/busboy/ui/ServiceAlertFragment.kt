@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.taitsmith.busboy.data.ServiceAlert
 import com.taitsmith.busboy.databinding.FragmentServiceAlertBinding
+import com.taitsmith.busboy.ui.theme.BusboyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -53,7 +53,7 @@ class ServiceAlertFragment : Fragment() {
         composeView.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                MaterialTheme {
+                BusboyTheme {
                     ServiceAlertList(alerts = alertList)
                 }
             }
@@ -84,7 +84,7 @@ class ServiceAlertFragment : Fragment() {
             shadowElevation = 4.dp,
             modifier = Modifier
                 .fillMaxWidth(),
-            color = Color(0xFFDCE5DC)
+            color = MaterialTheme.colorScheme.surfaceVariant
         ) {
             Column(
                 modifier = Modifier
@@ -155,7 +155,9 @@ class ServiceAlertFragment : Fragment() {
                 rtdir   = "NB"
             )
         )
-        AlertCard(alert)
+        BusboyTheme {
+            AlertCard(alert)
+        }
     }
 }
 
