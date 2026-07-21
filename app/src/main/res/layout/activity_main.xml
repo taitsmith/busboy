@@ -34,7 +34,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/md_theme_light_secondaryContainer"
+        android:background="?attr/colorSecondaryContainer"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"/>
 
@@ -57,7 +57,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/navHostFragment"
-        android:background="@color/md_theme_light_surfaceVariant"
+        android:background="?attr/colorSurfaceVariant"
         app:menu="@menu/bottom_nav"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,6 @@
         android:width="1dp"
         android:height="4dp"/>
 
-    <solid android:color="@color/md_theme_light_secondaryContainer"/>
+    <solid android:color="?attr/colorSecondaryContainer"/>
 
 </shape>
