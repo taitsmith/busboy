@@ -6,8 +6,14 @@
         setTheme() before super.onCreate(), so switching agencies in Settings
         re-skins the whole app. See ui/theme/AgencyTheme.kt for the mapping.
 
-        Anything that is NOT a color belongs in Base.AppTheme so the two agency
-        themes cannot drift apart.
+        IMPORTANT — the two agency styles must define exactly the same attributes.
+        Activity.setTheme() *layers* a style on top of the theme already applied from the
+        manifest (AppTheme.AcTransit); it does not replace it. So any attribute that
+        AppTheme.AcTransit defines and AppTheme.Cta omits silently leaks AC Transit's green
+        to CTA users, with no build error. AgencyThemeParityTest pins this.
+
+        Anything that is NOT a color belongs in Base.AppTheme, so the two agency themes
+        have less opportunity to drift in the first place.
     -->
     <style name="Base.AppTheme" parent="Theme.Material3.Light.NoActionBar" />
 
@@ -64,9 +70,5 @@
         <item name="colorOutline">@color/cta_outline</item>
         <item name="colorOnSurfaceInverse">@color/cta_inverseOnSurface</item>
     </style>
-
-    <!-- Launch theme named by AndroidManifest, and the fallback if setTheme()
-         never runs. MainActivity overrides it per the persisted agency. -->
-    <style name="AppTheme" parent="AppTheme.AcTransit" />
 
 </resources>

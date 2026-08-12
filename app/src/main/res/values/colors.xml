@@ -1,9 +1,10 @@
 <resources>
 
     <!--
-        Per-agency Material 3 light palettes. Each set is a full M3 tonal ramp:
-        the base role is tone 40, its "on" pair is tone 100, the container is
-        tone 90 and its "on" pair is tone 10; neutrals are tones 98/95/30/10.
+        Per-agency Material 3 light palettes. Each set is a full M3 tonal ramp: the base
+        role is tone 40, its "on" pair is tone 100, the container is tone 90 and its "on"
+        pair is tone 10. Neutrals are tone 98 (background/surface), 95 (inverseOnSurface),
+        90 (surfaceVariant), 50 (outline), 30 (onSurfaceVariant) and 10 (onSurface).
 
         Consumed only by the AppTheme.* styles in themes.xml. Layouts and Kotlin
         must go through the theme (?attr/colorPrimary, MaterialTheme.colorScheme),
@@ -32,7 +33,9 @@
     <color name="ac_outline">#717972</color>
     <color name="ac_inverseOnSurface">#EFF1EC</color>
 
-    <!-- CTA (Chicago) — blue, generated from the brand blue #00A1DE. -->
+    <!-- CTA (Chicago) — blue. Tonal ramp generated from the brand blue #00A1DE, using the
+         same tone/chroma rules that reproduce the AC Transit set above (so both agencies
+         are built by identical rules rather than by two different tools). -->
     <color name="cta_primary">#00658D</color>
     <color name="cta_onPrimary">#FFFFFF</color>
     <color name="cta_primaryContainer">#C8E6FF</color>
@@ -54,8 +57,10 @@
     <color name="cta_outline">#70787F</color>
     <color name="cta_inverseOnSurface">#EFF1F2</color>
 
-    <!-- Error roles are the M3 baseline red and carry no agency branding, so both
-         themes share one set rather than duplicating identical values. -->
+    <!-- Error roles carry no agency branding, so both themes share one set rather than
+         duplicating identical values. These are inherited verbatim from the app's original
+         palette, NOT the current M3 baseline error ramp (which is #B3261E / #F9DEDC /
+         #410E0B) — don't "resync" them without meaning to change three colors. -->
     <color name="md_theme_error">#BA1B1B</color>
     <color name="md_theme_errorContainer">#FFDAD4</color>
     <color name="md_theme_onError">#FFFFFF</color>

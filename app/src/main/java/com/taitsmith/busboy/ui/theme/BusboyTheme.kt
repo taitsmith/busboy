@@ -12,37 +12,45 @@ import androidx.appcompat.R as AppCompatR
 import com.google.android.material.R as MaterialR
 
 /**
- * Fallback used when a color attribute is missing from the host theme. Deliberately a
- * jarring magenta: every attribute below is defined by both AppTheme.* styles, so seeing
- * this on screen means the Compose content is hosted by something that is not an agency
- * theme, which should be obvious rather than silently subtle.
+ * Resolves a color from the host theme, throwing if the attribute is absent.
+ *
+ * Throwing rather than substituting a sentinel is deliberate: every attribute read below is
+ * defined by both AppTheme.* styles *and* by Theme.Material3 itself, so a miss means the
+ * content is hosted somewhere it was never meant to be. A silent fallback would render a
+ * plausible-looking wrong color that nobody traces back to here.
  */
-private const val MISSING_ATTR_COLOR = android.graphics.Color.MAGENTA
-
 private fun Context.themeColor(@AttrRes attr: Int): Color =
-    Color(MaterialColors.getColor(this, attr, MISSING_ATTR_COLOR))
+    Color(MaterialColors.getColor(this, attr, "BusboyTheme"))
 
 /**
  * Makes the agency theme available to Compose.
  *
  * The scheme is read back off the hosting Activity's theme rather than rebuilt from
- * colors.xml. That keeps themes.xml the single source of truth — the mapping of color
- * token to Material role is written once, in XML — so this screen cannot drift from the
- * View-based screens, and it needs no knowledge of which agency is selected: whatever
- * MainActivity applied in setTheme() is what it reads.
+ * colors.xml, so this screen cannot drift from the View-based screens and needs no knowledge
+ * of which agency is selected: whatever MainActivity applied in setTheme() is what it reads.
  *
- * Light-only, matching Base.AppTheme. If a dark theme is ever added, this needs to switch
- * to darkColorScheme() alongside it.
+ * Note the scope of that guarantee. Every ColorScheme role that has a corresponding theme
+ * attribute is mapped here. The roles Material has no attribute for — `surfaceTint`, `scrim`,
+ * and the twelve `*Fixed` roles — are set explicitly or left at lightColorScheme()'s M3
+ * baseline; the `*Fixed` set in particular is NOT agency-aware, so map it before using it.
+ *
+ * Also note that only *colors* come from XML. Typography and shapes still come from Compose
+ * defaults, so MaterialTheme.shapes/typography are not agency- or app-themed.
+ *
+ * Light-only, matching Base.AppTheme. If a dark theme is ever added, this needs to switch to
+ * darkColorScheme() alongside it.
  */
 @Composable
 fun BusboyTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
+    val primary = context.themeColor(AppCompatR.attr.colorPrimary)
     MaterialTheme(
         colorScheme = lightColorScheme(
-            primary = context.themeColor(AppCompatR.attr.colorPrimary),
+            primary = primary,
             onPrimary = context.themeColor(MaterialR.attr.colorOnPrimary),
             primaryContainer = context.themeColor(MaterialR.attr.colorPrimaryContainer),
             onPrimaryContainer = context.themeColor(MaterialR.attr.colorOnPrimaryContainer),
+            inversePrimary = context.themeColor(MaterialR.attr.colorPrimaryInverse),
             secondary = context.themeColor(MaterialR.attr.colorSecondary),
             onSecondary = context.themeColor(MaterialR.attr.colorOnSecondary),
             secondaryContainer = context.themeColor(MaterialR.attr.colorSecondaryContainer),
@@ -61,8 +69,21 @@ fun BusboyTheme(content: @Composable () -> Unit) {
             onSurface = context.themeColor(MaterialR.attr.colorOnSurface),
             surfaceVariant = context.themeColor(MaterialR.attr.colorSurfaceVariant),
             onSurfaceVariant = context.themeColor(MaterialR.attr.colorOnSurfaceVariant),
-            outline = context.themeColor(MaterialR.attr.colorOutline),
+            surfaceBright = context.themeColor(MaterialR.attr.colorSurfaceBright),
+            surfaceDim = context.themeColor(MaterialR.attr.colorSurfaceDim),
+            surfaceContainer = context.themeColor(MaterialR.attr.colorSurfaceContainer),
+            surfaceContainerLow = context.themeColor(MaterialR.attr.colorSurfaceContainerLow),
+            surfaceContainerLowest = context.themeColor(MaterialR.attr.colorSurfaceContainerLowest),
+            surfaceContainerHigh = context.themeColor(MaterialR.attr.colorSurfaceContainerHigh),
+            surfaceContainerHighest = context.themeColor(MaterialR.attr.colorSurfaceContainerHighest),
+            inverseSurface = context.themeColor(MaterialR.attr.colorSurfaceInverse),
             inverseOnSurface = context.themeColor(MaterialR.attr.colorOnSurfaceInverse),
+            outline = context.themeColor(MaterialR.attr.colorOutline),
+            outlineVariant = context.themeColor(MaterialR.attr.colorOutlineVariant),
+            //no theme attributes exist for these two. surfaceTint is primary in M3 by
+            //definition, and scrim is always black.
+            surfaceTint = primary,
+            scrim = Color.Black,
         ),
         content = content
     )

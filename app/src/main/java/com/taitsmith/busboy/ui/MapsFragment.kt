@@ -1,6 +1,5 @@
 package com.taitsmith.busboy.ui
 
-import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -112,14 +111,19 @@ class MapsFragment: Fragment(), GoogleMap.OnMarkerDragListener, GoogleMap.OnMark
 
     //if we're displaying a route
     private fun setupForRouteDisplay() {
+        //this runs from the async OnMapReadyCallback, which can fire after the fragment has
+        //detached (back out while the Maps renderer is still initialising). requireContext()
+        //would throw there, so bail out instead — there is nothing left to draw into.
+        val themedContext = context ?: return
+
         val directionRoute = googleMap.addPolyline(PolylineOptions())
         directionRoute.points = polylineCoords
         //resolved from the live Activity theme, so the route follows the selected agency
         //without this fragment needing to know which one it is.
         directionRoute.color = MaterialColors.getColor(
-            requireContext(),
+            themedContext,
             androidx.appcompat.R.attr.colorPrimary,
-            Color.RED
+            "MapsFragment route polyline"
         )
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polylineCoords[0], 15F))
 

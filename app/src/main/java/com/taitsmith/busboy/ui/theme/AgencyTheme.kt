@@ -1,6 +1,7 @@
 package com.taitsmith.busboy.ui.theme
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import com.taitsmith.busboy.R
@@ -10,8 +11,15 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+
+private const val TAG = "AgencyTheme"
+
+/** Ceiling on the blocking read below, so a slow disk degrades instead of hanging the launch. */
+private const val SETTINGS_READ_TIMEOUT_MS = 250L
 
 /**
  * The XML theme each agency is skinned with. Deliberately an extension declared in
@@ -46,22 +54,38 @@ internal interface SettingsEntryPoint {
 }
 
 /**
- * Resolves the theme for the persisted agency, synchronously.
+ * Reads the persisted agency synchronously, for choosing the Activity theme.
  *
- * Blocking is deliberate and load-bearing. `setTheme()` must happen before
- * `super.onCreate()` so the window background resolved during attach matches the
- * rest of the UI, which rules out both Hilt field injection and any coroutine.
- * Reading [SettingsRepository.selectedAgencyState] instead would not work either:
- * it seeds eagerly with `AC_TRANSIT` and hydrates from DataStore asynchronously,
- * so a CTA user would get a frame of green at every cold start.
+ * Blocking is deliberate. The theme has to be set before `super.onCreate()`, because
+ * AppCompat's delegate caches theme-derived state there and the FragmentManager restores
+ * fragments there; everything inflated afterwards — including the decor and window
+ * background at `setContentView()` — then resolves against the agency theme. That timing
+ * rules out both Hilt field injection and any coroutine.
  *
- * The cost is one small DataStore read, which is served from memory on every call
- * after the first.
+ * Reading [SettingsRepository.selectedAgencyState] instead would not work: it seeds
+ * eagerly with `AC_TRANSIT` and hydrates from DataStore asynchronously, so a CTA user
+ * would get a frame of green whenever the seed won the race.
+ *
+ * Cost is one DataStore read. Later calls are served from the singleton's in-memory
+ * cache, but the first read in each process is blocking disk I/O on the main thread
+ * during Activity creation — hence the timeout.
+ *
+ * Failure is never fatal: theming is cosmetic, and crashing here would happen before
+ * `super.onCreate()`, bricking every launch with no in-app escape. Falling back to
+ * AC_TRANSIT self-corrects, because MainActivity reconciles the agency it themed with
+ * against [SettingsRepository.selectedAgencyState] and rebuilds on a mismatch.
  */
-@StyleRes
-fun Context.persistedAgencyThemeRes(): Int {
+fun Context.persistedAgency(): Agency {
     val settings = EntryPointAccessors
         .fromApplication(applicationContext, SettingsEntryPoint::class.java)
         .settingsRepository()
-    return runBlocking { settings.selectedAgency.first() }.themeRes
+    return try {
+        runBlocking { withTimeout(SETTINGS_READ_TIMEOUT_MS) { settings.selectedAgency.first() } }
+    } catch (e: TimeoutCancellationException) {
+        Log.e(TAG, "settings read exceeded ${SETTINGS_READ_TIMEOUT_MS}ms; using default theme", e)
+        Agency.AC_TRANSIT
+    } catch (e: Exception) {
+        Log.e(TAG, "could not resolve persisted agency; using default theme", e)
+        Agency.AC_TRANSIT
+    }
 }

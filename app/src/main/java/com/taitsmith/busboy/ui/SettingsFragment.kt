@@ -53,15 +53,11 @@ class SettingsFragment : Fragment() {
                         Agency.AC_TRANSIT -> R.id.agency_ac_transit
                         Agency.CTA -> R.id.agency_cta
                     }
+                    //no RadioButton starts checked, so this runs on every visit to Settings.
+                    //Detach while syncing the UI to the persisted value, or check() re-enters
+                    //the listener and writes the value straight back to DataStore.
                     if (binding.agencyRadioGroup.checkedRadioButtonId != id) {
-                        //detach while syncing the UI to the persisted value, so echoing that
-                        //value into the RadioGroup cannot loop back through the listener and
-                        //write it straight back to DataStore. Since MainActivity now calls
-                        //recreate() on every agency change, such a write-back is not merely
-                        //redundant — a stale one would rebuild the Activity for no reason.
-                        binding.agencyRadioGroup.setOnCheckedChangeListener(null)
-                        binding.agencyRadioGroup.check(id)
-                        binding.agencyRadioGroup.setOnCheckedChangeListener(agencySelectionListener)
+                        binding.agencyRadioGroup.withListenerDetached { check(id) }
                     }
                     binding.settingsActiveAgency.text = getString(
                         R.string.settings_active_agency, getString(agency.displayNameRes)
@@ -71,6 +67,22 @@ class SettingsFragment : Fragment() {
         }
 
         binding.agencyRadioGroup.setOnCheckedChangeListener(agencySelectionListener)
+    }
+
+    /**
+     * Runs [block] with the agency listener detached, always reattaching afterwards.
+     *
+     * The try/finally is what makes this safe rather than incidentally safe: if the listener
+     * were ever left detached, agency switching would stop working silently — no crash, no
+     * log, and a UI that still looks entirely normal.
+     */
+    private inline fun RadioGroup.withListenerDetached(block: RadioGroup.() -> Unit) {
+        setOnCheckedChangeListener(null)
+        try {
+            block()
+        } finally {
+            setOnCheckedChangeListener(agencySelectionListener)
+        }
     }
 
     override fun onDestroyView() {

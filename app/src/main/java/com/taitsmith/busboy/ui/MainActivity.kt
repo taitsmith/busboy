@@ -25,12 +25,12 @@ import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.di.SettingsRepository
 import com.taitsmith.busboy.ui.theme.displayNameRes
-import com.taitsmith.busboy.ui.theme.persistedAgencyThemeRes
+import com.taitsmith.busboy.ui.theme.persistedAgency
+import com.taitsmith.busboy.ui.theme.themeRes
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,10 +50,15 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
+    /** The agency this instance actually inflated against — see the collector in [onCreate]. */
+    private var inflatedAgency: Agency = Agency.AC_TRANSIT
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        //must precede super.onCreate() so the window background resolved during attach
-        //matches the agency theme, otherwise the previous agency's color flashes.
-        setTheme(persistedAgencyThemeRes())
+        //must precede super.onCreate(): AppCompat's delegate caches theme-derived state in its
+        //own onCreate and the FragmentManager restores fragments there, so everything inflated
+        //afterwards resolves against the agency theme.
+        inflatedAgency = persistedAgency()
+        setTheme(inflatedAgency.themeRes)
         super.onCreate(savedInstanceState)
 
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -79,11 +84,18 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //drop(1) skips the current value and reacts only to later changes. Load-bearing:
-                //onAgencyChanged calls recreate(), and the rebuilt Activity starts collecting
-                //again — without the drop it would immediately re-fire on the value that
-                //triggered the switch and recreate forever.
-                settingsRepository.selectedAgencyState.drop(1).collect { onAgencyChanged(it) }
+                //reconcile against what this instance inflated with, rather than dropping the
+                //first emission. repeatOnLifecycle re-runs this block on every STOPPED->STARTED
+                //transition and each run re-collects from the current value, so a positional
+                //drop() would silently swallow any switch that landed while stopped — leaving
+                //the old theme in place while the data layer already served the new agency.
+                //
+                //Comparing is also what makes this loop-safe: onAgencyChanged calls recreate(),
+                //and the rebuilt instance re-reads the same persisted value into inflatedAgency,
+                //so the values match and it settles.
+                settingsRepository.selectedAgencyState.collect { agency ->
+                    if (agency != inflatedAgency) onAgencyChanged(agency)
+                }
             }
         }
 
@@ -132,11 +144,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetToStartDestination() {
+        //selection first: the menu ids (R.id.byId) differ from the destination ids
+        //(R.id.byIdFragment), so NavigationUI cannot sync the tab highlight itself and
+        //setTabListeners' listener has to do it. That listener also navigates, which is why
+        //the explicit navigate comes second — popUpTo(inclusive) then collapses whatever the
+        //listener pushed, leaving a single By-ID entry rather than a duplicate on the stack.
+        bottomNavigationView.selectedItemId = R.id.byId
+
         val options = NavOptions.Builder()
             .setPopUpTo(navController.graph.startDestinationId, true)
             .build()
         navController.navigate(navController.graph.startDestinationId, null, options)
-        bottomNavigationView.selectedItemId = R.id.byId
     }
 
     private fun updateStatus(s: String) {

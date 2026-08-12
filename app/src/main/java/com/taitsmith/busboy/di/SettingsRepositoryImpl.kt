@@ -29,6 +29,15 @@ class SettingsRepositoryImpl @Inject constructor(
     @AppCoroutineScope private val scope: CoroutineScope
 ) : SettingsRepository {
 
+    //TODO this catch terminates the flow instead of recovering it. DataStore.data completes
+    //with its exception, so a single transient IOException emits emptyPreferences() once and
+    //then ends the stream — which also completes the stateIn sharing coroutine below, freezing
+    //selectedAgencyState at AC_TRANSIT for the rest of the process. Everything downstream then
+    //silently serves the wrong agency (DelegatingRemoteDataSource routes to AC Transit,
+    //DatabaseRepository filters favorites by it) while the stored value still says CTA, and
+    //re-picking the agency in Settings writes to disk but can never re-emit. Should retryWhen
+    //the IO case and surface a status code on give-up rather than pretending "read failed"
+    //means "fresh install". Pre-existing; see the theming PR review.
     override val selectedAgency: Flow<Agency> = dataStore.data
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
         .map { prefs -> prefs[AGENCY_KEY].toAgency() }
