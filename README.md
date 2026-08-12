@@ -1,10 +1,6 @@
 # busboy  
 
 
-<a href='https://play.google.com/store/apps/details?id=com.taitsmith.busboy'><img alt='busboy on google play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=200 height=auto/></a>  
-
-(jenkins is broken and direct apk downloads from there will be back soon, probably)
-
 Don't you hate it when you wait twenty minutes for the 51A, and then three show up at the same time? Busboy doesn't prevent that unfortunately, but it does allow you see that all three will be arriving simultaneously. 
   
 Already at a bus stop? Busboy can use your stop's ID to tell you what buses are coming.  
@@ -28,6 +24,3 @@ New in 1.2.0: Drag and drop marker to search for nearby stops without letting Bu
 
 Don't care about stops that don't serve the 51A? Tell Busboy what lines you're looking for:  
 ![image](https://user-images.githubusercontent.com/18432394/224452590-a796598b-d14a-449f-b92d-02306923cb19.png)  
-
-
-Busboy uses Retrofit and Kotlin Coroutines to make its network calls, Hilt for DI and Room for offline storage. It's built on MVVM design patterns and uses LiveData and all the standard fancy tools.
