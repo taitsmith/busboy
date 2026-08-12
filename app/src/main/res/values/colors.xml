@@ -1,26 +1,69 @@
 <resources>
-    <color name="md_theme_light_primary">#006D41</color>
-    <color name="md_theme_light_onPrimary">#FFFFFF</color>
-    <color name="md_theme_light_primaryContainer">#87F9B8</color>
-    <color name="md_theme_light_onPrimaryContainer">#002110</color>
-    <color name="md_theme_light_secondary">#4E6355</color>
-    <color name="md_theme_light_onSecondary">#FFFFFF</color>
-    <color name="md_theme_light_secondaryContainer">#D1E8D6</color>
-    <color name="md_theme_light_onSecondaryContainer">#0C1F14</color>
-    <color name="md_theme_light_tertiary">#3B6471</color>
-    <color name="md_theme_light_onTertiary">#FFFFFF</color>
-    <color name="md_theme_light_tertiaryContainer">#BFE9F8</color>
-    <color name="md_theme_light_onTertiaryContainer">#001F28</color>
-    <color name="md_theme_light_error">#BA1B1B</color>
-    <color name="md_theme_light_errorContainer">#FFDAD4</color>
-    <color name="md_theme_light_onError">#FFFFFF</color>
-    <color name="md_theme_light_onErrorContainer">#410001</color>
-    <color name="md_theme_light_background">#FBFDF8</color>
-    <color name="md_theme_light_onBackground">#191C1A</color>
-    <color name="md_theme_light_surface">#FBFDF8</color>
-    <color name="md_theme_light_onSurface">#191C1A</color>
-    <color name="md_theme_light_surfaceVariant">#DCE5DC</color>
-    <color name="md_theme_light_onSurfaceVariant">#404942</color>
-    <color name="md_theme_light_outline">#717972</color>
-    <color name="md_theme_light_inverseOnSurface">#EFF1EC</color>
+
+    <!--
+        Per-agency Material 3 light palettes. Each set is a full M3 tonal ramp: the base
+        role is tone 40, its "on" pair is tone 100, the container is tone 90 and its "on"
+        pair is tone 10. Neutrals are tone 98 (background/surface), 95 (inverseOnSurface),
+        90 (surfaceVariant), 50 (outline), 30 (onSurfaceVariant) and 10 (onSurface).
+
+        Consumed only by the AppTheme.* styles in themes.xml. Layouts and Kotlin
+        must go through the theme (?attr/colorPrimary, MaterialTheme.colorScheme),
+        never these names directly, or they will not follow the agency switch.
+    -->
+
+    <!-- AC Transit (Oakland) — green. -->
+    <color name="ac_primary">#006D41</color>
+    <color name="ac_onPrimary">#FFFFFF</color>
+    <color name="ac_primaryContainer">#87F9B8</color>
+    <color name="ac_onPrimaryContainer">#002110</color>
+    <color name="ac_secondary">#4E6355</color>
+    <color name="ac_onSecondary">#FFFFFF</color>
+    <color name="ac_secondaryContainer">#D1E8D6</color>
+    <color name="ac_onSecondaryContainer">#0C1F14</color>
+    <color name="ac_tertiary">#3B6471</color>
+    <color name="ac_onTertiary">#FFFFFF</color>
+    <color name="ac_tertiaryContainer">#BFE9F8</color>
+    <color name="ac_onTertiaryContainer">#001F28</color>
+    <color name="ac_background">#FBFDF8</color>
+    <color name="ac_onBackground">#191C1A</color>
+    <color name="ac_surface">#FBFDF8</color>
+    <color name="ac_onSurface">#191C1A</color>
+    <color name="ac_surfaceVariant">#DCE5DC</color>
+    <color name="ac_onSurfaceVariant">#404942</color>
+    <color name="ac_outline">#717972</color>
+    <color name="ac_inverseOnSurface">#EFF1EC</color>
+
+    <!-- CTA (Chicago) — blue. Tonal ramp generated from the brand blue #00A1DE, using the
+         same tone/chroma rules that reproduce the AC Transit set above (so both agencies
+         are built by identical rules rather than by two different tools). -->
+    <color name="cta_primary">#00658D</color>
+    <color name="cta_onPrimary">#FFFFFF</color>
+    <color name="cta_primaryContainer">#C8E6FF</color>
+    <color name="cta_onPrimaryContainer">#011E2D</color>
+    <color name="cta_secondary">#4C6171</color>
+    <color name="cta_onSecondary">#FFFFFF</color>
+    <color name="cta_secondaryContainer">#CFE5F8</color>
+    <color name="cta_onSecondaryContainer">#061E2B</color>
+    <color name="cta_tertiary">#6C586D</color>
+    <color name="cta_onTertiary">#FFFFFF</color>
+    <color name="cta_tertiaryContainer">#F3DBF4</color>
+    <color name="cta_onTertiaryContainer">#261628</color>
+    <color name="cta_background">#F8F9FB</color>
+    <color name="cta_onBackground">#1A1C1D</color>
+    <color name="cta_surface">#F8F9FB</color>
+    <color name="cta_onSurface">#1A1C1D</color>
+    <color name="cta_surfaceVariant">#DBE4EB</color>
+    <color name="cta_onSurfaceVariant">#40484E</color>
+    <color name="cta_outline">#70787F</color>
+    <color name="cta_inverseOnSurface">#EFF1F2</color>
+
+    <!-- Error roles carry no agency branding, so both themes share one set rather than
+         duplicating identical values. These are inherited verbatim from the app's original
+         palette, NOT the current M3 baseline error ramp (which is #B3261E / #F9DEDC /
+         #410E0B) — don't "resync" them without meaning to change three colors. -->
+    <color name="md_theme_error">#BA1B1B</color>
+    <color name="md_theme_errorContainer">#FFDAD4</color>
+    <color name="md_theme_onError">#FFFFFF</color>
+    <color name="md_theme_onErrorContainer">#410001</color>
+
 </resources>

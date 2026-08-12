@@ -24,11 +24,13 @@ import com.taitsmith.busboy.R
 import com.taitsmith.busboy.data.Agency
 import com.taitsmith.busboy.databinding.ActivityMainBinding
 import com.taitsmith.busboy.di.SettingsRepository
+import com.taitsmith.busboy.ui.theme.displayNameRes
+import com.taitsmith.busboy.ui.theme.persistedAgency
+import com.taitsmith.busboy.ui.theme.themeRes
 import com.taitsmith.busboy.viewmodels.MainActivityViewModel
 import com.taitsmith.busboy.viewmodels.NearbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import im.delight.android.location.SimpleLocation
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,7 +50,15 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
+    /** The agency this instance actually inflated against — see the collector in [onCreate]. */
+    private var inflatedAgency: Agency = Agency.AC_TRANSIT
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        //must precede super.onCreate(): AppCompat's delegate caches theme-derived state in its
+        //own onCreate and the FragmentManager restores fragments there, so everything inflated
+        //afterwards resolves against the agency theme.
+        inflatedAgency = persistedAgency()
+        setTheme(inflatedAgency.themeRes)
         super.onCreate(savedInstanceState)
 
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -62,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainActivityViewModel!!.uiState.collect { uiState ->
+                mainActivityViewModel.uiState.collect { uiState ->
                     when (uiState) {
                         is MainActivityViewModel.LoadingState.Loading -> hideUi(true)
                         is MainActivityViewModel.LoadingState.StatusUpdate -> updateStatus(uiState.msg)
@@ -74,13 +84,38 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //react only to changes after the current value, so a switch resets the app to a
-                //clean By-ID screen for the newly selected agency.
-                settingsRepository.selectedAgencyState.drop(1).collect { onAgencyChanged(it) }
+                //reconcile against what this instance inflated with, rather than dropping the
+                //first emission. repeatOnLifecycle re-runs this block on every STOPPED->STARTED
+                //transition and each run re-collects from the current value, so a positional
+                //drop() would silently swallow any switch that landed while stopped — leaving
+                //the old theme in place while the data layer already served the new agency.
+                //
+                //Comparing is also what makes this loop-safe: onAgencyChanged calls recreate(),
+                //and the rebuilt instance re-reads the same persisted value into inflatedAgency,
+                //so the values match and it settles.
+                settingsRepository.selectedAgencyState.collect { agency ->
+                    if (agency != inflatedAgency) onAgencyChanged(agency)
+                }
             }
         }
 
         setTabListeners()
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+
+        //a message parked here means this instance was rebuilt by an agency switch. recreate()
+        //restores the saved nav back stack, so the reset to By-ID has to be explicit — otherwise
+        //the previous agency's screen and data linger under the new theme.
+        //
+        //this has to run in onPostCreate rather than onCreate: onRestoreInstanceState lands in
+        //between and re-applies BottomNavigationView's saved selection, which would leave the
+        //Settings tab highlighted over By-ID content.
+        mainActivityViewModel.consumePendingAgencyMessage()?.let { message ->
+            resetToStartDestination()
+            showSnackbar(message)
+        }
     }
 
     private fun setTabListeners() {
@@ -97,17 +132,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onAgencyChanged(agency: Agency) {
+        //park the message first: recreate() tears this instance down before a Snackbar
+        //could render, and the rebuilt Activity shows it instead.
+        mainActivityViewModel.setPendingAgencyMessage(
+            getString(R.string.snackbar_agency_switched, getString(agency.displayNameRes))
+        )
+
+        //rebuilds the Activity so it inflates against the new agency's theme. The rebuilt
+        //instance picks the message back up and resets navigation.
+        recreate()
+    }
+
+    private fun resetToStartDestination() {
+        //selection first: the menu ids (R.id.byId) differ from the destination ids
+        //(R.id.byIdFragment), so NavigationUI cannot sync the tab highlight itself and
+        //setTabListeners' listener has to do it. That listener also navigates, which is why
+        //the explicit navigate comes second — popUpTo(inclusive) then collapses whatever the
+        //listener pushed, leaving a single By-ID entry rather than a duplicate on the stack.
+        bottomNavigationView.selectedItemId = R.id.byId
+
         val options = NavOptions.Builder()
             .setPopUpTo(navController.graph.startDestinationId, true)
             .build()
         navController.navigate(navController.graph.startDestinationId, null, options)
-        bottomNavigationView.selectedItemId = R.id.byId
-
-        val name = when (agency) {
-            Agency.AC_TRANSIT -> getString(R.string.agency_ac_transit)
-            Agency.CTA        -> getString(R.string.agency_cta)
-        }
-        showSnackbar(getString(R.string.snackbar_agency_switched, name))
     }
 
     private fun updateStatus(s: String) {
